@@ -475,20 +475,24 @@ namespace Shell.ViewModels
             string ConnStroke, string ConnFill, string Grid, string ItemFg,
             string DescFg, string HeaderFg, string Sep, string Border,
             string LogBg, string LogText, string LogBorder, string ImgInfo,
-            string ToolHover, string ToolSelected)[] Themes =
+            string ToolHover, string ToolSelected,
+            string ToolCardBg, string ToolCardBorder, string ToolSearchFocus, string ToolBadge)[] Themes =
         {
             ("Dark",  "#1E1E1E", "#D4D4D4", "#2D2D30", "#667788", "#2D2D30",
              "#3A3A3A", "#D4D4D4", "#808080", "#A0A0A0", "#333337", "#FF3E3E42",
              "#12121E", "#AAAAAA", "#3F3F58", "#1E1E2E",
-             "#3A3A4A", "#1E5A8A"),
+             "#3A3A4A", "#1E5A8A",
+             "#08FFFFFF", "#15FFFFFF", "#FF0078D4", "#FF4A4A5A"),
             ("Light", "#F0F0F0", "#222222", "#E0E0E0", "#556677", "#FFFFFF",
              "#B0B8C8", "#222222", "#444444", "#555555", "#C0C0C0", "#C0C0C0",
              "#E8E8F0", "#444444", "#D0D0D8", "#E0E0E8",
-             "#D5DCE8", "#B8CCF0"),
+             "#D5DCE8", "#B8CCF0",
+             "#08000000", "#15000000", "#FF0078D4", "#FFE0E0E8"),
             ("Nodify","#2A1B47", "#E0E0E0", "#3D2B5A", "#8899BB", "#3D2B5A",
              "#4C3180", "#E0E0E0", "#909090", "#B0B0B0", "#553388", "#553388",
              "#1A0F30", "#B0A0C8", "#4C3180", "#251545",
-             "#3D2B5A", "#5A3D8A"),
+             "#3D2B5A", "#5A3D8A",
+             "#10FFFFFF", "#18FFFFFF", "#FF9C27B0", "#FF3D2B5A"),
         };
 
         private void ApplyTheme(string name)
@@ -514,6 +518,11 @@ namespace Shell.ViewModels
             SetBrush(app, "ImagePanelInfoBrush", t.ImgInfo);
             SetBrush(app, "ToolboxItemHoverBrush", t.ToolHover);
             SetBrush(app, "ToolboxItemSelectedBrush", t.ToolSelected);
+            // ── 工具箱卡片笔刷 ──
+            SetBrush(app, "ToolboxCardBackgroundBrush", t.ToolCardBg);
+            SetBrush(app, "ToolboxCardBorderBrush", t.ToolCardBorder);
+            SetBrush(app, "ToolboxSearchFocusBrush", t.ToolSearchFocus);
+            SetBrush(app, "ToolboxBadgeBrush", t.ToolBadge);
             Nodify.ThemeManager.SetTheme(name);
         }
 
