@@ -1,0 +1,773 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Rectangle x:Key="AlignCenterIcon"
+               x:Shared="False"
+               Width="16"
+               Height="16">
+        <Rectangle.Fill>
+            <DrawingBrush>
+                <DrawingBrush.Drawing>
+                    <DrawingGroup>
+                        <DrawingGroup.Children>
+                            <GeometryDrawing Brush="#00FFFFFF"
+                                             Geometry="F1M16,16L0,16 0,0 16,0z" />
+                            <GeometryDrawing Brush="#FFF6F6F6"
+                                             Geometry="F1M6.0003,-0.000199999999999534L6.0003,3.0008 1.0003,3.0008 1.0003,6.9998 6.0003,6.9998 6.0003,8.9998 1.9993,8.9998 1.9993,13.0008 6.0003,13.0008 6.0003,15.9998 9.0003,15.9998 9.0003,13.0008 12.9993,13.0008 12.9993,8.9998 9.0003,8.9998 9.0003,6.9998 14.0003,6.9998 14.0003,3.0008 9.0003,3.0008 9.0003,-0.000199999999999534z" />
+                            <GeometryDrawing Brush="#FF424242"
+                                             Geometry="F1M8,6L8,10 12,10 12,12 8,12 8,15 7,15 7,12 3,12 3,10 7,10 7,6 2,6 2,4 7,4 7,1 8,1 8,4 13,4 13,6z" />
+                        </DrawingGroup.Children>
+                    </DrawingGroup>
+                </DrawingBrush.Drawing>
+            </DrawingBrush>
+        </Rectangle.Fill>
+    </Rectangle>
+
+    <Rectangle x:Key="AlignMiddleIcon"
+               x:Shared="False"
+               Width="16"
+               Height="16">
+        <Rectangle.Fill>
+            <DrawingBrush>
+                <DrawingBrush.Drawing>
+                    <DrawingGroup>
+                        <DrawingGroup.Children>
+                            <GeometryDrawing Brush="#00FFFFFF"
+                                             Geometry="F1M16,16L0,16 0,0 16,0z" />
+                            <GeometryDrawing Brush="#FFF6F6F6"
+                                             Geometry="F1M2.9997,1.9996L2.9997,6.9996 -0.000300000000000189,6.9996 -0.000300000000000189,9.9996 2.9997,9.9996 2.9997,15.0006 7.0007,15.0006 7.0007,9.9996 8.9997,9.9996 8.9997,14.0006 12.9997,14.0006 12.9997,9.9996 16.0007,9.9996 16.0007,6.9996 12.9997,6.9996 12.9997,3.0006 8.9997,3.0006 8.9997,6.9996 7.0007,6.9996 7.0007,1.9996z" />
+                            <GeometryDrawing Brush="#FF424242"
+                                             Geometry="F1M6,8L10,8 10,4 12,4 12,8 15,8 15,9 12,9 12,13 10,13 10,9 6,9 6,14 4,14 4,9 1,9 1,8 4,8 4,3 6,3z" />
+                        </DrawingGroup.Children>
+                    </DrawingGroup>
+                </DrawingBrush.Drawing>
+            </DrawingBrush>
+        </Rectangle.Fill>
+    </Rectangle>
+
+    <Rectangle x:Key="AlignRightIcon"
+               x:Shared="False"
+               Width="16"
+               Height="16">
+        <Rectangle.Fill>
+            <DrawingBrush>
+                <DrawingBrush.Drawing>
+                    <DrawingGroup>
+                        <DrawingGroup.Children>
+                            <GeometryDrawing Brush="#00FFFFFF"
+                                             Geometry="F1M16,16L0,16 0,0 16,0z" />
+                            <GeometryDrawing Brush="#FFF6F6F6"
+                                             Geometry="F1M12.9996,-0.000199999999999534L12.9996,3.0008 -0.000400000000000844,3.0008 -0.000400000000000844,6.9998 12.9996,6.9998 12.9996,8.9998 2.9996,8.9998 2.9996,13.0008 12.9996,13.0008 12.9996,15.9998 16.0006,15.9998 16.0006,-0.000199999999999534z" />
+                            <GeometryDrawing Brush="#FF424242"
+                                             Geometry="F1M13,10L4,10 4,12 13,12z M13,4L1,4 1,6 13,6z M14,1L15,1 15,15 14,15z" />
+                        </DrawingGroup.Children>
+                    </DrawingGroup>
+                </DrawingBrush.Drawing>
+            </DrawingBrush>
+        </Rectangle.Fill>
+    </Rectangle>
+
+    <Rectangle x:Key="AlignBottomIcon"
+               x:Shared="False"
+               Width="16"
+               Height="16">
+        <Rectangle.Fill>
+            <DrawingBrush>
+                <DrawingBrush.Drawing>
+                    <DrawingGroup>
+                        <DrawingGroup.Children>
+                            <GeometryDrawing Brush="#00FFFFFF"
+                                             Geometry="F1M16,16L0,16 0,0 16,0z" />
+                            <GeometryDrawing Brush="#FFF6F6F6"
+                                             Geometry="F1M2.9997,-0.000199999999999534L2.9997,13.0008 -0.000300000000000189,13.0008 -0.000300000000000189,15.9998 16.0007,15.9998 16.0007,13.0008 12.9997,13.0008 12.9997,3.0008 8.9997,3.0008 8.9997,13.0008 7.0007,13.0008 7.0007,-0.000199999999999534z" />
+                            <GeometryDrawing Brush="#FF424242"
+                                             Geometry="F1M12,4L10,4 10,13 12,13z M6,1L4,1 4,13 6,13z M15,15L1,15 1,14 15,14z" />
+                        </DrawingGroup.Children>
+                    </DrawingGroup>
+                </DrawingBrush.Drawing>
+            </DrawingBrush>
+        </Rectangle.Fill>
+    </Rectangle>
+
+    <Rectangle x:Key="AlignLeftIcon"
+               x:Shared="False"
+               Width="16"
+               Height="16">
+        <Rectangle.Fill>
+            <DrawingBrush>
+                <DrawingBrush.Drawing>
+                    <DrawingGroup>
+                        <DrawingGroup.Children>
+                            <GeometryDrawing Brush="#00FFFFFF"
+                                             Geometry="F1M16,16L0,16 0,0 16,0z" />
+                            <GeometryDrawing Brush="#FFF6F6F6"
+                                             Geometry="F1M0,-0.000199999999999534L0,15.9998 3,15.9998 3,13.0008 13,13.0008 13,8.9998 3,8.9998 3,6.9998 16,6.9998 16,3.0008 3,3.0008 3,-0.000199999999999534z" />
+                            <GeometryDrawing Brush="#FF424242"
+                                             Geometry="F1M12,10L3,10 3,12 12,12z M15,4L3,4 3,6 15,6z M1,1L2,1 2,15 1,15z" />
+                        </DrawingGroup.Children>
+                    </DrawingGroup>
+                </DrawingBrush.Drawing>
+            </DrawingBrush>
+        </Rectangle.Fill>
+    </Rectangle>
+
+    <Rectangle x:Key="AlignTopIcon"
+               x:Shared="False"
+               Width="16"
+               Height="16">
+        <Rectangle.Fill>
+            <DrawingBrush>
+                <DrawingBrush.Drawing>
+                    <DrawingGroup>
+                        <DrawingGroup.Children>
+                            <GeometryDrawing Brush="#00FFFFFF"
+                                             Geometry="F1M16,16L0,16 0,0 16,0z" />
+                            <GeometryDrawing Brush="#FFF6F6F6"
+                                             Geometry="F1M0,-0.000199999999999534L0,4.0008 3,4.0008 3,15.9998 7,15.9998 7,4.0008 9,4.0008 9,12.0008 13,12.0008 13,4.0008 16,4.0008 16,-0.000199999999999534z" />
+                            <GeometryDrawing Brush="#FF424242"
+                                             Geometry="F1M10,11L12,11 12,4 10,4z M4,15L6,15 6,4 4,4z M15,3L1,3 1,1 15,1z" />
+                        </DrawingGroup.Children>
+                    </DrawingGroup>
+                </DrawingBrush.Drawing>
+            </DrawingBrush>
+        </Rectangle.Fill>
+    </Rectangle>
+
+    <Rectangle x:Key="ThemeIcon"
+               x:Shared="False"
+               Width="16"
+               Height="16">
+        <Rectangle.Fill>
+            <DrawingBrush>
+                <DrawingBrush.Drawing>
+                    <DrawingGroup>
+                        <DrawingGroup.Children>
+                            <GeometryDrawing Brush="#FFF6F6F6"
+                                             Geometry="F1M16,8C16,12.418 12.418,16 8,16 3.582,16 0,12.418 0,8 0,3.582 3.582,0 8,0 12.418,0 16,3.582 16,8" />
+                            <GeometryDrawing Brush="#FF414141"
+                                             Geometry="F1M7.999,14C7.657,14 7.325,13.965 6.999,13.91 9.836,13.434 12,10.973 12,8 12,5.027 9.836,2.567 6.999,2.09 7.325,2.035 7.657,2 7.999,2 11.312,2 13.999,4.687 13.999,8 13.999,11.313 11.312,14 7.999,14 M7.999,1C4.133,1 0.999,4.134 0.999,8 0.999,11.866 4.133,15 7.999,15 11.865,15 14.999,11.866 14.999,8 14.999,4.134 11.865,1 7.999,1" />
+                            <GeometryDrawing Brush="#FFF0EFF1"
+                                             Geometry="F1M7.999,2C7.657,2 7.325,2.035 6.999,2.09 9.836,2.567 12,5.027 12,8 12,10.973 9.836,13.434 6.999,13.91 7.325,13.965 7.657,14 7.999,14 11.312,14 13.999,11.313 13.999,8 13.999,4.687 11.312,2 7.999,2" />
+                        </DrawingGroup.Children>
+                    </DrawingGroup>
+                </DrawingBrush.Drawing>
+            </DrawingBrush>
+        </Rectangle.Fill>
+    </Rectangle>
+
+    <Rectangle x:Key="DiamondFillIcon"
+               x:Shared="False"
+               Width="16"
+               Height="16">
+        <Rectangle.Fill>
+            <DrawingBrush>
+                <DrawingBrush.Drawing>
+                    <DrawingGroup>
+                        <DrawingGroup.Children>
+                            <GeometryDrawing Brush="#00FFFFFF"
+                                             Geometry="F1M16,16L0,16 0,0 16,0z" />
+                            <GeometryDrawing Brush="#FFF6F6F6"
+                                             Geometry="F1M1.5859,8L7.9999,1.586 14.4139,8 7.9999,14.414z" />
+                            <GeometryDrawing Brush="#FF414141"
+                                             Geometry="F1M4.4141,8L8.0001,4.414 11.5861,8 8.0001,11.586z M8.0001,3L3.0001,8 8.0001,13 13.0001,8z" />
+                            <GeometryDrawing Brush="#FFFFCC00"
+                                             Geometry="F1M8,4.4141L11.586,8.0001 8,11.5861 4.414,8.0001z" />
+                        </DrawingGroup.Children>
+                    </DrawingGroup>
+                </DrawingBrush.Drawing>
+            </DrawingBrush>
+        </Rectangle.Fill>
+    </Rectangle>
+
+    <Rectangle x:Key="DiamondIcon"
+               x:Shared="False"
+               Width="16"
+               Height="16">
+        <Rectangle.Fill>
+            <DrawingBrush>
+                <DrawingBrush.Drawing>
+                    <DrawingGroup>
+                        <DrawingGroup.Children>
+                            <GeometryDrawing Brush="#00FFFFFF"
+                                             Geometry="F1M16,16L0,16 0,0 16,0z" />
+                            <GeometryDrawing Brush="#FFF6F6F6"
+                                             Geometry="F1M1.5859,8L7.9999,1.586 14.4139,8 7.9999,14.414z" />
+                            <GeometryDrawing Brush="#FFEFEFF0"
+                                             Geometry="F1M8,4.4141L11.586,8.0001 8,11.5861 4.414,8.0001z" />
+                            <GeometryDrawing Brush="#FF424242"
+                                             Geometry="F1M4.4141,8L8.0001,4.414 11.5861,8 8.0001,11.586z M8.0001,3L3.0001,8 8.0001,13 13.0001,8z" />
+                        </DrawingGroup.Children>
+                    </DrawingGroup>
+                </DrawingBrush.Drawing>
+            </DrawingBrush>
+        </Rectangle.Fill>
+    </Rectangle>
+
+    <Rectangle x:Key="PlusIcon"
+               x:Shared="False"
+               Width="16"
+               Height="16">
+        <Rectangle.Fill>
+            <DrawingBrush>
+                <DrawingBrush.Drawing>
+                    <DrawingGroup>
+                        <DrawingGroup.Children>
+                            <GeometryDrawing Brush="#00FFFFFF"
+                                             Geometry="F1M16,16L0,16 0,0 16,0z" />
+                            <GeometryDrawing Brush="#FFF6F6F6"
+                                             Geometry="F1M6.0003,-0.000199999999999534L6.0003,5.9998 0.000300000000000189,5.9998 0.000300000000000189,9.9998 6.0003,9.9998 6.0003,15.9998 10.0003,15.9998 10.0003,9.9998 16.0003,9.9998 16.0003,5.9998 10.0003,5.9998 10.0003,-0.000199999999999534z" />
+                            <GeometryDrawing Brush="#FF424242"
+                                             Geometry="F1M15,9L9,9 9,15 7,15 7,9 1,9 1,7 7,7 7,1 9,1 9,7 15,7z" />
+                        </DrawingGroup.Children>
+                    </DrawingGroup>
+                </DrawingBrush.Drawing>
+            </DrawingBrush>
+        </Rectangle.Fill>
+    </Rectangle>
+
+    <Rectangle x:Key="RemoveKeyIcon"
+               x:Shared="False"
+               Width="16"
+               Height="16">
+        <Rectangle.Fill>
+            <DrawingBrush>
+                <DrawingBrush.Drawing>
+                    <DrawingGroup>
+                        <DrawingGroup.Children>
+                            <GeometryDrawing Brush="#00FFFFFF"
+                                             Geometry="F1M16,16L0,16 0,0 16,0z" />
+                            <GeometryDrawing Brush="#FFF6F6F6"
+                                             Geometry="F1M13,10L4,10 4,6 13,6z" />
+                            <GeometryDrawing Brush="#FF414141"
+                                             Geometry="F1M12,9L5,9 5,7 12,7z" />
+                        </DrawingGroup.Children>
+                    </DrawingGroup>
+                </DrawingBrush.Drawing>
+            </DrawingBrush>
+        </Rectangle.Fill>
+    </Rectangle>
+
+    <Rectangle x:Key="AddKeyIcon"
+               x:Shared="False"
+               Width="16"
+               Height="16">
+        <Rectangle.Fill>
+            <DrawingBrush>
+                <DrawingBrush.Drawing>
+                    <DrawingGroup>
+                        <DrawingGroup.Children>
+                            <GeometryDrawing Brush="#00FFFFFF"
+                                             Geometry="F1M16,16L0,16 0,0 16,0z" />
+                            <GeometryDrawing Brush="#FFF6F6F6"
+                                             Geometry="F1M16,8.4629C16,10.9239 13.997,12.9259 11.537,12.9259 11.118,12.9259 10.704,12.8669 10.3,12.7479L7.704,15.3439C7.595,15.4529 7.003,16.0019 6.147,16.0019 5.767,16.0019 5.2,15.8869 4.657,15.3439 3.538,14.2249 4.043,12.9079 4.657,12.2959L7.252,9.6989C7.133,9.2959 7.073,8.8819 7.073,8.4629 7.073,7.5529 7.35,6.7069 7.82,5.9999L6,5.9999 6,7.9999 2.019,7.9999 2.019,5.9999 0,5.9999 0,2.0179 2.019,2.0179 2.019,-9.99999999979906E-05 6,-9.99999999979906E-05 6,2.0179 8,2.0179 8,5.7719C8.816,4.7019 10.091,3.9999 11.537,3.9999 12.165,3.9999 13.132,4.2889 13.368,4.3999 13.605,4.5099 14.987,5.1659 15.601,6.6309 15.688,6.8399 16,7.8359 16,8.4629" />
+                            <GeometryDrawing Brush="#FF424242"
+                                             Geometry="F1M14.9873,8.5049C14.9873,10.4339 13.4233,11.9969 11.4953,11.9969 10.9823,11.9969 10.4323,11.9349 9.9953,11.7359L7.1303,14.6149C7.1303,14.6149 6.2573,15.4879 5.3843,14.6149 4.5103,13.7419 5.3843,12.8689 5.3843,12.8689L8.3233,10.0179C8.1263,9.5779 8.0033,9.0169 8.0033,8.5049 8.0033,6.5769 9.5663,5.0139 11.4953,5.0139 12.0063,5.0139 12.5553,5.0849 12.9953,5.2829L10.6223,7.6329 12.3683,9.3789 14.7143,7.0179C14.9113,7.4549,14.9873,7.9939,14.9873,8.5049" />
+                            <GeometryDrawing Brush="#FF388A34"
+                                             Geometry="F1M7,3.0176L5,3.0176 5,0.9996 3.019,0.9996 3.019,3.0176 1,3.0176 1,4.9996 3.019,4.9996 3.019,6.9996 5,6.9996 5,4.9996 7,4.9996z" />
+                        </DrawingGroup.Children>
+                    </DrawingGroup>
+                </DrawingBrush.Drawing>
+            </DrawingBrush>
+        </Rectangle.Fill>
+    </Rectangle>
+
+    <Rectangle x:Key="ExpandRightIcon"
+               x:Shared="False"
+               Width="16"
+               Height="16">
+        <Rectangle.Fill>
+            <DrawingBrush>
+                <DrawingBrush.Drawing>
+                    <DrawingGroup>
+                        <DrawingGroup.Children>
+                            <GeometryDrawing Brush="#00FFFFFF"
+                                             Geometry="F1M16,16L0,16 0,0 16,0z" />
+                            <GeometryDrawing Brush="#FF0081E4"
+                                             Geometry="F1M6.3906,13.6943L3.9156,11.2193 7.1356,8.0003 3.9156,4.7803 6.3906,2.3053 12.0836,8.0003z" />
+                            <GeometryDrawing Brush="#FF0081E4"
+                                             Geometry="F1M6.3901,12.2803L5.3291,11.2193 8.5491,8.0003 5.3291,4.7803 6.3901,3.7193 10.6701,8.0003z" />
+                        </DrawingGroup.Children>
+                    </DrawingGroup>
+                </DrawingBrush.Drawing>
+            </DrawingBrush>
+        </Rectangle.Fill>
+    </Rectangle>
+
+    <Rectangle x:Key="ExpandLeftIcon"
+               x:Shared="False"
+               Width="16"
+               Height="16">
+        <Rectangle.LayoutTransform>
+            <RotateTransform Angle="180" />
+        </Rectangle.LayoutTransform>
+        <Rectangle.Fill>
+            <DrawingBrush>
+                <DrawingBrush.Drawing>
+                    <DrawingGroup>
+                        <DrawingGroup.Children>
+                            <GeometryDrawing Brush="#00FFFFFF"
+                                             Geometry="F1M16,16L0,16 0,0 16,0z" />
+                            <GeometryDrawing Brush="#FF0081E4"
+                                             Geometry="F1M6.3906,13.6943L3.9156,11.2193 7.1356,8.0003 3.9156,4.7803 6.3906,2.3053 12.0836,8.0003z" />
+                            <GeometryDrawing Brush="#FF0081E4"
+                                             Geometry="F1M6.3901,12.2803L5.3291,11.2193 8.5491,8.0003 5.3291,4.7803 6.3901,3.7193 10.6701,8.0003z" />
+                        </DrawingGroup.Children>
+                    </DrawingGroup>
+                </DrawingBrush.Drawing>
+            </DrawingBrush>
+        </Rectangle.Fill>
+    </Rectangle>
+
+    <Rectangle x:Key="ExpandDownIcon"
+               x:Shared="False"
+               Width="16"
+               Height="16">
+        <Rectangle.Fill>
+            <DrawingBrush>
+                <DrawingBrush.Drawing>
+                    <DrawingGroup>
+                        <DrawingGroup.Children>
+                            <GeometryDrawing Brush="#00FFFFFF"
+                                             Geometry="F1M0,0L16,0 16,16 0,16z" />
+                            <GeometryDrawing Brush="#FF0081E4"
+                                             Geometry="F1M2.3057,6.3906L4.7807,3.9156 7.9997,7.1356 11.2197,3.9156 13.6947,6.3906 7.9997,12.0836z" />
+                            <GeometryDrawing Brush="#FF0081E4"
+                                             Geometry="F1M3.7197,6.3901L4.7807,5.3291 7.9997,8.5491 11.2197,5.3291 12.2807,6.3901 7.9997,10.6701z" />
+                        </DrawingGroup.Children>
+                    </DrawingGroup>
+                </DrawingBrush.Drawing>
+            </DrawingBrush>
+        </Rectangle.Fill>
+    </Rectangle>
+
+    <Rectangle x:Key="EditIcon"
+               x:Shared="False"
+               Width="16"
+               Height="16">
+        <Rectangle.Fill>
+            <DrawingBrush>
+                <DrawingBrush.Drawing>
+                    <DrawingGroup>
+                        <DrawingGroup.Children>
+                            <GeometryDrawing Brush="#00FFFFFF"
+                                             Geometry="F1M16,16L0,16 0,0 16,0z" />
+                            <GeometryDrawing Brush="#FFF6F6F6"
+                                             Geometry="F1M2.5857,-0.000199999999999534L-0.000299999999999745,2.5858 -0.000299999999999745,3.4148 1.0867,4.4998 -0.000299999999999745,5.5858 -0.000299999999999745,12.4148 2.5857,14.9998 13.4147,14.9998 16.0007,12.4148 16.0007,5.5858 13.4147,3.0008 6.4147,3.0008 3.4137,-0.000199999999999534z" />
+                            <GeometryDrawing Brush="#FF424242"
+                                             Geometry="F1M13,4L7.414,4 8.414,5 12.586,5 14,6.414 14,11.586 12.586,13 3.414,13 2,11.586 2,6.414 2.358,6.057 2.5,5.914 1.793,5.207 1.624,5.376 1,6 1,12 3,14 13,14 15,12 15,6z" />
+                            <GeometryDrawing Brush="#FFF0EFF1"
+                                             Geometry="F1M12.5858,5L8.4138,5 10.9998,7.586 10.9998,11 7.5858,11 2.4998,5.914 2.3578,6.057 1.9998,6.414 1.9998,11.586 3.4138,13 7.5858,13 12.5858,13 13.4998,12.086 13.6428,11.943 13.9998,11.586 13.9998,6.414z" />
+                            <GeometryDrawing Brush="#FF00539C"
+                                             Geometry="F1M5,3L3,5 7,8.999 9,6.999z" />
+                            <GeometryDrawing Brush="#FF00539C"
+                                             Geometry="F1M4,2L2,4 1,3 3,1z" />
+                            <GeometryDrawing Brush="#FF00539C"
+                                             Geometry="F1M8,10L10,9.999 10,8z" />
+                            <GeometryDrawing Brush="#FF00539C"
+                                             Geometry="F1M5,3L3,5 7,8.999 9,6.999z" />
+                            <GeometryDrawing Brush="#FF00539C"
+                                             Geometry="F1M4,2L2,4 1,3 3,1z" />
+                            <GeometryDrawing Brush="#FF00539C"
+                                             Geometry="F1M8,10L10,9.999 10,8z" />
+                        </DrawingGroup.Children>
+                    </DrawingGroup>
+                </DrawingBrush.Drawing>
+            </DrawingBrush>
+        </Rectangle.Fill>
+    </Rectangle>
+
+    <Rectangle x:Key="UnpauseIcon"
+               x:Shared="False"
+               Width="16"
+               Height="16">
+        <Rectangle.Fill>
+            <DrawingBrush>
+                <DrawingBrush.Drawing>
+                    <DrawingGroup>
+                        <DrawingGroup.Children>
+                            <GeometryDrawing Brush="#00FFFFFF"
+                                             Geometry="F1M16,16L0,16 0,0 16,0z" />
+                            <GeometryDrawing Brush="#FF0081E4"
+                                             Geometry="F1M4,2L4,14 12,8z" />
+                        </DrawingGroup.Children>
+                    </DrawingGroup>
+                </DrawingBrush.Drawing>
+            </DrawingBrush>
+        </Rectangle.Fill>
+    </Rectangle>
+
+    <Rectangle x:Key="PauseIcon"
+               x:Shared="False"
+               Width="16"
+               Height="16">
+        <Rectangle.Fill>
+            <DrawingBrush>
+                <DrawingBrush.Drawing>
+                    <DrawingGroup>
+                        <DrawingGroup.Children>
+                            <GeometryDrawing Brush="#00f6f6f6"
+                                             Geometry="M16,0V16H0V0Z" />
+                            <GeometryDrawing Brush="Transparent"
+                                             Geometry="M13,2V13H3V2Z" />
+                            <GeometryDrawing Brush="#FF0081E4"
+                                             Geometry="M4,3H7v9H4ZM9,3v9h3V3Z" />
+                        </DrawingGroup.Children>
+                    </DrawingGroup>
+                </DrawingBrush.Drawing>
+            </DrawingBrush>
+        </Rectangle.Fill>
+    </Rectangle>
+
+    <Rectangle x:Key="ZoomOutIcon"
+               x:Shared="False"
+               Width="16"
+               Height="16">
+        <Rectangle.Fill>
+            <DrawingBrush>
+                <DrawingBrush.Drawing>
+                    <DrawingGroup ClipGeometry="M0,0 V16 H16 V0 H0 Z">
+                        <GeometryDrawing Geometry="F1 M16,16z M0,0z M16,16L0,16 0,0 16,0 16,16z">
+                            <GeometryDrawing.Brush>
+                                <SolidColorBrush Color="#FFF6F6F6"
+                                                 Opacity="0" />
+                            </GeometryDrawing.Brush>
+                        </GeometryDrawing>
+                        <GeometryDrawing Brush="#FF252526"
+                                         Geometry="F1 M16,16z M0,0z M8.654,11.548C7.969,11.846 7.237,12 6.5,12 3.467,12 1,9.532 1,6.5 1,3.467 3.467,1 6.5,1 9.532,1 12,3.467 12,6.5 12,7.225 11.849,7.948 11.559,8.625L16,13.066 16,13.433 13.437,16 13.107,16 8.654,11.548z" />
+                        <GeometryDrawing Brush="#FFC5C5C5"
+                                         Geometry="F1 M16,16z M0,0z M14.769,13.25L10.338,8.819C10.75,8.14 11,7.352 11,6.5 11,4.015 8.985,2 6.5,2 4.015,2 2,4.015 2,6.5 2,8.985 4.015,11 6.5,11 7.362,11 8.16,10.745 8.844,10.325L13.271,14.75 14.769,13.25z M3,6.5C3,4.567 4.567,3 6.5,3 8.433,3 10,4.567 10,6.5 10,8.433 8.433,10 6.5,10 4.567,10 3,8.433 3,6.5z" />
+                        <GeometryDrawing Brush="#FF2A292C"
+                                         Geometry="F1 M16,16z M0,0z M6.5,3C4.567,3 3,4.567 3,6.5 3,8.433 4.567,10 6.5,10 8.433,10 10,8.433 10,6.5 10,4.567 8.433,3 6.5,3z M4,7L4,6 9,6 9,7 4,7z" />
+                        <GeometryDrawing Brush="#FF75BEFF"
+                                         Geometry="F1 M16,16z M0,0z M9,7L4,7 4,6 9,6 9,7z" />
+                    </DrawingGroup>
+                </DrawingBrush.Drawing>
+            </DrawingBrush>
+        </Rectangle.Fill>
+    </Rectangle>
+
+    <Rectangle x:Key="ZoomInIcon"
+               x:Shared="False"
+               Width="16"
+               Height="16">
+        <Rectangle.Fill>
+            <DrawingBrush>
+                <DrawingBrush.Drawing>
+                    <DrawingGroup ClipGeometry="M0,0 V16 H16 V0 H0 Z">
+                        <GeometryDrawing Geometry="F1 M16,16z M0,0z M16,16L0,16 0,0 16,0 16,16z">
+                            <GeometryDrawing.Brush>
+                                <SolidColorBrush Color="#FFF6F6F6"
+                                                 Opacity="0" />
+                            </GeometryDrawing.Brush>
+                        </GeometryDrawing>
+                        <GeometryDrawing Brush="#FF252526"
+                                         Geometry="F1 M16,16z M0,0z M8.654,11.548C7.969,11.846 7.237,12 6.5,12 3.467,12 1,9.532 1,6.5 1,3.467 3.467,1 6.5,1 9.532,1 12,3.467 12,6.5 12,7.225 11.849,7.948 11.559,8.625L16,13.066 16,13.433 13.437,16 13.107,16 8.654,11.548z" />
+                        <GeometryDrawing Brush="#FFC5C5C5"
+                                         Geometry="F1 M16,16z M0,0z M14.769,13.25L10.338,8.819C10.75,8.14 11,7.352 11,6.5 11,4.015 8.985,2 6.5,2 4.015,2 2,4.015 2,6.5 2,8.985 4.015,11 6.5,11 7.362,11 8.16,10.745 8.844,10.325L13.271,14.75 14.769,13.25z M3,6.5C3,4.567 4.567,3 6.5,3 8.433,3 10,4.567 10,6.5 10,8.433 8.433,10 6.5,10 4.567,10 3,8.433 3,6.5z" />
+                        <GeometryDrawing Brush="#FF2A292C"
+                                         Geometry="F1 M16,16z M0,0z M6.5,3C4.567,3 3,4.567 3,6.5 3,8.433 4.567,10 6.5,10 8.433,10 10,8.433 10,6.5 10,4.567 8.433,3 6.5,3z M7,7L7,9 6,9 6,7 4,7 4,6 6,6 6,4 7,4 7,6 9,6 9,7 7,7z" />
+                        <GeometryDrawing Brush="#FF75BEFF"
+                                         Geometry="F1 M16,16z M0,0z M9,6L9,7 7,7 7,9 6,9 6,7 4,7 4,6 6,6 6,4 7,4 7,6 9,6z" />
+                    </DrawingGroup>
+                </DrawingBrush.Drawing>
+            </DrawingBrush>
+        </Rectangle.Fill>
+    </Rectangle>
+
+    <Rectangle x:Key="StopIcon"
+               x:Shared="False"
+               Width="16"
+               Height="16">
+        <Rectangle.Fill>
+            <DrawingBrush>
+                <DrawingBrush.Drawing>
+                    <DrawingGroup>
+                        <DrawingGroup.Children>
+                            <GeometryDrawing Brush="#00FFFFFF"
+                                             Geometry="F1M16,16L0,16 0,0 16,0z" />
+                            <GeometryDrawing Brush="#F38B76"
+                                             Geometry="F1M13,13L3,13 3,3 13,3z" />
+                            <GeometryDrawing Brush="#F38B76"
+                                             Geometry="F1M12,12L4,12 4,4 12,4z" />
+                        </DrawingGroup.Children>
+                    </DrawingGroup>
+                </DrawingBrush.Drawing>
+            </DrawingBrush>
+        </Rectangle.Fill>
+    </Rectangle>
+
+    <Rectangle x:Key="RunIcon"
+               x:Shared="False"
+               Width="16"
+               Height="16">
+        <Rectangle.Fill>
+            <DrawingBrush>
+                <DrawingBrush.Drawing>
+                    <DrawingGroup>
+                        <DrawingGroup.Children>
+                            <GeometryDrawing Brush="#00FFFFFF"
+                                             Geometry="F1M16,16L0,16 0,0 16,0z" />
+                            <GeometryDrawing Brush="#8DD28A"
+                                             Geometry="F1M4,2L4,14 12,8z" />
+                        </DrawingGroup.Children>
+                    </DrawingGroup>
+                </DrawingBrush.Drawing>
+            </DrawingBrush>
+        </Rectangle.Fill>
+    </Rectangle>
+
+    <Rectangle x:Key="AddStateIcon"
+               x:Shared="False"
+               Width="16"
+               Height="16">
+        <Rectangle.Fill>
+            <DrawingBrush>
+                <DrawingBrush.Drawing>
+                    <DrawingGroup>
+                        <DrawingGroup.Children>
+                            <GeometryDrawing Brush="#00FFFFFF"
+                                             Geometry="F1M16,16L0,16 0,0 16,0z" />
+                            <GeometryDrawing Brush="#FFF6F6F6"
+                                             Geometry="F1M1.9998,-0.000199999999999534L1.9998,1.9998 -0.000199999999999978,1.9998 -0.000199999999999978,5.9998 1.9998,5.9998 1.9998,13.4148 3.5858,14.9998 5.4148,14.9998 6.9998,13.4148 6.9998,12.0008 14.4148,12.0008 15.9998,10.4138 15.9998,6.5858 14.4148,4.9998 7.9998,4.9998 7.9998,1.9998 6.0008,1.9998 6.0008,-0.000199999999999534z" />
+                            <GeometryDrawing Brush="#FF424242"
+                                             Geometry="F1M15,7L15,10 14,11 6,11 6,13 5,14 4,14 3,13 3,8 4,8 4,13 5,13 5,10 14,10 14,7 6,7 6,6 14,6z" />
+                            <GeometryDrawing Brush="#FFF0EFF1"
+                                             Geometry="F1M14,7L14,10 5,10 5,13 4,13 4,8 6,8 6,7z" />
+                            <GeometryDrawing Brush="#FF388A34"
+                                             Geometry="F1M3,5L1,5 1,3 3,3 3,1 5,1 5,3 7,3 7,5 5,5 5,7 3,7z" />
+                        </DrawingGroup.Children>
+                    </DrawingGroup>
+                </DrawingBrush.Drawing>
+            </DrawingBrush>
+        </Rectangle.Fill>
+    </Rectangle>
+
+    <Rectangle x:Key="RenameIcon"
+               x:Shared="False"
+               Width="16"
+               Height="16">
+        <Rectangle.Fill>
+            <DrawingBrush>
+                <DrawingBrush.Drawing>
+                    <DrawingGroup>
+                        <DrawingGroup.Children>
+                            <GeometryDrawing Brush="#00FFFFFF"
+                                             Geometry="F1M16,16L0,16 0,0 16,0z" />
+                            <GeometryDrawing Brush="#FFF6F6F6"
+                                             Geometry="F1M0,0.999700000000001L0,14.0007 8,14.0007 8,13.0007 16,13.0007 16,4.0007 8,4.0007 8,0.999700000000001z" />
+                            <GeometryDrawing Brush="#FF414141"
+                                             Geometry="F1M1,13L3,13 3,11 1,11z" />
+                            <GeometryDrawing Brush="#FF414141"
+                                             Geometry="F1M3,11L5,11 5,4 3,4z" />
+                            <GeometryDrawing Brush="#FF414141"
+                                             Geometry="F1M7,11L5,11 5,13 7,13z" />
+                            <GeometryDrawing Brush="#FF414141"
+                                             Geometry="F1M1,4L3,4 3,2 1,2z" />
+                            <GeometryDrawing Brush="#FF414141"
+                                             Geometry="F1M1,6L2,6 2,5 1,5z" />
+                            <GeometryDrawing Brush="#FF414141"
+                                             Geometry="F1M1,8L2,8 2,7 1,7z" />
+                            <GeometryDrawing Brush="#FF414141"
+                                             Geometry="F1M6,6L7,6 7,5 6,5z" />
+                            <GeometryDrawing Brush="#FF414141"
+                                             Geometry="F1M5,4L7,4 7,2 5,2z" />
+                            <GeometryDrawing Brush="#FF414141"
+                                             Geometry="F1M1,10L2,10 2,9 1,9z" />
+                            <GeometryDrawing Brush="#FF414141"
+                                             Geometry="F1M8,6L9,6 9,5 8,5z" />
+                            <GeometryDrawing Brush="#FF414141"
+                                             Geometry="F1M14,10L15,10 15,9 14,9z" />
+                            <GeometryDrawing Brush="#FF414141"
+                                             Geometry="F1M14,8L15,8 15,7 14,7z" />
+                            <GeometryDrawing Brush="#FF414141"
+                                             Geometry="F1M14,12L15,12 15,10.999 14,10.999z" />
+                            <GeometryDrawing Brush="#FF414141"
+                                             Geometry="F1M14,6L15,6 15,5 14,5z" />
+                            <GeometryDrawing Brush="#FF414141"
+                                             Geometry="F1M12,12L13,12 13,10.999 12,10.999z" />
+                            <GeometryDrawing Brush="#FF414141"
+                                             Geometry="F1M12,6L13,6 13,5 12,5z" />
+                            <GeometryDrawing Brush="#FF414141"
+                                             Geometry="F1M10,12L11,12 11,10.999 10,10.999z" />
+                            <GeometryDrawing Brush="#FF414141"
+                                             Geometry="F1M10,6L11,6 11,5 10,5z" />
+                            <GeometryDrawing Brush="#FF414141"
+                                             Geometry="F1M8,12L9,12 9,10.999 8,10.999z" />
+                        </DrawingGroup.Children>
+                    </DrawingGroup>
+                </DrawingBrush.Drawing>
+            </DrawingBrush>
+        </Rectangle.Fill>
+    </Rectangle>
+
+    <Rectangle x:Key="DeleteIcon"
+               x:Shared="False"
+               Width="16"
+               Height="16">
+        <Rectangle.Fill>
+            <DrawingBrush>
+                <DrawingBrush.Drawing>
+                    <DrawingGroup ClipGeometry="M0,0 V511.992 H511.992 V0 H0 Z">
+                        <DrawingGroup.Transform>
+                            <TranslateTransform X="3.5762786865234375E-07"
+                                                Y="3.5762786865234375E-07" />
+                        </DrawingGroup.Transform>
+                        <GeometryDrawing Brush="#FFE76E54"
+                                         Geometry="F1 M511.992,511.992z M0,0z M415.402344,495.421875L255.996094,336.011719 96.589844,495.421875C74.492188,517.515625 38.667969,517.515625 16.570312,495.421875 -5.52343799999997,473.324219 -5.52343799999997,437.5 16.570312,415.402344L175.980469,255.996094 16.570312,96.589844C-5.52343799999997,74.492188 -5.52343799999997,38.667969 16.570312,16.570312 38.667969,-5.52343800000003 74.492188,-5.52343800000003 96.589844,16.570312L255.996094,175.980469 415.402344,16.570312C437.5,-5.52343800000003 473.324219,-5.52343800000003 495.421875,16.570312 517.515625,38.667969 517.515625,74.492188 495.421875,96.589844L336.011719,255.996094 495.421875,415.402344C517.515625,437.5 517.515625,473.324219 495.421875,495.421875 473.324219,517.515625 437.5,517.515625 415.402344,495.421875z M415.402344,495.421875" />
+                    </DrawingGroup>
+                </DrawingBrush.Drawing>
+            </DrawingBrush>
+        </Rectangle.Fill>
+    </Rectangle>
+
+    <Rectangle x:Key="DisconnectIcon"
+               x:Shared="False"
+               Width="16"
+               Height="16">
+        <Rectangle.Fill>
+            <DrawingBrush>
+                <DrawingBrush.Drawing>
+                    <DrawingGroup>
+                        <DrawingGroup.Children>
+                            <GeometryDrawing Brush="#00FFFFFF"
+                                             Geometry="F1M16,16L0,16 0,0 16,0z" />
+                            <GeometryDrawing Brush="#FFF6F6F6"
+                                             Geometry="F1M7.0002,-0.000199999999999534L7.0002,0.6468 6.3532,-0.000199999999999534 5.5252,-0.000199999999999534 3.9702,1.5558 2.4142,-0.000199999999999534 1.5862,-0.000199999999999534 0.000200000000000422,1.5858 0.000200000000000422,2.5348 1.4952,4.0298 0.000200000000000422,5.5258 0.000200000000000422,6.4748 1.5252,7.9998 1.0002,7.9998 1.0002,15.9998 10.0002,15.9998 10.0002,13.9998 14.0002,13.9998 14.0002,7.9998 16.0002,7.9998 16.0002,-0.000199999999999534z M6.4442,4.0298L7.0002,3.4748 7.0002,4.5858z M3.9702,6.5048L5.4652,7.9998 2.4752,7.9998z M7.0002,7.4138L7.0002,7.9998 6.4142,7.9998z M10.0002,7.9998L11.0002,7.9998 11.0002,10.9998 10.0002,10.9998z" />
+                            <GeometryDrawing Brush="#FF424242"
+                                             Geometry="F1M14,6L9,6 9,3 14,3z M8,14L3,14 3,11 8,11z M8,1L8,7 12,7 12,12 9,12 9,9 2,9 2,15 9,15 9,13 13,13 13,7 15,7 15,1z" />
+                            <GeometryDrawing Brush="#FFEFEFF0"
+                                             Geometry="F1M9,6L14,6 14,3 9,3z M3,11L8,11 8,14 3,14z" />
+                            <GeometryDrawing Brush="#FFA1260D"
+                                             Geometry="F1M3.9699,2.9698L1.9999,0.999799999999999 0.9399,2.0608 2.9089,4.0298 0.9399,5.9998 1.9999,7.0598 3.9699,5.0908 5.9389,7.0598 6.9999,5.9998 5.0299,4.0298 6.9999,2.0608 5.9389,0.999799999999999z" />
+                        </DrawingGroup.Children>
+                    </DrawingGroup>
+                </DrawingBrush.Drawing>
+            </DrawingBrush>
+        </Rectangle.Fill>
+    </Rectangle>
+
+    <Rectangle x:Key="SelectAllIcon"
+               x:Shared="False"
+               Width="16"
+               Height="16">
+        <Rectangle.Fill>
+            <DrawingBrush>
+                <DrawingBrush.Drawing>
+                    <DrawingGroup>
+                        <DrawingGroup.Children>
+                            <GeometryDrawing Brush="#00FFFFFF"
+                                             Geometry="F1M16,16L0,16 0,0 16,0z" />
+                            <GeometryDrawing Brush="#FFF6F6F6"
+                                             Geometry="F1M0,-0.000199999999999534L0,13.0008 6,13.0008 6,14.9998 7.649,14.9998 8.337,14.2448 9.115,15.9998 9.983,15.9998 12.269,14.9598 11.406,13.0008 15,13.0008 15,-0.000199999999999534z" />
+                            <GeometryDrawing Brush="#FF414141"
+                                             Geometry="F1M8.4141,7L9.4141,8 11.0001,8 11.0001,7z" />
+                            <GeometryDrawing Brush="#FF414141"
+                                             Geometry="F1M1,12L2,12 2,10.999 1,10.999z" />
+                            <GeometryDrawing Brush="#FF414141"
+                                             Geometry="F1M1,2L2,2 2,1 1,1z" />
+                            <GeometryDrawing Brush="#FF414141"
+                                             Geometry="F1M1,10L2,10 2,9 1,9z" />
+                            <GeometryDrawing Brush="#FF414141"
+                                             Geometry="F1M1,6L2,6 2,5 1,5z" />
+                            <GeometryDrawing Brush="#FF414141"
+                                             Geometry="F1M1,4L2,4 2,3 1,3z" />
+                            <GeometryDrawing Brush="#FF414141"
+                                             Geometry="F1M1,8L2,8 2,7 1,7z" />
+                            <GeometryDrawing Brush="#FF414141"
+                                             Geometry="F1M9,2L10,2 10,1 9,1z" />
+                            <GeometryDrawing Brush="#FF414141"
+                                             Geometry="F1M7,2L8,2 8,1 7,1z" />
+                            <GeometryDrawing Brush="#FF414141"
+                                             Geometry="F1M5,2L6,2 6,1 5,1z" />
+                            <GeometryDrawing Brush="#FF414141"
+                                             Geometry="F1M3,2L4,2 4,1 3,1z" />
+                            <GeometryDrawing Brush="#FF414141"
+                                             Geometry="F1M3,6L10,6 10,5 3,5z" />
+                            <GeometryDrawing Brush="#FF414141"
+                                             Geometry="F1M13,4L14.001,4 14.001,3 13,3z" />
+                            <GeometryDrawing Brush="#FF414141"
+                                             Geometry="F1M13,10L14.001,10 14.001,9 13,9z" />
+                            <GeometryDrawing Brush="#FF414141"
+                                             Geometry="F1M3,12L4,12 4,10.999 3,10.999z" />
+                            <GeometryDrawing Brush="#FF414141"
+                                             Geometry="F1M12.9996,10.9996L12.9996,11.5856 13.4146,12.0006 14.0006,12.0006 14.0006,10.9996z" />
+                            <GeometryDrawing Brush="#FF414141"
+                                             Geometry="F1M13,6L14.001,6 14.001,5 13,5z" />
+                            <GeometryDrawing Brush="#FF414141"
+                                             Geometry="F1M13,2L14.001,2 14.001,1 13,1z" />
+                            <GeometryDrawing Brush="#FF414141"
+                                             Geometry="F1M13,8L14.001,8 14.001,7 13,7z" />
+                            <GeometryDrawing Brush="#FF414141"
+                                             Geometry="F1M11,2L12,2 12,1 11,1z" />
+                            <GeometryDrawing Brush="#FF414141"
+                                             Geometry="F1M3,8L6.001,8 6.001,7 3,7z" />
+                            <GeometryDrawing Brush="#FF414141"
+                                             Geometry="F1M5,12L6,12 6,10.999 5,10.999z" />
+                            <GeometryDrawing Brush="#FF414141"
+                                             Geometry="F1M3,4L12,4 12,3 3,3z" />
+                            <GeometryDrawing Brush="#FF414141"
+                                             Geometry="F1M10.9551,14.459L9.8691,11.994 12.3871,11.994 7.0001,6.996 7.0001,14.228 8.6291,12.438 9.7661,15z" />
+                        </DrawingGroup.Children>
+                    </DrawingGroup>
+                </DrawingBrush.Drawing>
+            </DrawingBrush>
+        </Rectangle.Fill>
+    </Rectangle>
+
+    <Rectangle x:Key="LockIcon"
+               x:Shared="False"
+               Width="16"
+               Height="16">
+        <Rectangle.Fill>
+            <DrawingBrush>
+                <DrawingBrush.Drawing>
+                    <DrawingGroup>
+                        <DrawingGroup.Children>
+                            <GeometryDrawing Brush="#00FFFFFF"
+                                             Geometry="M16,16H0V0H16Z" />
+                            <GeometryDrawing Brush="#0A212121"
+                                             Geometry="M2.5,14.5h10v-8H2.5Z" />
+                            <GeometryDrawing Brush="#FF212121"
+                                             Geometry="M8,12H7V9H8Z" />
+                            <GeometryDrawing Brush="#FF212121"
+                                             Geometry="M12.5,6H11V4.536a3.5,3.5,0,0,0-7,0V6H2.5L2,6.5v8l.5.5h10l.5-.5v-8ZM5,4.536a2.5,2.5,0,0,1,5,0V6H5ZM12,14H3V7h9Z" />
+                        </DrawingGroup.Children>
+                    </DrawingGroup>
+                </DrawingBrush.Drawing>
+            </DrawingBrush>
+        </Rectangle.Fill>
+    </Rectangle>
+
+    <Rectangle x:Key="UnlockIcon"
+               x:Shared="False"
+               Width="16"
+               Height="16">
+        <Rectangle.Fill>
+            <DrawingBrush>
+                <DrawingBrush.Drawing>
+                    <DrawingGroup>
+                        <DrawingGroup.Children>
+                            <GeometryDrawing Brush="#00FFFFFF"
+                                             Geometry="M16,16H0V0H16Z" />
+                            <GeometryDrawing Brush="#0A212121"
+                                             Geometry="M1.5,14.5h10v-8H1.5Z" />
+                            <GeometryDrawing Brush="#FF212121"
+                                             Geometry="M7,12H6V9H7Z" />
+                            <GeometryDrawing Brush="#FF212121"
+                                             Geometry="M12.5,1.036A3.5,3.5,0,0,0,9,4.536V6H1.5L1,6.5v8l.5.5h10l.5-.5v-8L11.5,6H10V4.536a2.5,2.5,0,0,1,5,0V5h1V4.536A3.5,3.5,0,0,0,12.5,1.036ZM11,7v7H2V7Z" />
+                        </DrawingGroup.Children>
+                    </DrawingGroup>
+                </DrawingBrush.Drawing>
+            </DrawingBrush>
+        </Rectangle.Fill>
+    </Rectangle>
+
+    <PathGeometry x:Key="CloseGeometry"
+                  x:Shared="False"
+                  Figures="M9.15625 6.3125L6.3125 9.15625L22.15625 25L6.21875 40.96875L9.03125 43.78125L25 27.84375L40.9375 43.78125L43.78125 40.9375L27.84375 25L43.6875 9.15625L40.84375 6.3125L25 22.15625Z" />
+
+    <PathGeometry x:Key="AddGeometry"
+                  x:Shared="False"
+                  Figures="M15 5L15 15L5 15L5 17L15 17L15 27L17 27L17 17L27 17L27 15L17 15L17 5Z" />
+
+</ResourceDictionary>

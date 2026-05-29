@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>流程编辑器 Shell — 工程总结</title>
+<style>
+  :root { --bg: #1e1e1e; --fg: #d4d4d4; --accent: #569cd6; --green: #6a9955; --orange: #ce9178; --purple: #c586c0; --border: #333; --card: #252526; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif; background: var(--bg); color: var(--fg); line-height: 1.7; padding: 40px 20px; }
+  .container { max-width: 1000px; margin: 0 auto; }
+  h1 { font-size: 28px; color: var(--accent); border-bottom: 2px solid var(--accent); padding-bottom: 12px; margin-bottom: 8px; }
+  h2 { font-size: 20px; color: var(--orange); margin: 32px 0 12px; padding-left: 8px; border-left: 3px solid var(--orange); }
+  h3 { font-size: 16px; color: var(--purple); margin: 20px 0 8px; }
+  .subtitle { color: #888; font-size: 14px; margin-bottom: 32px; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0 20px; }
+  th { background: var(--card); text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--border); font-size: 13px; color: var(--accent); }
+  td { padding: 8px 12px; border-bottom: 1px solid var(--border); font-size: 13px; }
+  tr:hover { background: #2a2a2a; }
+  code { background: #333; padding: 2px 6px; border-radius: 3px; font-size: 12px; color: var(--accent); }
+  .card { background: var(--card); border-radius: 6px; padding: 16px 20px; margin: 12px 0; border: 1px solid var(--border); }
+  .tag { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; margin: 2px; }
+  .tag-done { background: #1b5e20; color: #a5d6a7; }
+  .tag-wip { background: #e65100; color: #ffe0b2; }
+  .tag-todo { background: #424242; color: #bdbdbd; }
+  ul { padding-left: 20px; margin: 8px 0; }
+  li { margin: 4px 0; font-size: 13px; }
+  .footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--border); color: #666; font-size: 12px; text-align: center; }
+  .stat { font-size: 24px; font-weight: bold; color: var(--accent); }
+  .stat-label { font-size: 12px; color: #888; }
+  .stat-box { display: inline-block; text-align: center; margin: 8px 20px 8px 0; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>Shell 流程编辑器</h1>
+<p class="subtitle">基于 WPF + Nodify 的可视化数据流编辑器 | .NET 8 | Prism MVVM | 2026-05-27</p>
+
+<!-- 统计 -->
+<div style="margin: 20px 0;">
+  <div class="stat-box"><span class="stat">4</span><br><span class="stat-label">项目</span></div>
+  <div class="stat-box"><span class="stat">6</span><br><span class="stat-label">节点类型</span></div>
+  <div class="stat-box"><span class="stat">~25</span><br><span class="stat-label">源文件</span></div>
+  <div class="stat-box"><span class="stat">3</span><br><span class="stat-label">主题</span></div>
+</div>
+
+<!-- 架构 -->
+<h2>项目架构</h2>
+<div class="card">
+<pre style="font-size:12px;overflow-x:auto;">
+Shell.sln
+├── <b>Shell</b> (WPF App)
+│   ├── Models/
+│   │   ├── ToolBoxItem.cs, ToolBoxCategory.cs
+│   │   └── <b>Nodes/</b> (10 files)
+│   │       ├── NodeEnums.cs, NodeViewModel.cs, ConnectorViewModel.cs, ConnectionViewModel.cs
+│   │       ├── ConstantNodeViewModel.cs, FunctionNodeViewModel.cs, DisplayNodeViewModel.cs
+│   │       └── DelayNodeViewModel.cs, ConditionNodeViewModel.cs, LoopNodeViewModel.cs
+│   ├── ViewModels/
+│   │   ├── MainWindowViewModel.cs  (<b>主编排器</b>: 节点管理、执行、序列化、主题)
+│   │   ├── ToolBoxViewModel.cs, PendingConnectionViewModel.cs
+│   ├── Services/
+│   │   ├── GraphExecutor.cs (<b>Kahn 拓扑排序执行</b> + 异步管道)
+│   │   ├── GraphSerializer.cs (JSON 保存/加载)
+│   │   └── NodeFactory.cs (反序列化工厂)
+│   └── Views/
+│       ├── MainWindow.xaml/.cs (主界面 + TreeView 拖拽)
+│       └── NodeTemplateSelector.cs
+├── <b>Nodify.Shared</b> (Class Library)
+│   ├── Themes/ (Brushes, Controls, Dark, Light, Nodify)
+│   ├── ThemeManager.cs, DelegateCommand.cs, AsyncDelegateCommand.cs
+│   └── UndoRedo/ (ActionsHistory)
+└── <b>Core.UI</b> (Class Library)
+</pre>
+</div>
+
+<!-- 节点类型 -->
+<h2>节点类型一览</h2>
+<table>
+  <tr><th>节点</th><th>NodeType</th><th>分类</th><th>输入</th><th>输出</th><th>可编辑参数</th><th>核心逻辑</th></tr>
+  <tr>
+    <td>🟢 常量</td><td><code>Constant</code></td><td>📥 输入</td><td>-</td><td>Value ×1</td><td>常数值 (TextBox)</td><td>手动设定数值</td>
+  </tr>
+  <tr>
+    <td>🔵 加法</td><td><code>Function</code></td><td>🔢 算术</td><td>A, B</td><td>Result</td><td>-</td><td>f(x) = A + B</td>
+  </tr>
+  <tr>
+    <td>🔵 减法</td><td><code>Function</code></td><td>🔢 算术</td><td>A, B</td><td>Result</td><td>-</td><td>f(x) = A − B</td>
+  </tr>
+  <tr>
+    <td>🔵 乘法</td><td><code>Function</code></td><td>🔢 算术</td><td>A, B</td><td>Result</td><td>-</td><td>f(x) = A × B</td>
+  </tr>
+  <tr>
+    <td>🔵 除法</td><td><code>Function</code></td><td>🔢 算术</td><td>A, B</td><td>Result</td><td>-</td><td>f(x) = A ÷ B (÷0→NaN)</td>
+  </tr>
+  <tr>
+    <td>⏱ 延时</td><td><code>Delay</code></td><td>🔀 流程控制</td><td>输入 ×1</td><td>输出 ×1</td><td>延时 ms (TextBox)</td><td>Task.Delay 异步等待后直通</td>
+  </tr>
+  <tr>
+    <td>◈ 判断</td><td><code>Condition</code></td><td>🔀 流程控制</td><td>输入值 ×1</td><td>满足 / 不满足 ×2</td><td>比较方式 (ComboBox 符号)、阈值 (TextBox)</td><td>比较后路由到对应输出</td>
+  </tr>
+  <tr>
+    <td>🔄 循环</td><td><code>Loop</code></td><td>🔀 流程控制</td><td>输入 ×1</td><td>输出 ×1</td><td>循环次数 (TextBox)</td><td>输出 = 输入 × 次数</td>
+  </tr>
+  <tr>
+    <td>🟠 显示</td><td><code>Display</code></td><td>📤 输出</td><td>In ×1</td><td>-</td><td>-</td><td>观测输入值</td>
+  </tr>
+</table>
+
+<!-- 功能清单 -->
+<h2>功能清单</h2>
+<table>
+  <tr><th>类别</th><th>功能</th><th>状态</th></tr>
+  <tr><td>编辑器</td><td>NodifyEditor 画布 + 双击网格线背景 (DrawingBrush)</td><td><span class="tag tag-done">完成</span></td></tr>
+  <tr><td>编辑器</td><td>节点拖拽、多选、删除、连线、断连</td><td><span class="tag tag-done">完成</span></td></tr>
+  <tr><td>编辑器</td><td>FitToScreen / ZoomIn / ZoomOut / 撤销 / 重做</td><td><span class="tag tag-done">完成</span></td></tr>
+  <tr><td>编辑器</td><td>右下角 Minimap 小地图</td><td><span class="tag tag-done">完成</span></td></tr>
+  <tr><td>编辑器</td><td>连接线悬停发光 + 选中高亮 + 右键删除菜单</td><td><span class="tag tag-done">完成</span></td></tr>
+  <tr><td>工具箱</td><td>TreeView 树形可折叠 (4 分类 9 项)</td><td><span class="tag tag-done">完成</span></td></tr>
+  <tr><td>工具箱</td><td>自定义展开箭头 (▶/▼) + 分类图标 + 分隔线</td><td><span class="tag tag-done">完成</span></td></tr>
+  <tr><td>工具箱</td><td>拖拽创建节点 + ToolTip 提示</td><td><span class="tag tag-done">完成</span></td></tr>
+  <tr><td>节点</td><td>渐变头部 + 阴影 + 圆形连接器 + 彩色边框</td><td><span class="tag tag-done">完成</span></td></tr>
+  <tr><td>节点</td><td>参数直接可编辑 (TextBox / ComboBox)</td><td><span class="tag tag-done">完成</span></td></tr>
+  <tr><td>节点</td><td>f(x)= 表达式展示 (Consolas 等宽字体)</td><td><span class="tag tag-done">完成</span></td></tr>
+  <tr><td>执行</td><td>异步执行管道 (AsyncDelegateCommand + Task.Run)</td><td><span class="tag tag-done">完成</span></td></tr>
+  <tr><td>执行</td><td>Kahn 拓扑排序 + 环检测 + 错误反馈</td><td><span class="tag tag-done">完成</span></td></tr>
+  <tr><td>执行</td><td>Delay 节点 Task.Delay 异步等待不阻塞 UI</td><td><span class="tag tag-done">完成</span></td></tr>
+  <tr><td>持久化</td><td>JSON 序列化/反序列化 (GraphSerializer)</td><td><span class="tag tag-done">完成</span></td></tr>
+  <tr><td>持久化</td><td>NodeFactory DTO → ViewModel 还原</td><td><span class="tag tag-done">完成</span></td></tr>
+  <tr><td>主题</td><td>Dark / Light / Nodify 三主题动态切换</td><td><span class="tag tag-done">完成</span></td></tr>
+  <tr><td>主题</td><td>自研主题引擎 (直接修改 Application.Resources.Color)</td><td><span class="tag tag-done">完成</span></td></tr>
+  <tr><td>架构</td><td>Models/Nodes/ 子目录拆分 (10 个独立文件)</td><td><span class="tag tag-done">完成</span></td></tr>
+</table>
+
+<!-- 关键技术决策 -->
+<h2>关键技术决策</h2>
+<div class="card">
+  <h3>为什么自研主题引擎而不是用 ThemeManager？</h3>
+  <p>Nodify 框架 DLL 的 <code>Controls.xaml</code> 有 <b>72 处 StaticResource</b> 引用，Brushes.xaml 的笔刷全部 <code>o:Freeze="True"</code>。字典替换方式无法让冻结笔刷更新。改用直接修改 <code>Application.Current.Resources[key].Color</code> 属性，利用 WPF Freezable 变更通知触发全量重绘。</p>
+</div>
+<div class="card">
+  <h3>异步执行管道设计</h3>
+  <p><code>AsyncDelegateCommand</code>（防重入锁）→ <code>Task.Run(后台线程)</code> → <code>GraphExecutor.ExecuteAsync</code>（拓扑序 await）→ <code>node.ExecuteAsync(ct)</code>。Delay 节点使用 <code>await Task.Delay(ms, ct)</code>，不占用线程。同步 Execute() 保留向后兼容。</p>
+</div>
+<div class="card">
+  <h3>新增节点全链路注册</h3>
+  <p>每个新节点需要在 <b>7 处 switch</b> 中同步添加：<code>NodeTemplateSelector</code>、<code>MainWindowViewModel.AddNodeFromToolBox</code>、<code>NodeFactory.CreateNode(NodeData)</code>、<code>NodeFactory.CreateNode(string)</code>、<code>NodeFactory.RestoreProperties</code>、<code>GraphSerializer.DetermineNodeType</code>、<code>GraphSerializer.ExtractProperties</code>。</p>
+</div>
+
+<!-- 文件统计 -->
+<h2>关键文件</h2>
+<table>
+  <tr><th>文件</th><th>位置</th><th>说明</th></tr>
+  <tr><td>MainWindow.xaml</td><td><code>Shell/Views/</code></td><td>主界面 (工具箱 + 编辑器 + 小地图 + 主题按钮)</td></tr>
+  <tr><td>MainWindowViewModel.cs</td><td><code>Shell/ViewModels/</code></td><td>主编排器 (节点、连接、执行、主题、序列化)</td></tr>
+  <tr><td>Nodes/NodeViewModel.cs</td><td><code>Shell/Models/Nodes/</code></td><td>抽象基类 (Execute + ExecuteAsync + 输入/输出)</td></tr>
+  <tr><td>GraphExecutor.cs</td><td><code>Shell/Services/</code></td><td>拓扑排序 + 同步/异步执行</td></tr>
+  <tr><td>Dark.xaml / Light.xaml</td><td><code>Nodify.Shared/Themes/</code></td><td>Shell 自定义笔刷 (不含 Freeze)</td></tr>
+  <tr><td>AsyncDelegateCommand.cs</td><td><code>Nodify.Shared/</code></td><td>异步命令 (Func&lt;Task&gt; + 防重入)</td></tr>
+</table>
+
+<div class="footer">
+  Shell 流程编辑器 — 工程总结 | 生成于 2026-05-27 | .NET 8 + WPF + Nodify 7.3.0 + Prism 8.1
+</div>
+
+</div>
+</body>
+</html>

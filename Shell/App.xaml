@@ -1,0 +1,25 @@
+﻿<prism:PrismApplication x:Class="Shell.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:Shell"
+             xmlns:prism="http://prismlibrary.com/">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/Core.UI;component/Style/Generic.xaml"/>
+                <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/SkinDefault.xaml"/>
+                <ResourceDictionary Source="pack://application:,,,/HandyControl;component/Themes/Theme.xaml"/>
+
+                <ResourceDictionary Source="pack://application:,,,/Nodify;component/Themes/Nodify.xaml" />
+
+                <!-- ═══ 项目样式（按类型分文件管理） ═══ -->
+                <ResourceDictionary Source="Style/Brushes.xaml"/>
+                <ResourceDictionary Source="Style/ButtonStyles.xaml"/>
+                <ResourceDictionary Source="Style/DialogStyles.xaml"/>
+                <ResourceDictionary Source="Style/ConnectionStyles.xaml"/>
+                <ResourceDictionary Source="Style/NodeTemplates.xaml"/>
+                <ResourceDictionary Source="Style/NodeEditTemplates.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
+</prism:PrismApplication>

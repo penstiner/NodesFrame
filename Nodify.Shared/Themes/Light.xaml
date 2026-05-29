@@ -1,0 +1,36 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="Brushes.xaml" />
+        <ResourceDictionary Source="Controls.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+
+    <Color x:Key="ForegroundColor">Black</Color>
+    <Color x:Key="DisabledForegroundColor">Gray</Color>
+
+    <Color x:Key="BackgroundColor">#D4DCF2</Color>
+    <Color x:Key="ContrastBackgroundColor">#CCD6ED</Color>
+    <Color x:Key="HighlightedBackgroundColor">#B1C5FF</Color>
+
+    <Color x:Key="BorderColor">#CBCCDF</Color>
+    <Color x:Key="DisabledBorderColor">Gray</Color>
+    <Color x:Key="HighlightedBorderColor">#7EB4EA</Color>
+    <Color x:Key="FocusedBorderColor">#569DE5</Color>
+
+    <Color x:Key="GridLinesColor">#7EB4EA</Color>
+
+    <!-- Shell 自定义笔刷（不含 Freeze，支持动态主题切换） -->
+    <SolidColorBrush x:Key="BackgroundBrush" Color="#F0F0F0"/>
+    <SolidColorBrush x:Key="ForegroundBrush" Color="#222222"/>
+    <SolidColorBrush x:Key="ContrastBackgroundBrush" Color="#E0E0E0"/>
+    <SolidColorBrush x:Key="ConnectorStroke" Color="#556677"/>
+    <SolidColorBrush x:Key="ConnectorFill" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="EditorGridLinesBrush" Color="#B0B8C8"/>
+    <SolidColorBrush x:Key="ToolboxItemForeground" Color="#222222"/>
+    <SolidColorBrush x:Key="ToolboxItemDescForeground" Color="#444444"/>
+    <SolidColorBrush x:Key="ToolboxHeaderForeground" Color="#555555"/>
+    <SolidColorBrush x:Key="ToolboxSeparatorBrush" Color="#C0C0C0"/>
+    <SolidColorBrush x:Key="EditorToolbarBorder" Color="#C0C0C0"/>
+
+</ResourceDictionary>

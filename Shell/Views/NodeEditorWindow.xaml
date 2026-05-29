@@ -1,0 +1,59 @@
+<Window x:Class="Shell.Views.NodeEditorWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="节点设定" Width="520"
+        SizeToContent="Height"
+        MaxHeight="700"
+        MinHeight="250"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="CanResizeWithGrip"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent">
+
+    <!-- ═══ 窗口主体 ═══ -->
+    <Border Background="#FF1C1C28" CornerRadius="8" BorderBrush="#FF3F3F58" BorderThickness="1">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="20" ShadowDepth="4" Opacity="0.5" Color="#000000"/>
+        </Border.Effect>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*" MinHeight="80"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- 标题栏 -->
+            <Border Grid.Row="0" Height="40" Background="#FF252535"
+                    CornerRadius="8,8,0,0" MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
+                <Grid>
+                    <TextBlock Text="⚙ 节点设定" VerticalAlignment="Center"
+                               Margin="16,0,0,0" FontSize="13" FontWeight="SemiBold"
+                               Foreground="#C0C0D0"/>
+                    <Button Content="✕" HorizontalAlignment="Right"
+                            Click="CancelButton_Click"
+                            Style="{StaticResource DialogCloseBtn}"/>
+                </Grid>
+            </Border>
+
+            <!-- 编辑内容区（ScrollViewer 包裹） -->
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
+                          Background="#FF1C1C28">
+                <ContentControl Content="{Binding}"
+                                ContentTemplateSelector="{StaticResource EditTemplateSelector}"/>
+            </ScrollViewer>
+
+            <!-- 底部按钮 -->
+            <Border Grid.Row="2" Background="#FF222233" CornerRadius="0,0,8,8" Padding="16,12">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="取 消" Margin="0,0,12,0"
+                            Click="CancelButton_Click"
+                            Style="{StaticResource DialogCancelBtn}"/>
+                    <Button Content="✓ 确 定"
+                            Click="ConfirmButton_Click"
+                            Style="{StaticResource DialogConfirmBtn}"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Border>
+</Window>

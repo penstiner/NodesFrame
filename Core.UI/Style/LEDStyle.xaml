@@ -1,0 +1,136 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:converter="clr-namespace:Core.UI.Converter">
+    <converter:ColorToBoolConverter x:Key="ColorToBoolConverter"/>
+
+    <Style x:Key="LED" TargetType="Label">
+        <Setter Property="Width" Value="80"/>
+        <Setter Property="Height" Value="50"/>
+        <Setter Property="FontSize" Value="10"/>
+        <Setter Property="Foreground" Value="Black"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Label">
+                    <Border Width="{TemplateBinding Width}" Height="{TemplateBinding Height}" Background="Transparent">
+                        <StackPanel Orientation="Vertical">
+                            <Border Name="border" Width="20" Height="20" Background="{TemplateBinding Background}"
+                                    CornerRadius="100" Margin="0,2,0,0" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <TextBlock Text="{TemplateBinding Content}" FontSize="{TemplateBinding FontSize}"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,5,0,0"/>
+                        </StackPanel>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="LED2" TargetType="Label">
+        <Setter Property="Width" Value="80"/>
+        <Setter Property="Height" Value="50"/>
+        <Setter Property="FontSize" Value="10"/>
+        <Setter Property="Foreground" Value="Black"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Label">
+                    <Border Width="{TemplateBinding Width}" Height="{TemplateBinding Height}" Background="Transparent">
+                        <StackPanel Orientation="Vertical">
+                            <Border Name="border" Width="20" Height="20" Background="{TemplateBinding Background}"
+                                CornerRadius="100" Margin="0,2,0,0" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <TextBlock Text="{TemplateBinding Content}" FontSize="{TemplateBinding FontSize}"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,5,0,0"/>
+                        </StackPanel>
+
+                    </Border>
+
+                    <ControlTemplate.Triggers>
+                        <DataTrigger 
+                            Binding="{Binding Background, RelativeSource={RelativeSource Self}, Converter={StaticResource ColorToBoolConverter}}" 
+                                        Value="True">
+                            <DataTrigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard RepeatBehavior="Forever">
+                                        <ColorAnimationUsingKeyFrames Storyboard.TargetName="border" 
+                                              Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)">
+                                            <!-- 立即切换为绿色 -->
+                                            <DiscreteColorKeyFrame Value="Gray" KeyTime="0:0:0"/>
+                                            <!-- 0.5秒后立即切换为红色 -->
+                                            <DiscreteColorKeyFrame Value="LightGreen" KeyTime="0:0:0.5"/>
+                                            <!-- 1秒后立即切换回绿色（形成循环） -->
+                                            <DiscreteColorKeyFrame Value="Gray" KeyTime="0:0:1"/>
+                                        </ColorAnimationUsingKeyFrames>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </DataTrigger.EnterActions>
+                            <DataTrigger.ExitActions>
+                                <StopStoryboard BeginStoryboardName="{x:Null}"/>
+                                <!-- 可选：停止时恢复颜色 -->
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <ColorAnimation Storyboard.TargetName="border"
+                                            Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
+                                            To="Gray" Duration="0:0:0"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </DataTrigger.ExitActions>
+                        </DataTrigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="RightLED" TargetType="Label">
+        <Setter Property="Width" Value="60"/>
+        <Setter Property="Height" Value="30"/>
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="HorizontalAlignment" Value="Left"/>
+        <Setter Property="Margin" Value="5 0 0 0"/>
+        <Setter Property="Foreground" Value="Black"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Label">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{TemplateBinding Content}" FontSize="{TemplateBinding FontSize}" Foreground="Black"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <Border Name="border" Width="20" Height="20" Background="{TemplateBinding Background}"
+                                    CornerRadius="100" Margin="0,2,0,0" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="LEDStyle2" TargetType="Label">
+        <Setter Property="Width" Value="30"/>
+        <Setter Property="Height" Value="30"/>
+        <Setter Property="Foreground" Value="Black"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Label">
+                    <Border Name="border" Background="{TemplateBinding Background}" CornerRadius="100" BorderThickness="0" SnapsToDevicePixels="True" Margin="2,0,0,0">
+                        <TextBlock Text="{TemplateBinding Content}" Foreground="Black" HorizontalAlignment="Center" VerticalAlignment="Center" TextAlignment="Center" FontSize="12"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="NormalLEDStyle" TargetType="Label">
+        <Setter Property="Width" Value="80"/>
+        <Setter Property="Height" Value="50"/>
+        <Setter Property="FontSize" Value="10"/>
+        <Setter Property="Margin" Value="0"/>
+        <Setter Property="Foreground" Value="Black"/>
+        <Setter Property="HorizontalAlignment" Value="Center"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Label">
+                    <Border Name="border" Width="28" Height="28" Background="{TemplateBinding Background}"
+                            CornerRadius="100" Margin="0" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+</ResourceDictionary>

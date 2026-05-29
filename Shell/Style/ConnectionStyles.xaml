@@ -1,0 +1,58 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:nodify="clr-namespace:Nodify;assembly=Nodify">
+
+    <!-- ══════════════════════════════════════ -->
+    <!--  连接线样式 + 右键菜单项样式             -->
+    <!-- ══════════════════════════════════════ -->
+
+    <!-- 连接线外观 -->
+    <Style x:Key="ConnectionLineStyle" TargetType="nodify:LineConnection"
+           BasedOn="{StaticResource {x:Type nodify:LineConnection}}">
+        <Setter Property="Stroke" Value="#8899AABB" />
+        <Setter Property="StrokeThickness" Value="1.5" />
+        <Setter Property="OutlineBrush" Value="Transparent" />
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Stroke" Value="#CC6699CC" />
+                <Setter Property="StrokeThickness" Value="2" />
+                <Setter Property="OutlineBrush" Value="#336699CC" />
+            </Trigger>
+            <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                <Setter Property="Stroke" Value="#FF7C4DFF" />
+                <Setter Property="StrokeThickness" Value="2.5" />
+                <Setter Property="OutlineBrush" Value="#59E040FB" />
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- 右键菜单项 -->
+    <Style x:Key="ConnectionMenuItemStyle" TargetType="MenuItem">
+        <Setter Property="Foreground" Value="#D4D4D4"/>
+        <Setter Property="Padding" Value="10,6"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="MenuItem">
+                    <Border Name="Bd" Background="Transparent" Padding="{TemplateBinding Padding}"
+                            CornerRadius="3" Margin="2,1">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="20"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="✂" FontSize="11" VerticalAlignment="Center" Foreground="#FF6B6B6B"/>
+                            <TextBlock Grid.Column="1" Text="删除连接" VerticalAlignment="Center"
+                                       Foreground="#FFE0E0E0" FontSize="12"/>
+                        </Grid>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsHighlighted" Value="True">
+                            <Setter TargetName="Bd" Property="Background" Value="#FF3E3E42"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+</ResourceDictionary>
