@@ -32,5 +32,9 @@
     <SolidColorBrush x:Key="ToolboxHeaderForeground" Color="#555555"/>
     <SolidColorBrush x:Key="ToolboxSeparatorBrush" Color="#C0C0C0"/>
     <SolidColorBrush x:Key="EditorToolbarBorder" Color="#C0C0C0"/>
+    <SolidColorBrush x:Key="ToolboxCardBackgroundBrush" Color="#08000000"/>
+    <SolidColorBrush x:Key="ToolboxCardBorderBrush" Color="#15000000"/>
+    <SolidColorBrush x:Key="ToolboxSearchFocusBrush" Color="#FF0078D4"/>
+    <SolidColorBrush x:Key="ToolboxBadgeBrush" Color="#FFE0E0E8"/>
 
 </ResourceDictionary>

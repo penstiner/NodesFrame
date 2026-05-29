@@ -75,4 +75,10 @@
     <SolidColorBrush x:Key="ToolboxItemHoverBrush" Color="#3A3A4A"/>
     <SolidColorBrush x:Key="ToolboxItemSelectedBrush" Color="#1E5A8A"/>
 
+    <!-- ═══ 工具箱卡片笔刷（默认深色，运行时可被 ApplyTheme 覆盖） ═══ -->
+    <SolidColorBrush x:Key="ToolboxCardBackgroundBrush" Color="#08FFFFFF"/>
+    <SolidColorBrush x:Key="ToolboxCardBorderBrush" Color="#15FFFFFF"/>
+    <SolidColorBrush x:Key="ToolboxSearchFocusBrush" Color="#FF0078D4"/>
+    <SolidColorBrush x:Key="ToolboxBadgeBrush" Color="#FF4A4A5A"/>
+
 </ResourceDictionary>
