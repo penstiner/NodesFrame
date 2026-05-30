@@ -28,7 +28,7 @@
         <shared:StringToVisibilityConverter x:Key="StringToVisibilityConverter" />
         <shared:FontFamilyKeyConverter x:Key="FontFamilyKeyConverter"/>
     </Window.Resources>
-    <Grid Margin="5">
+    <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="200"/>
             <ColumnDefinition Width="*"/>
@@ -157,10 +157,15 @@
                         <Style x:Key="LeafItemStyle" TargetType="TreeViewItem">
                             <Setter Property="Padding" Value="0"/>
                             <Setter Property="Margin" Value="0"/>
+                            <EventSetter Event="PreviewMouseLeftButtonDown" Handler="ToolBoxTree_PreviewMouseLeftButtonDown"/>
+                            <EventSetter Event="PreviewMouseLeftButtonUp" Handler="ToolBoxTree_PreviewMouseLeftButtonUp"/>
+                            <EventSetter Event="PreviewMouseMove" Handler="ToolBoxTree_PreviewMouseMove"/>
                             <Setter Property="Template">
                                 <Setter.Value>
                                     <ControlTemplate TargetType="TreeViewItem">
-                                        <ContentPresenter ContentSource="Header"/>
+                                        <Border Background="Transparent" Padding="{TemplateBinding Padding}">
+                                            <ContentPresenter ContentSource="Header"/>
+                                        </Border>
                                     </ControlTemplate>
                                 </Setter.Value>
                             </Setter>

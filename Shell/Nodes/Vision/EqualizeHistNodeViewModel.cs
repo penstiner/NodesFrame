@@ -10,6 +10,6 @@ namespace Shell.Models.Nodes.Vision
     public class EqualizeHistNodeViewModel : VisionNodeBase
     {
         public EqualizeHistNodeViewModel() : base("直方图均衡") { }
-        protected override byte[] ProcessImage(byte[] input) => VisionAlgorithmService.EqualizeHist(input);
+        protected override ImageData ProcessImage(ImageData input) => VisionAlgorithmService.EqualizeHist(input);
     }
 }

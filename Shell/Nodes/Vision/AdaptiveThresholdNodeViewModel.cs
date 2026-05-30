@@ -19,7 +19,7 @@ namespace Shell.Models.Nodes.Vision
         [NodeProperty(Key = "blockSize", DisplayName = "块大小 (奇数)", Group = "阈值参数")] public int BlockSize { get => _blockSize; set => SetProperty(ref _blockSize, value); }
         private double _c = 2;
         [NodeProperty(Key = "c", DisplayName = "常数 C", Group = "阈值参数")] public double C { get => _c; set => SetProperty(ref _c, value); }
-        protected override byte[] ProcessImage(byte[] input) =>
+        protected override ImageData ProcessImage(ImageData input) =>
             VisionAlgorithmService.AdaptiveThreshold(input, MaxValue, AdaptiveMethod, ThresholdTypes.Binary, BlockSize, C);
     }
 }

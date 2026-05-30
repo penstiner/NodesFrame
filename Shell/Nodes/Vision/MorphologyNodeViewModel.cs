@@ -20,6 +20,6 @@ namespace Shell.Models.Nodes.Vision
         private int _si;
         [NodeProperty(Key = "selectedOpIndex", DisplayName = "操作类型", Options = "膨胀 (Dilate),腐蚀 (Erode),开运算 (Open),闭运算 (Close)")]
         public int SelectedOpIndex { get => _si; set { if (SetProperty(ref _si, value)) MorphOp = value switch { 0 => MorphTypes.Dilate, 1 => MorphTypes.Erode, 2 => MorphTypes.Open, 3 => MorphTypes.Close, _ => MorphTypes.Dilate }; } }
-        protected override byte[] ProcessImage(byte[] input) => VisionAlgorithmService.MorphologyOp(input, MorphOp, KernelSize, Iterations);
+        protected override ImageData ProcessImage(ImageData input) => VisionAlgorithmService.MorphologyOp(input, MorphOp, KernelSize, Iterations);
     }
 }

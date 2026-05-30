@@ -16,6 +16,6 @@ namespace Shell.Models.Nodes.Vision
         private int _si;
         [NodeProperty(Key = "flipMode", DisplayName = "翻转方向", Options = "水平翻转,垂直翻转,双向翻转")]
         public int SelectedModeIndex { get => _si; set { if (SetProperty(ref _si, value)) Mode = value switch { 0 => FlipMode.X, 1 => FlipMode.Y, 2 => FlipMode.XY, _ => FlipMode.X }; } }
-        protected override byte[] ProcessImage(byte[] input) => VisionAlgorithmService.Flip(input, Mode);
+        protected override ImageData ProcessImage(ImageData input) => VisionAlgorithmService.Flip(input, Mode);
     }
 }

@@ -61,14 +61,13 @@ namespace Shell.ViewModels
         public ObservableCollection<NodeViewModel> SelectedNodes { get; } = new ObservableCollection<NodeViewModel>();
 
         /// <summary>安全获取选中节点的预览图像（空集合返回 null，不抛异常）。</summary>
-        public System.Windows.Media.Imaging.BitmapImage? SelectedPreviewImage
+        public System.Windows.Media.ImageSource? SelectedPreviewImage
         {
             get
             {
                 if (SelectedNodes.Count == 0) return null;
                 var node = SelectedNodes[0];
-                var prop = node.GetType().GetProperty("PreviewImage");
-                return prop?.GetValue(node) as System.Windows.Media.Imaging.BitmapImage;
+                return GetPreviewImageSource(node);
             }
         }
 
@@ -393,19 +392,34 @@ namespace Shell.ViewModels
         // ── 图像对比模式 ──
 
         public bool IsCompareMode => SelectedNodes.Count == 2
-            && SelectedNodes[0].GetType().GetProperty("PreviewImage") != null
-            && SelectedNodes[1].GetType().GetProperty("PreviewImage") != null;
+            && SelectedNodes[0].GetType().GetProperty("Preview") != null
+            && SelectedNodes[1].GetType().GetProperty("Preview") != null;
 
         public bool IsSingleMode => !IsCompareMode;
 
-        public System.Windows.Media.Imaging.BitmapImage? SecondPreviewImage
+        public System.Windows.Media.ImageSource? SecondPreviewImage
         {
             get
             {
                 if (!IsCompareMode) return null;
-                var prop = SelectedNodes[1].GetType().GetProperty("PreviewImage");
-                return prop?.GetValue(SelectedNodes[1]) as System.Windows.Media.Imaging.BitmapImage;
+                return GetPreviewImageSource(SelectedNodes[1]);
             }
+        }
+
+        /// <summary>通过反射读取节点的 Preview.ImageSource（支持 ImagePreview 组件）。</summary>
+        private static System.Windows.Media.ImageSource? GetPreviewImageSource(NodeViewModel node)
+        {
+            var previewProp = node.GetType().GetProperty("Preview");
+            if (previewProp != null)
+            {
+                var preview = previewProp.GetValue(node);
+                if (preview != null)
+                {
+                    var srcProp = preview.GetType().GetProperty("ImageSource");
+                    return srcProp?.GetValue(preview) as System.Windows.Media.ImageSource;
+                }
+            }
+            return null;
         }
 
         public string SecondImageInfo

@@ -1,3 +1,4 @@
+using System.Linq;
 using Shell.Models.Attributes;
 using Shell.Services.Algorithms.Vision;
 
@@ -36,12 +37,11 @@ namespace Shell.Models.Nodes.Vision
             set => SetProperty(ref _lineCount, value);
         }
 
-        protected override byte[] ProcessImage(byte[] input)
+        protected override ImageData ProcessImage(ImageData input)
         {
             var result = VisionAlgorithmService.HoughLinesP(
                 input, Rho, Theta, HoughThreshold, MinLineLength, MaxLineGap, out var count);
             LineCount = count;
-            // 将线段数量写入第二个输出连接器
             if (Output.Count > 1)
                 Output[1].Value = VariantValue.FromInt32(count);
             return result;
@@ -49,23 +49,21 @@ namespace Shell.Models.Nodes.Vision
 
         public override void Execute()
         {
-            // 重写以支持第二个输出连接器（线段数）
             var inputVal = Input.ElementAtOrDefault(0)?.Value ?? VariantValue.Null;
-            if (!inputVal.TryGetBytes(out var pngData) || pngData.Length == 0)
+            if (!inputVal.TryGetImageData(out var imageData) || imageData == null)
             {
                 ImageInfo = "等待输入图像...";
                 return;
             }
 
-            var result = ProcessImage(pngData);
-            if (result != null && result.Length > 0)
+            var result = ProcessImage(imageData);
+            if (result != null)
             {
                 if (Output.Count > 0)
-                    Output[0].Value = VariantValue.FromBytes(result);
+                    Output[0].Value = VariantValue.FromImageData(result);
 
-                var info = VisionAlgorithmService.GetImageInfo(result);
-                ImageInfo = $"{info.Width}×{info.Height}, {info.Channels}ch, {LineCount} 条线";
-                PreviewImage = VisionHelper.MakePreview(result);
+                ImageInfo = $"{result.InfoText}, {LineCount} 条线";
+                Preview.Update(result);
             }
         }
     }

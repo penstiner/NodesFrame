@@ -16,6 +16,6 @@ namespace Shell.Models.Nodes.Vision
         private int _sel;
         [NodeProperty(Key = "selectedIndex", DisplayName = "转换类型", Options = "灰度 BGR→GRAY,HSV BGR→HSV,Lab BGR→Lab")]
         public int SelectedIndex { get => _sel; set { if (SetProperty(ref _sel, value)) ConversionCode = value switch { 0 => ColorConversionCodes.BGR2GRAY, 1 => ColorConversionCodes.BGR2HSV, 2 => ColorConversionCodes.BGR2Lab, _ => ColorConversionCodes.BGR2GRAY }; } }
-        protected override byte[] ProcessImage(byte[] input) => VisionAlgorithmService.CvtColor(input, ConversionCode);
+        protected override ImageData ProcessImage(ImageData input) => VisionAlgorithmService.CvtColor(input, ConversionCode);
     }
 }

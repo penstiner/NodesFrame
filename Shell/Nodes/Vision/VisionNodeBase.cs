@@ -1,15 +1,18 @@
 using System.Linq;
-using System.Windows.Media.Imaging;
 using Shell.Services.Algorithms.Vision;
 
 namespace Shell.Models.Nodes.Vision
 {
     /// <summary>
     /// 视觉算法节点基类 —— 封装通用的输入/输出处理、预览生成、图像信息提取。
-    /// 子类只需重写 ProcessImage(byte[] input) → byte[] output 即可。
+    /// 节点间传递 ImageData（原始像素），零 PNG 编解码开销。
+    /// 预览使用 WriteableBitmap 复用 + UI 节流，子类无需关心显示细节。
     /// </summary>
     public abstract class VisionNodeBase : NodeViewModel
     {
+        /// <summary>高性能图像预览组件（WriteableBitmap 复用 + 节流）。</summary>
+        public ImagePreview Preview { get; } = new();
+
         protected VisionNodeBase(string title = "视觉节点")
         {
             Title = title;
@@ -25,13 +28,6 @@ namespace Shell.Models.Nodes.Vision
             });
         }
 
-        private BitmapImage? _previewImage;
-        public BitmapImage? PreviewImage
-        {
-            get => _previewImage;
-            set => SetProperty(ref _previewImage, value);
-        }
-
         private string _imageInfo = string.Empty;
         public string ImageInfo
         {
@@ -39,27 +35,26 @@ namespace Shell.Models.Nodes.Vision
             set => SetProperty(ref _imageInfo, value);
         }
 
-        /// <summary>子类实现具体的图像处理逻辑。</summary>
-        protected abstract byte[]? ProcessImage(byte[] input);
+        /// <summary>子类实现具体的图像处理逻辑（ImageData → ImageData，零 PNG 开销）。</summary>
+        protected abstract ImageData? ProcessImage(ImageData input);
 
         public override void Execute()
         {
             var inputVal = Input.ElementAtOrDefault(0)?.Value ?? VariantValue.Null;
-            if (!inputVal.TryGetBytes(out var pngData) || pngData.Length == 0)
+            if (!inputVal.TryGetImageData(out var imageData) || imageData == null)
             {
                 ImageInfo = "等待输入图像...";
                 return;
             }
 
-            var result = ProcessImage(pngData);
-            if (result != null && result.Length > 0)
+            var result = ProcessImage(imageData);
+            if (result != null)
             {
                 if (Output.Count > 0)
-                    Output[0].Value = VariantValue.FromBytes(result);
+                    Output[0].Value = VariantValue.FromImageData(result);
 
-                var info = VisionAlgorithmService.GetImageInfo(result);
-                ImageInfo = $"{info.Width}×{info.Height}, {info.Channels}ch";
-                PreviewImage = VisionHelper.MakePreview(result);
+                ImageInfo = result.InfoText;
+                Preview.Update(result);
             }
         }
     }

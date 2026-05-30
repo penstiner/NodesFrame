@@ -20,6 +20,6 @@ namespace Shell.Models.Nodes.Vision
         private int _si;
         [NodeProperty(Key = "thresholdTypeIndex", DisplayName = "阈值类型", Options = "Binary,BinaryInv,Otsu")]
         public int SelectedTypeIndex { get => _si; set { if (SetProperty(ref _si, value)) ThresholdType = value switch { 0 => ThresholdTypes.Binary, 1 => ThresholdTypes.BinaryInv, 2 => ThresholdTypes.Otsu, _ => ThresholdTypes.Binary }; } }
-        protected override byte[] ProcessImage(byte[] input) => VisionAlgorithmService.Threshold(input, ThresholdValue, MaxValue, ThresholdType);
+        protected override ImageData ProcessImage(ImageData input) => VisionAlgorithmService.Threshold(input, ThresholdValue, MaxValue, ThresholdType);
     }
 }

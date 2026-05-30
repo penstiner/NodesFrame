@@ -40,6 +40,7 @@ namespace Shell.Models
         public static VariantValue FromString(string value) => new(value ?? string.Empty, TypeCode.String);
         public static VariantValue FromBytes(byte[] value) => new(value, TypeCode.Object); // Object 代表 byte[]
         public static VariantValue FromDoubleArray(double[] value) => new(value, TypeCode.Object);
+        public static VariantValue FromImageData(ImageData value) => new(value, TypeCode.Object);
 
         // ──────────── 隐式转换 (从基础类型 → VariantValue) ────────────
 
@@ -129,6 +130,27 @@ namespace Shell.Models
             return false;
         }
 
+        /// <summary>
+        /// 尝试获取 ImageData。若值是 ImageData 直接返回；
+        /// 若值是 PNG byte[] 则自动解码（向后兼容）。
+        /// </summary>
+        public bool TryGetImageData(out ImageData result)
+        {
+            if (_typeCode == TypeCode.Object && _value is ImageData img)
+            {
+                result = img;
+                return true;
+            }
+            // 向后兼容：如果是 PNG byte[]，解码为 ImageData
+            if (_typeCode == TypeCode.Object && _value is byte[] bytes && bytes.Length > 0)
+            {
+                result = Services.Algorithms.Vision.VisionAlgorithmService.PngBytesToImageData(bytes);
+                return result != null;
+            }
+            result = null;
+            return false;
+        }
+
         public bool TryGetDoubleArray(out double[] result)
         {
             if (_typeCode == TypeCode.Object && _value is double[] arr)
@@ -175,6 +197,7 @@ namespace Shell.Models
                 TypeCode.Int32 => ((int)_value).ToString(),
                 TypeCode.Boolean => ((bool)_value).ToString(),
                 TypeCode.String => (string)_value,
+                TypeCode.Object when _value is ImageData img => $"[Image {img.Width}×{img.Height} {img.Channels}ch]",
                 TypeCode.Object when _value is byte[] bytes => $"[byte[{bytes.Length}]]",
                 TypeCode.Object when _value is double[] arr => $"[double[{arr.Length}]]",
                 _ => _value?.ToString() ?? "(null)"

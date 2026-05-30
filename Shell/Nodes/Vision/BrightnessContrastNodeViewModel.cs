@@ -14,6 +14,6 @@ namespace Shell.Models.Nodes.Vision
         [NodeProperty(Key = "alpha", DisplayName = "对比度 (alpha)", Group = "调整参数")] public double Alpha { get => _alpha; set => SetProperty(ref _alpha, value); }
         private double _beta = 10;
         [NodeProperty(Key = "beta", DisplayName = "亮度 (beta)", Group = "调整参数")]  public double Beta { get => _beta; set => SetProperty(ref _beta, value); }
-        protected override byte[] ProcessImage(byte[] input) => VisionAlgorithmService.BrightnessContrast(input, Alpha, Beta);
+        protected override ImageData ProcessImage(ImageData input) => VisionAlgorithmService.BrightnessContrast(input, Alpha, Beta);
     }
 }

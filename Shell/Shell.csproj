@@ -8,6 +8,7 @@
     <UseWPF>true</UseWPF>
     <AssemblyVersion>2.0.0.0</AssemblyVersion>
     <FileVersion>2.0.0.0</FileVersion>
+    <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
 
   <ItemGroup>
@@ -27,6 +28,12 @@
 
   <ItemGroup>
     <Folder Include="Style\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="MvCameraControl.Net">
+      <HintPath>bin\Debug\net8.0-windows\MvCameraControl.Net.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

@@ -44,6 +44,12 @@ namespace Shell.Models.Attributes
 
         /// <summary>下拉选项标签（逗号分隔）。设置后渲染为 ComboBox 而非数字框。</summary>
         public string Options { get; set; }
+
+        /// <summary>
+        /// 动态选项来源方法名。指定节点上一个返回 IReadOnlyList&lt;string&gt; 的方法名，
+        /// PropertyItem 将在构造时调用该方法获取下拉选项（优先级高于 Options）。
+        /// </summary>
+        public string DynamicOptionsSource { get; set; }
     }
 
     /// <summary>

@@ -406,7 +406,7 @@
                         </DataTemplate>
                     </nodify:Node.OutputConnectorTemplate>
                     <StackPanel Orientation="Vertical" Margin="8,5" MinWidth="120">
-                        <Image Source="{Binding PreviewImage, Mode=OneWay}"
+                        <Image Source="{Binding Preview.ImageSource, Mode=OneWay}"
                                Width="120" Height="90" Stretch="Uniform"
                                Visibility="{Binding HasImage, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}"/>
                         <TextBlock Text="{Binding ImageInfo, Mode=OneWay}"

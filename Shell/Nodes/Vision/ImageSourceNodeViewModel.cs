@@ -9,17 +9,17 @@ using Shell.Services.Algorithms.Vision;
 namespace Shell.Models.Nodes.Vision
 {
     /// <summary>
-    /// 图像源节点：从文件加载图像并输出。
+    /// 图像源节点：从文件加载图像并输出 ImageData。
     /// 中文路径通过 .NET File API 桥接，安全绕过 OpenCV 的中文限制。
     /// </summary>
     [Node(
         Category = "输入输出",
         DisplayName = "图像源",
         DefaultTitle = "图像源",
-        Description = "从本地文件加载图像，输出 PNG 格式图像数据",
+        Description = "从本地文件加载图像，输出 ImageData 格式图像数据",
         NodeTypeId = "Vision.ImageSource")]
     [NodeConnector(Title = "输出图像", Direction = ConnectorDirection.Output,
-        ExpectedType = "Object", Description = "PNG 编码的 byte[] 图像数据")]
+        ExpectedType = "Object", Description = "ImageData 原始像素图像数据")]
     public class ImageSourceNodeViewModel : NodeViewModel
     {
         public ImageSourceNodeViewModel()
@@ -65,12 +65,8 @@ namespace Shell.Models.Nodes.Vision
             set => SetProperty(ref _imageInfo, value);
         }
 
-        private System.Windows.Media.Imaging.BitmapImage? _previewImage;
-        public System.Windows.Media.Imaging.BitmapImage? PreviewImage
-        {
-            get => _previewImage;
-            set => SetProperty(ref _previewImage, value);
-        }
+        /// <summary>高性能图像预览组件（WriteableBitmap 复用）。</summary>
+        public ImagePreview Preview { get; } = new();
 
         /// <summary>尝试加载图像</summary>
         public void TryLoadImage()
@@ -78,12 +74,14 @@ namespace Shell.Models.Nodes.Vision
             if (!HasFile) return;
             try
             {
-                var pngBytes = VisionAlgorithmService.LoadImageAsPngBytes(FilePath);
-                if (Output.Count > 0)
-                    Output[0].Value = VariantValue.FromBytes(pngBytes);
-                var info = VisionAlgorithmService.GetImageInfo(pngBytes);
-                ImageInfo = $"{info.Width}×{info.Height}, {info.Channels} 通道";
-                PreviewImage = VisionHelper.MakePreview(pngBytes);
+                var imageData = VisionAlgorithmService.LoadImageAsImageData(FilePath);
+                if (imageData != null)
+                {
+                    if (Output.Count > 0)
+                        Output[0].Value = VariantValue.FromImageData(imageData);
+                    ImageInfo = $"{imageData.Width}×{imageData.Height}, {imageData.Channels} 通道";
+                    Preview.UpdateSync(imageData);
+                }
             }
             catch (Exception ex)
             {

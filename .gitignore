@@ -33,6 +33,9 @@ project.lock.json
 # Fody
 FodyWeavers.xsd
 
+# Qoder
+.qoder/
+
 # OS files
 .DS_Store
 Thumbs.db

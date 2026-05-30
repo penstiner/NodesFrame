@@ -82,12 +82,14 @@ namespace Shell.ViewModels
                 AddBuiltInCategories();
             }
 
-            // 排序：输入输出 > 视觉算法 > 其他
+            // 排序：流程控制 > 输入输出 > 硬件采集 > 视觉算法 > 其他
             var sortedCategories = Categories.OrderBy(c =>
             {
-                if (c.Name == "输入输出") return 0;
-                if (c.Name == "视觉算法") return 1;
-                return 2;
+                if (c.Name == "流程控制") return 0;
+                if (c.Name == "输入输出") return 1;
+                if (c.Name == "硬件采集") return 2;
+                if (c.Name == "视觉算法") return 3;
+                return 4;
             }).ToList();
 
             Categories.Clear();
@@ -215,6 +217,15 @@ namespace Shell.ViewModels
                 "Display" => "\uf06e",       // 眼睛
                 "ImageDisplay" => "\uf03e",  // 图片
 
+                // 硬件采集节点（FontAwesome 字体）
+                "Hardware.CameraInit" => "\uf030",      // FontAwesome camera
+                "Hardware.CameraCapture" => "\uf030",   // FontAwesome camera
+                "Hardware.CameraClose" => "\uf057",     // FontAwesome times-circle
+
+                // 流程控制节点（FontAwesome 字体）
+                "Flow.Start" => "\uf04b",              // FontAwesome play
+                "Flow.End" => "\uf04d",                // FontAwesome stop
+
                 // 视觉算法节点（iconfont 字体）
                 "Vision.GaussianBlur" => "\ue634",
                 "Vision.MedianBlur" => "\ue73f",
@@ -271,6 +282,12 @@ namespace Shell.ViewModels
                 // 输入输出
                 "Vision.ImageSource" => "#FF26C6DA",
                 "Vision.ImageDisplay" => "#FF26C6DA",
+
+                // 硬件采集节点 - 靖蓝色
+                _ when nodeTypeId.StartsWith("Hardware.") => "#FF5C6BC0",
+                
+                // 流程控制节点 - 绿色
+                _ when nodeTypeId.StartsWith("Flow.") => "#FF66BB6A",
 
                 _ => "#FF78909C"             // 灰色（默认）
             };

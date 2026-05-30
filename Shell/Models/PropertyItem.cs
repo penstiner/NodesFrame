@@ -43,8 +43,34 @@ namespace Shell.Models
 
             var type = Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType;
 
-            // ── Options 优先：逗号分隔的标签 → ComboBox ──
-            if (!string.IsNullOrEmpty(attr.Options))
+            // ── 优先级 1：DynamicOptionsSource → 调用节点方法获取动态选项 ──
+            if (!string.IsNullOrEmpty(attr.DynamicOptionsSource))
+            {
+                EditorType = "Enum";
+                var list = new List<EnumOption>();
+                try
+                {
+                    var method = owner.GetType().GetMethod(attr.DynamicOptionsSource,
+                        System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+                    if (method != null)
+                    {
+                        var result = method.Invoke(owner, null);
+                        if (result is IEnumerable<string> labels)
+                        {
+                            int idx = 0;
+                            foreach (var label in labels)
+                                list.Add(new EnumOption(label, idx++));
+                        }
+                    }
+                }
+                catch { }
+                // 若动态查询无结果，提供默认提示项
+                if (list.Count == 0)
+                    list.Add(new EnumOption("未发现设备", 0));
+                EnumOptions = list;
+            }
+            // ── 优先级 2：Options 静态逗号分隔标签 → ComboBox ──
+            else if (!string.IsNullOrEmpty(attr.Options))
             {
                 EditorType = "Enum";
                 var labels = attr.Options.Split(',');

@@ -21,7 +21,7 @@ namespace Shell.Models.Nodes.Vision
         [NodeProperty(Key = "targetWidth", DisplayName = "目标宽度", Group = "缩放参数")] public int TargetWidth { get => _tw; set => SetProperty(ref _tw, value); }
         private int _th = 240;
         [NodeProperty(Key = "targetHeight", DisplayName = "目标高度", Group = "缩放参数")] public int TargetHeight { get => _th; set => SetProperty(ref _th, value); }
-        protected override byte[] ProcessImage(byte[] input) => UseScaleMode
+        protected override ImageData ProcessImage(ImageData input) => UseScaleMode
             ? VisionAlgorithmService.Resize(input, ScaleX, ScaleY)
             : VisionAlgorithmService.ResizeToSize(input, TargetWidth, TargetHeight);
     }

@@ -12,6 +12,6 @@ namespace Shell.Models.Nodes.Vision
         public MedianBlurNodeViewModel() : base("中值滤波") { }
         private int _ksize = 5;
         [NodeProperty(Key = "kernelSize", DisplayName = "核大小 (奇数)")] public int KernelSize { get => _ksize; set => SetProperty(ref _ksize, value); }
-        protected override byte[] ProcessImage(byte[] input) => VisionAlgorithmService.MedianBlur(input, KernelSize);
+        protected override ImageData ProcessImage(ImageData input) => VisionAlgorithmService.MedianBlur(input, KernelSize);
     }
 }

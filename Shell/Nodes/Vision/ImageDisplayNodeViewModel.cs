@@ -1,9 +1,6 @@
 using System;
-using System.IO;
 using System.Linq;
-using System.Windows.Media.Imaging;
 using Shell.Models.Attributes;
-using Shell.Services.Algorithms.Vision;
 
 namespace Shell.Models.Nodes.Vision
 {
@@ -17,7 +14,7 @@ namespace Shell.Models.Nodes.Vision
         Description = "显示输入图像并提供尺寸信息",
         NodeTypeId = "Vision.ImageDisplay")]
     [NodeConnector(Title = "输入图像", Direction = ConnectorDirection.Input,
-        ExpectedType = "Object", Description = "PNG 编码的 byte[] 图像数据")]
+        ExpectedType = "Object", Description = "ImageData 原始像素图像数据")]
     [NodeConnector(Title = "尺寸信息", Direction = ConnectorDirection.Output,
         ExpectedType = "String", Description = "图像尺寸描述")]
     public class ImageDisplayNodeViewModel : NodeViewModel
@@ -43,13 +40,8 @@ namespace Shell.Models.Nodes.Vision
             set => SetProperty(ref _imageInfo, value);
         }
 
-        private BitmapImage? _previewImage;
-        /// <summary>预览图像（WPF Image.Source 可绑定）</summary>
-        public BitmapImage? PreviewImage
-        {
-            get => _previewImage;
-            set => SetProperty(ref _previewImage, value);
-        }
+        /// <summary>高性能图像预览组件（WriteableBitmap 复用 + 节流）。</summary>
+        public ImagePreview Preview { get; } = new();
 
         private bool _hasImage;
         public bool HasImage
@@ -62,22 +54,12 @@ namespace Shell.Models.Nodes.Vision
         {
             var inputVal = Input.ElementAtOrDefault(0)?.Value ?? VariantValue.Null;
 
-            if (inputVal.TryGetBytes(out var imageData) && imageData.Length > 0)
+            if (inputVal.TryGetImageData(out var img) && img != null)
             {
                 try
                 {
-                    var info = VisionAlgorithmService.GetImageInfo(imageData);
-                    ImageInfo = $"{info.Width}×{info.Height}, {info.Channels} 通道, {imageData.Length / 1024} KB";
-
-                    // 创建缩略图预览
-                    var bmp = new BitmapImage();
-                    bmp.BeginInit();
-                    bmp.StreamSource = new MemoryStream(imageData);
-                    bmp.DecodePixelWidth = 160;
-                    bmp.CacheOption = BitmapCacheOption.OnLoad;
-                    bmp.EndInit();
-                    bmp.Freeze(); // 允许跨线程访问
-                    PreviewImage = bmp;
+                    ImageInfo = $"{img.Width}×{img.Height}, {img.Channels} 通道, {img.DataSize / 1024} KB";
+                    Preview.Update(img);
                     HasImage = true;
 
                     if (Output.Count > 0)

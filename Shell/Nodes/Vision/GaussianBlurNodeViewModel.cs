@@ -14,6 +14,6 @@ namespace Shell.Models.Nodes.Vision
         [NodeProperty(Key = "kernelSize", DisplayName = "核大小", Group = "模糊参数")] public int KernelSize { get => _kernelSize; set => SetProperty(ref _kernelSize, value); }
         private double _sigmaX = 1.5;
         [NodeProperty(Key = "sigmaX", DisplayName = "Sigma X", Group = "模糊参数")] public double SigmaX { get => _sigmaX; set => SetProperty(ref _sigmaX, value); }
-        protected override byte[] ProcessImage(byte[] input) => VisionAlgorithmService.GaussianBlur(input, KernelSize, SigmaX);
+        protected override ImageData ProcessImage(ImageData input) => VisionAlgorithmService.GaussianBlur(input, KernelSize, SigmaX);
     }
 }
