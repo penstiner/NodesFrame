@@ -6,9 +6,13 @@
 
 - **可视化节点编辑** — 拖拽创建节点、连接端口、自由布局，支持撤销/重做
 - **视觉算法库** — 内置 12+ 种 OpenCV 图像处理算法（高斯模糊、Canny边缘、二值化、形态学、霍夫直线等）
+- **硬件采集** — 海康相机集成（初始化→触发拍照→关闭），支持动态枚举已连接设备
 - **流程控制** — 延时、条件判断、循环等流程控制节点
-- **图执行引擎** — 基于 Kahn 拓扑排序的自动执行，支持环检测与错误处理
+- **图执行引擎** — 基于 Kahn 拓扑排序的自动执行，支持环检测与异步执行
+- **高性能图像传递** — 节点间使用 ImageData 原始像素直传，零 PNG 编解码开销
+- **WriteableBitmap 预览** — 复用式位图 + UI 写入节流，支持高频刷新场景
 - **实时图像预览** — 右侧面板实时显示处理结果，支持缩放与对比模式
+- **动态属性系统** — 基于 Attribute 反射扫描，支持动态下拉选项（如相机设备列表）
 - **三种主题** — Dark / Light / Nodify 主题一键切换
 - **序列化与持久化** — JSON 格式保存/加载完整流程图
 - **执行日志** — 带级别着色的实时日志面板，支持折叠与清空
@@ -23,17 +27,24 @@
 | Nodify | 7.3.0 | 节点图编辑器控件 |
 | OpenCvSharp4 | 4.13.0 | 图像处理算法 |
 | Prism.Unity | 8.1.97 | 依赖注入 |
-| PropertyChanged.Fody | - | MVVM 属性通知 |
+| ReactiveUI | 23.2.27 | 响应式 MVVM + WriteableBitmap 预览 |
+| MvCamCtrl.NET | - | 海康相机 SDK |
 
 ## 项目结构
 
 ```
 Shell.sln
 ├── Shell/                    # 主应用程序
-│   ├── Models/              # 数据模型（节点、属性、工具箱）
-│   │   └── Nodes/           # 各类节点 ViewModel
-│   ├── Services/            # 服务层（执行引擎、序列化、注册表）
-│   │   └── Algorithms/      # 视觉算法实现
+│   ├── Attributes/          # 节点属性标记（[Node], [NodeProperty], [NodeConnector]）
+│   ├── Hardware/            # 硬件驱动封装（海康相机 SDK）
+│   ├── Models/              # 数据模型与框架类型（VariantValue, ImageData, PropertyItem）
+│   ├── Nodes/               # 节点 ViewModel
+│   │   ├── Flow/            # 流程开始/结束节点
+│   │   ├── Hardware/        # 相机初始化/拍照/关闭节点
+│   │   ├── Motion/          # 电机运动/序列/传感器节点
+│   │   └── Vision/          # 视觉算法节点 + ImagePreview + VisionHelper
+│   ├── Services/            # 服务层（执行引擎、序列化、注册表、CameraManager）
+│   │   └── Algorithms/      # 视觉算法实现（ImageData 输入输出）
 │   ├── ViewModels/          # 主窗口与工具箱 ViewModel
 │   ├── Views/               # XAML 视图
 │   └── Style/               # 样式与模板资源
