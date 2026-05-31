@@ -7,8 +7,9 @@
 - **可视化节点编辑** — 拖拽创建节点、连接端口、自由布局，支持撤销/重做
 - **视觉算法库** — 内置 12+ 种 OpenCV 图像处理算法（高斯模糊、Canny边缘、二值化、形态学、霍夫直线等）
 - **硬件采集** — 海康相机集成（初始化→触发拍照→关闭），支持动态枚举已连接设备
-- **流程控制** — 延时、条件判断、循环等流程控制节点
-- **图执行引擎** — 基于 Kahn 拓扑排序的自动执行，支持环检测与异步执行
+- **流程控制** — 延时、条件判断、重复N次循环、等待信号⏳ 等节点，支持回环连线与外部触发式循环
+- **多回路分支** — 单个输出可连接多个下游，主流程走回环路径，旁路 BFS 递归执行
+- **双执行引擎** — FlowExecutor 流式执行（循环栈 + 轮询等待 + 旁路分支）+ GraphExecutor 拓扑排序
 - **高性能图像传递** — 节点间使用 ImageData 原始像素直传，零 PNG 编解码开销
 - **WriteableBitmap 预览** — 复用式位图 + UI 写入节流，支持高频刷新场景
 - **实时图像预览** — 右侧面板实时显示处理结果，支持缩放与对比模式
@@ -39,11 +40,11 @@ Shell.sln
 │   ├── Hardware/            # 硬件驱动封装（海康相机 SDK）
 │   ├── Models/              # 数据模型与框架类型（VariantValue, ImageData, PropertyItem）
 │   ├── Nodes/               # 节点 ViewModel
-│   │   ├── Flow/            # 流程开始/结束节点
+│   │   ├── Flow/            # 流程开始/结束、循环判断、等待信号⏳ 节点
 │   │   ├── Hardware/        # 相机初始化/拍照/关闭节点
 │   │   ├── Motion/          # 电机运动/序列/传感器节点
 │   │   └── Vision/          # 视觉算法节点 + ImagePreview + VisionHelper
-│   ├── Services/            # 服务层（执行引擎、序列化、注册表、CameraManager）
+│   ├── Services/            # 服务层（FlowExecutor、GraphExecutor、序列化、VariableManager、CameraManager）
 │   │   └── Algorithms/      # 视觉算法实现（ImageData 输入输出）
 │   ├── ViewModels/          # 主窗口与工具箱 ViewModel
 │   ├── Views/               # XAML 视图

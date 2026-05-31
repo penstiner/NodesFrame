@@ -394,19 +394,66 @@ IconBtnPurpleStyle   <!-- 紫 — 自动布局 -->
 
 ## 9. 执行引擎
 
+系统有双执行引擎：
+
+### 9.1 FlowExecutor（流式执行器）— 主引擎
+
+从 `FlowStart` 节点出发，沿连接边逐节点步进：
+
 ```
-GraphExecutor:
-  1. 构建连接器→节点映射
-  2. 构建邻接表 + 入度表
-  3. Kahn 拓扑排序
-  4. 环检测（存在环 → 返回错误）
-  5. 按拓扑序执行:
-     - 重置所有节点 → State = Idle
-     - 执行节点前 → State = Running
-     - 执行成功 → State = Success + 记录耗时
-     - 执行失败 → State = Error + 记录错误日志
-  6. 输出总耗时到 ExecutionLogger
+while (current != null) {
+    current.ExecuteAsync(ct);           // 异步执行（支持轮询等待）
+    PropagateOutputs(current);          // 数据传播到所有下游
+    ExecuteSideBranches(current, ...);  // 多回路旁路 BFS 递归执行
+    循环栈管理 (WhileNode / LoopNode);
+    next = ResolveNextNode(current);    // 回环节点优先
+    if (next == null && 栈非空) next = 栈顶;  // 自动回跳
+    current = next;
+}
 ```
+
+| 节点类型 | 接口 | Output[0] | Output[1] | 执行器行为 |
+|---------|------|----------|----------|-----------|
+| `FlowStart` | — | 触发 | — | 流程入口 |
+| `FlowEnd` | — | — | — | 命中即结束 |
+| `WhileNode` | `IBranchNode` | 循环体 | 退出 | 循环栈：真→压栈走[0]，假→出栈走[1] |
+| `LoopNode` | `IBranchNode` | 循环体 | 完成 | 有限次：未达→压栈走[0]，完成→出栈走[1] |
+| `WaitSignalNode` | `IBranchNode` | 收到信号 | 超时/停止 | 不参与循环栈，由回环连线显式控制循环 |
+| `ConditionNode` | `IBranchNode` | 满足 | 不满足 | 一次性分支 |
+| 普通节点 | — | — | — | 默认跟随 Output[0] |
+
+> ⚠️ **关键约定：所有 `IBranchNode` 的 `Output[1]` 是退出/停止/异常路径。**
+> 正常流程（旁路 BFS）**永远不执行** Output[1]，它只在流程取消时由
+> `ExecuteCleanupPathAsync` 单独遍历。连线时请把 CameraClose 等清理节点连到 Output[1]。
+
+**多回路旁路执行：** 活跃输出连多个下游时，回环节点走主流程，其余 BFS 递归执行。
+
+**停止与清理：** 点击停止 → `CancellationToken` 取消 → 轮询节点抛出异常 → FlowExecutor 捕获 → `ExecuteCleanupPathAsync` 沿 **IBranchNode.Output[1]**（优先）或 Output[0]（兜底）链式执行到 FlowEnd。最后兜底执行所有未触发的 `CameraCloseNode`。
+
+### 9.2 等待信号节点 (WaitSignalNode)
+
+`NodeTypeId = "Flow.WaitSignal"`，用于外部触发式循环：
+
+```
+属性：信号变量（下拉选择 Boolean 变量，SkipBindingResolve=true）
+      轮询间隔(ms) 默认 50
+
+端口：触发 (Input) / 回环 (Input) / 收到信号 (Output[0]) / 超时停止 (Output[1])
+
+行为：ExecuteAsync → while (!EvaluateSignal()) { await Task.Delay; }
+      收到信号 → Execute（走 Output[0]）→ 复位变量（SetValueAndNotify）
+      回环连线存在 → 流程自动回到等待；不存在 → 单次结束
+```
+
+### 9.3 变量系统
+
+- `Variable.SetValueAndNotify()` — 直写字段 + 通知 UI 刷新
+- `[NodeProperty(SkipBindingResolve = true)]` — 属性存变量名而非值
+- `StringToBoolConverter` — 变量管理器面板 Bool 用 CheckBox 切换
+
+### 9.4 GraphExecutor（拓扑执行器）
+
+基于 Kahn 拓扑排序的 DAG 执行器，用于无环图批量计算。
 
 ---
 
@@ -429,6 +476,15 @@ GraphExecutor:
 
 **Q: 如何创建非视觉节点（纯逻辑）？**
 → 继承 `NodeViewModel`（而非 `VisionNodeBase`），手动创建连接器，标记 `[Node]` + `[NodeProperty]` 即可。
+
+**Q: 等待信号节点收到信号但变量没复位？**
+→ 检查 SignalVariable 是否正确绑定（属性面板 🔗 下拉选择变量，勿手动输入）。
+
+**Q: 回环连线后流程不循环？**
+→ 确认 ImageDisplay 的「完成」连到 WaitSignal 的「回环」。多连接时回环节点优先。
+
+**Q: 多回路中某节点没执行？**
+→ 旁路 BFS 自动执行。若节点是 WhileNode/WaitSignalNode/FlowEnd 则被跳过。
 
 ---
 
