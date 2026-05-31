@@ -232,40 +232,19 @@ namespace Shell.Views
         //  图像预览缩放
         // ═══════════════════════════════════════════
 
-        private const double ImageZoomMin = 0.1;
-        private const double ImageZoomMax = 5.0;
-        private const double ImageZoomStep = 1.25;
-
-        private void PreviewImage_MouseWheel(object sender, MouseWheelEventArgs e)
-        {
-            var factor = e.Delta > 0 ? ImageZoomStep : 1.0 / ImageZoomStep;
-            ApplyZoom(factor);
-            e.Handled = true;
-        }
-
         private void ImageZoomIn_Click(object sender, RoutedEventArgs e)
         {
-            ApplyZoom(ImageZoomStep);
+            PreviewViewer.ZoomIn();
         }
 
         private void ImageZoomOut_Click(object sender, RoutedEventArgs e)
         {
-            ApplyZoom(1.0 / ImageZoomStep);
+            PreviewViewer.ZoomOut();
         }
 
         private void ImageFit_Click(object sender, RoutedEventArgs e)
         {
-            ImageScale.ScaleX = 1.0;
-            ImageScale.ScaleY = 1.0;
-        }
-
-        private void ApplyZoom(double factor)
-        {
-            var newX = ImageScale.ScaleX * factor;
-            var newY = ImageScale.ScaleY * factor;
-            if (newX < ImageZoomMin || newX > ImageZoomMax) return;
-            ImageScale.ScaleX = newX;
-            ImageScale.ScaleY = newY;
+            PreviewViewer.ResetView();
         }
 
         private void ButtonMin_Click(object sender, RoutedEventArgs e)

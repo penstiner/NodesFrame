@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -10,14 +11,20 @@ using Nodify.UndoRedo;
 using Prism.Commands;
 using Prism.Mvvm;
 using Shell.Models;
+using Shell.Models.Nodes.Flow;
 using Shell.Services;
+using Shell.Views;
 
 namespace Shell.ViewModels
 {
     public class MainWindowViewModel : BindableBase
     {
-        private readonly IGraphExecutor _executor;
         private readonly IGraphSerializer _serializer;
+        private FlowExecutor _flowExecutor = new();
+        private CancellationTokenSource? _cts;
+
+        /// <summary>变量管理器，供节点绑定变量时使用。</summary>
+        public VariableManager VariableManager { get; } = new VariableManager();
 
         // Expose a collection so NodifyEditor.ItemsSource can enumerate nodes
         public ObservableCollection<NodeViewModel> Nodes { get; } = new ObservableCollection<NodeViewModel>();
@@ -37,6 +44,16 @@ namespace Shell.ViewModels
         // 执行命令：运行图上节点的运算
         public ICommand ExecuteCommand { get; }
 
+        // 停止命令：取消正在执行的流程
+        public ICommand StopCommand { get; }
+
+        private bool _isRunning;
+        public bool IsRunning
+        {
+            get => _isRunning;
+            set => SetProperty(ref _isRunning, value);
+        }
+
         // 自动布局命令
         public ICommand AutoLayoutCommand { get; }
 
@@ -51,11 +68,20 @@ namespace Shell.ViewModels
         // 清空编辑器命令
         public ICommand ClearCommand { get; }
 
-        // 主题切换命令
-        public ICommand ToggleThemeCommand { get; }
-
         // 删除选中项命令（节点和连接）
         public ICommand DeleteSelectedCommand { get; }
+
+        // 变量管理命令
+        public ICommand AddVariableCommand { get; }
+        public ICommand RemoveVariableCommand { get; }
+
+        private Variable _selectedVariable;
+        /// <summary>当前在变量管理器中选中的变量。</summary>
+        public Variable SelectedVariable
+        {
+            get => _selectedVariable;
+            set => SetProperty(ref _selectedVariable, value);
+        }
 
         /// <summary>NodifyEditor 选中节点集合（双向绑定）。</summary>
         public ObservableCollection<NodeViewModel> SelectedNodes { get; } = new ObservableCollection<NodeViewModel>();
@@ -103,10 +129,15 @@ namespace Shell.ViewModels
             set => SetProperty(ref _executionError, value);
         }
 
-        public MainWindowViewModel(IGraphExecutor executor, IGraphSerializer serializer)
+        public MainWindowViewModel(IGraphSerializer serializer)
         {
-            _executor = executor;
             _serializer = serializer;
+
+            _flowExecutor.VariableManager = VariableManager;
+
+            // 将 VariableManager 传递给 NodeViewModel，以便属性编辑器获取变量列表
+            NodeViewModel.GlobalVariableManager = VariableManager;
+            NodeViewModel.GlobalGraphHistory = GraphHistory;
 
             // 选中节点变化时刷新预览属性
             SelectedNodes.CollectionChanged += (s, e) =>
@@ -121,18 +152,21 @@ namespace Shell.ViewModels
 
             // 绑定命令
             ExecuteCommand = new Nodify.AsyncDelegateCommand(ExecuteAllAsync);
+            StopCommand = new DelegateCommand(StopFlow);
             AutoLayoutCommand = new DelegateCommand(AutoLayoutNodes);
             UndoCommand = new DelegateCommand(() => GraphHistory.Undo(), () => GraphHistory.CanUndo);
             RedoCommand = new DelegateCommand(() => GraphHistory.Redo(), () => GraphHistory.CanRedo);
             SaveCommand = new DelegateCommand(SaveGraph);
             LoadCommand = new DelegateCommand(LoadGraph);
             ClearCommand = new DelegateCommand(ClearAll);
-            ToggleThemeCommand = new DelegateCommand(ToggleTheme);
 
-            // 启动时应用默认深色主题
-            ApplyTheme("Dark");
+            // 启动时设置 Nodify 深色主题
+            Nodify.ThemeManager.SetTheme("Dark");
             DeleteSelectedCommand = new DelegateCommand(DeleteSelected);
             DeleteConnectionCommand = new DelegateCommand<ConnectionViewModel>(DeleteConnection);
+
+            AddVariableCommand = new DelegateCommand(AddVariable);
+            RemoveVariableCommand = new DelegateCommand(RemoveVariable, () => SelectedVariable != null);
 
             // 当历史状态变化时刷新撤销/重做按钮可用性
             GraphHistory.PropertyChanged += (s, e) =>
@@ -185,52 +219,24 @@ namespace Shell.ViewModels
         {
             if (item == null) return;
 
+            // 特殊处理：FunctionNode 需要根据 DisplayName 设置运算类型
+            if (item.NodeType == "Function")
+            {
+                var fn = CreateFunctionNode(item.DisplayName, item.DefaultTitle, graphPosition);
+                AddNode(fn);
+                return;
+            }
+
+            // 优先使用 NodeFactory（覆盖所有 [Node] 注册 + 内置类型）
             var factory = new NodeFactory();
-            NodeViewModel node = factory.CreateNode(item.NodeType);
+            NodeViewModel? node = factory.CreateNode(item.NodeType);
 
             if (node != null)
             {
                 node.Location = graphPosition;
                 node.Title = item.DefaultTitle;
-            }
-            else
-            {
-                // 回退到硬编码类型判断（向后兼容）
-                node = item.NodeType switch
-                {
-                    "Constant" => new ConstantNodeViewModel
-                    {
-                        Title = item.DefaultTitle,
-                        Location = graphPosition,
-                        Constant = 0
-                    },
-                    "Function" => CreateFunctionNode(item.DisplayName, item.DefaultTitle, graphPosition),
-                    "Display" => new DisplayNodeViewModel
-                    {
-                        Title = item.DefaultTitle,
-                        Location = graphPosition
-                    },
-                    "Delay" => new DelayNodeViewModel
-                    {
-                        Title = item.DefaultTitle,
-                        Location = graphPosition
-                    },
-                    "Condition" => new ConditionNodeViewModel
-                    {
-                        Title = item.DefaultTitle,
-                        Location = graphPosition
-                    },
-                    "Loop" => new LoopNodeViewModel
-                    {
-                        Title = item.DefaultTitle,
-                        Location = graphPosition
-                    },
-                    _ => null
-                };
-            }
-
-            if (node != null)
                 AddNode(node);
+            }
         }
 
         /// <summary>
@@ -317,8 +323,10 @@ namespace Shell.ViewModels
             if (Connections.Any(c => c.Source == source && c.Target == target))
                 return false;
 
-            // 校验 5：防止形成循环依赖
-            if (_executor.WouldCreateCycle(Nodes.ToList(), Connections.ToList(), source, target))
+            // 校验 5：防止形成循环依赖（等待信号/循环判断节点允许回环）
+            bool isLoopNode = target.ParentNode is Shell.Models.Nodes.Flow.WaitSignalNodeViewModel
+                           || target.ParentNode is Shell.Models.Nodes.Flow.WhileNodeViewModel;
+            if (!isLoopNode && FlowExecutor.WouldCreateCycle(Nodes.ToList(), Connections.ToList(), source, target))
             {
                 Debug.WriteLine("[Connect] 连接将形成循环依赖，已阻止。");
                 ExecutionError = "无法创建连接：将形成循环依赖。";
@@ -366,27 +374,99 @@ namespace Shell.ViewModels
         }
 
         /// <summary>
-        /// 使用 GraphExecutor 拓扑排序执行整张图的计算。
+        /// 使用 FlowExecutor 执行整张图的流程。
         /// </summary>
         private async Task ExecuteAllAsync()
         {
+            if (IsRunning) return;  // 防止重复启动
+
             ExecutionError = null;
+            IsRunning = true;
+            // 强制刷新停止按钮可用状态
+            ((Prism.Commands.DelegateCommand)StopCommand).RaiseCanExecuteChanged();
+            _cts = new CancellationTokenSource();
 
-            var snapshotNodes = Nodes.ToList();
-            var snapshotConns = Connections.ToList();
-
-            var result = await Task.Run(() =>
-                _executor.ExecuteAsync(snapshotNodes, snapshotConns));
-
-            if (!result.Success)
+            try
             {
-                ExecutionError = result.ErrorMessage;
-                Debug.WriteLine($"[Execute] {result.ErrorMessage}");
+                var snapshotNodes = Nodes.ToList();
+                var snapshotConns = Connections.ToList();
+
+                // 启动前：根据模式初始化条件变量
+                foreach (var node in snapshotNodes.OfType<WhileNodeViewModel>())
+                {
+                    if (!string.IsNullOrEmpty(node.ConditionVariable))
+                    {
+                        var v = VariableManager.GetVariable(node.ConditionVariable);
+                        if (v == null)
+                        {
+                            bool initValue = node.LoopMode != "等待触发";
+                            v = VariableManager.AddVariable(node.ConditionVariable, "Boolean",
+                                VariantValue.FromBoolean(initValue));
+                        }
+                        else if (node.LoopMode != "等待触发")
+                        {
+                            v.Value = VariantValue.FromBoolean(true);
+                        }
+                    }
+                }
+                // 等待信号节点：自动创建信号变量（默认 false，等待外部触发）
+                foreach (var node in snapshotNodes.OfType<WaitSignalNodeViewModel>())
+                {
+                    if (!string.IsNullOrEmpty(node.SignalVariable))
+                    {
+                        var v = VariableManager.GetVariable(node.SignalVariable);
+                        if (v == null)
+                            v = VariableManager.AddVariable(node.SignalVariable, "Boolean",
+                                VariantValue.FromBoolean(false));
+                    }
+                }
+
+                var result = await Task.Run(() =>
+                    _flowExecutor.RunAsync(snapshotNodes, snapshotConns, _cts.Token));
+
+                if (!result.Success)
+                {
+                    ExecutionError = result.ErrorMessage;
+                    if (result.WasCancelled)
+                        ExecutionLogger.Info("执行器", "流程已停止");
+                    else
+                        ExecutionLogger.Error("执行器", result.ErrorMessage);
+                }
+                else
+                {
+                    ExecutionLogger.Success("执行器", $"流程执行完成，共 {result.ExecutedNodeCount} 个节点");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                Debug.WriteLine($"[Execute] 成功执行 {result.ExecutionOrder.Count} 个节点。");
+                ExecutionError = ex.Message;
+                ExecutionLogger.Error("执行器", $"执行异常：{ex.Message}");
             }
+            finally
+            {
+                IsRunning = false;
+                ((Prism.Commands.DelegateCommand)StopCommand).RaiseCanExecuteChanged();
+                _cts?.Dispose();
+                _cts = null;
+            }
+        }
+
+        private void StopFlow()
+        {
+            // 「立即循环」模式 WhileNode：设变量为 false 使循环退出
+            foreach (var node in Nodes.OfType<WhileNodeViewModel>())
+            {
+                if (!string.IsNullOrEmpty(node.ConditionVariable) && node.LoopMode != "等待触发")
+                {
+                    var v = VariableManager.GetVariable(node.ConditionVariable);
+                    if (v != null)
+                        v.Value = VariantValue.FromBoolean(false);
+                }
+            }
+            // 等待信号 / WhileNode「等待触发」模式：不修改变量，由 CancellationToken 中断
+            _cts?.Cancel();
+            // 刷新按钮状态
+            ((Prism.Commands.DelegateCommand)StopCommand).RaiseCanExecuteChanged();
         }
 
         // ── 图像对比模式 ──
@@ -484,80 +564,7 @@ namespace Shell.ViewModels
             }
         }
 
-        private int _themeIndex;
-        private static readonly (string Name, string Bg, string Fg, string Contrast,
-            string ConnStroke, string ConnFill, string Grid, string ItemFg,
-            string DescFg, string HeaderFg, string Sep, string Border,
-            string LogBg, string LogText, string LogBorder, string ImgInfo,
-            string ToolHover, string ToolSelected,
-            string ToolCardBg, string ToolCardBorder, string ToolSearchFocus, string ToolBadge)[] Themes =
-        {
-            ("Dark",  "#1E1E1E", "#D4D4D4", "#2D2D30", "#667788", "#2D2D30",
-             "#3A3A3A", "#D4D4D4", "#808080", "#A0A0A0", "#333337", "#FF3E3E42",
-             "#12121E", "#AAAAAA", "#3F3F58", "#1E1E2E",
-             "#3A3A4A", "#1E5A8A",
-             "#08FFFFFF", "#15FFFFFF", "#FF0078D4", "#FF4A4A5A"),
-            ("Light", "#F0F0F0", "#222222", "#E0E0E0", "#556677", "#FFFFFF",
-             "#B0B8C8", "#222222", "#444444", "#555555", "#C0C0C0", "#C0C0C0",
-             "#E8E8F0", "#444444", "#D0D0D8", "#E0E0E8",
-             "#D5DCE8", "#B8CCF0",
-             "#08000000", "#15000000", "#FF0078D4", "#FFE0E0E8"),
-            ("Nodify","#2A1B47", "#E0E0E0", "#3D2B5A", "#8899BB", "#3D2B5A",
-             "#4C3180", "#E0E0E0", "#909090", "#B0B0B0", "#553388", "#553388",
-             "#1A0F30", "#B0A0C8", "#4C3180", "#251545",
-             "#3D2B5A", "#5A3D8A",
-             "#10FFFFFF", "#18FFFFFF", "#FF9C27B0", "#FF3D2B5A"),
-        };
 
-        private void ApplyTheme(string name)
-        {
-            var t = Themes.FirstOrDefault(x => x.Name == name);
-            if (t.Name == null) return;
-            var app = Application.Current;
-            SetBrush(app, "BackgroundBrush", t.Bg);
-            SetBrush(app, "ForegroundBrush", t.Fg);
-            SetBrush(app, "ContrastBackgroundBrush", t.Contrast);
-            SetBrush(app, "ConnectorStroke", t.ConnStroke);
-            SetBrush(app, "ConnectorFill", t.ConnFill);
-            SetBrush(app, "EditorGridLinesBrush", t.Grid);
-            SetBrush(app, "ToolboxItemForeground", t.ItemFg);
-            SetBrush(app, "ToolboxItemDescForeground", t.DescFg);
-            SetBrush(app, "ToolboxHeaderForeground", t.HeaderFg);
-            SetBrush(app, "ToolboxSeparatorBrush", t.Sep);
-            SetBrush(app, "EditorToolbarBorder", t.Border);
-            // ── 日志 / 图像预览面板 ──
-            SetBrush(app, "LogPanelBackgroundBrush", t.LogBg);
-            SetBrush(app, "LogPanelTextBrush", t.LogText);
-            SetBrush(app, "LogPanelBorderBrush", t.LogBorder);
-            SetBrush(app, "ImagePanelInfoBrush", t.ImgInfo);
-            SetBrush(app, "ToolboxItemHoverBrush", t.ToolHover);
-            SetBrush(app, "ToolboxItemSelectedBrush", t.ToolSelected);
-            // ── 工具箱卡片笔刷 ──
-            SetBrush(app, "ToolboxCardBackgroundBrush", t.ToolCardBg);
-            SetBrush(app, "ToolboxCardBorderBrush", t.ToolCardBorder);
-            SetBrush(app, "ToolboxSearchFocusBrush", t.ToolSearchFocus);
-            SetBrush(app, "ToolboxBadgeBrush", t.ToolBadge);
-            Nodify.ThemeManager.SetTheme(name);
-        }
-
-        private static void SetBrush(Application app, string key, string colorHex)
-        {
-            var color = (Color)ColorConverter.ConvertFromString(colorHex);
-            if (app.Resources[key] is SolidColorBrush b && !b.IsFrozen)
-            {
-                b.Color = color;
-            }
-            else
-            {
-                app.Resources[key] = new SolidColorBrush(color);
-            }
-        }
-
-        private void ToggleTheme()
-        {
-            _themeIndex = (_themeIndex + 1) % Themes.Length;
-            ApplyTheme(Themes[_themeIndex].Name);
-        }
 
         /// <summary>
         /// 清空编辑器中的所有节点和连接（支持撤销）。
@@ -661,6 +668,24 @@ namespace Shell.ViewModels
             RemoveConnectionInternal(conn);
         }
 
+        // ── 变量管理 ──
+
+        private void AddVariable()
+        {
+            // 打开变量管理窗口进行新增
+            VariableManagerDialog.Show(VariableManager, Application.Current.MainWindow);
+        }
+
+        private void RemoveVariable()
+        {
+            if (SelectedVariable != null)
+            {
+                VariableManager.RemoveVariable(SelectedVariable);
+                SelectedVariable = null;
+                ((DelegateCommand)RemoveVariableCommand).RaiseCanExecuteChanged();
+            }
+        }
+
         /// <summary>
         /// 保存当前图为 JSON 文件。
         /// </summary>
@@ -677,7 +702,7 @@ namespace Shell.ViewModels
             {
                 try
                 {
-                    var json = _serializer.Serialize(Nodes.ToList(), Connections.ToList());
+                    var json = _serializer.Serialize(Nodes.ToList(), Connections.ToList(), VariableManager);
                     System.IO.File.WriteAllText(dialog.FileName, json);
                     Debug.WriteLine($"[Save] 图已保存到 {dialog.FileName}");
                 }
@@ -705,13 +730,29 @@ namespace Shell.ViewModels
                 try
                 {
                     var json = System.IO.File.ReadAllText(dialog.FileName);
-                    var (loadedNodes, connectionDatas) = _serializer.Deserialize(json);
+                    var (loadedNodes, connectionDatas, variableDatas) = _serializer.Deserialize(json);
 
                     // 清空当前图（先断连后清空，确保干净）
                     foreach (var conn in Connections.ToList())
                         RemoveConnectionInternal(conn);
                     Nodes.Clear();
                     GraphHistory.Clear();
+
+                    // ── 先恢复变量定义 ──
+                    VariableManager.Clear();
+                    foreach (var vd in variableDatas)
+                    {
+                        var variable = new Variable
+                        {
+                            Name = vd.Name,
+                            TypeName = vd.TypeName ?? "Double",
+                            Description = vd.Description ?? ""
+                        };
+                        // 从字符串恢复变量值
+                        if (!string.IsNullOrEmpty(vd.Value))
+                            variable.ValueString = vd.Value;
+                        VariableManager.Variables.Add(variable);
+                    }
 
                     // ── 关键：在节点添加到编辑器之前，先标记将被连接的连接器 ──
                     // 这样 Nodify 首次布局时就会计算 Anchor，而非保持 (0,0)

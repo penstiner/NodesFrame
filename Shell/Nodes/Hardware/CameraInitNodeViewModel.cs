@@ -57,7 +57,7 @@ namespace Shell.Models.Nodes.Hardware
 
         private string _triggerMode = "软触发";
         [NodeProperty(Key = "triggerMode", DisplayName = "触发模式", Group = "相机设置",
-            Options = "连续采集,软触发")]
+            Options = "连续采集,软触发", BindableToVariable = true)]
         public string TriggerMode
         {
             get => _triggerMode;
@@ -65,7 +65,8 @@ namespace Shell.Models.Nodes.Hardware
         }
 
         private float _exposureTime = 10000;
-        [NodeProperty(Key = "exposureTime", DisplayName = "曝光时间(us)", Group = "相机参数")]
+        [NodeProperty(Key = "exposureTime", DisplayName = "曝光时间(us)", Group = "相机参数",
+            BindableToVariable = true)]
         public float ExposureTime
         {
             get => _exposureTime;

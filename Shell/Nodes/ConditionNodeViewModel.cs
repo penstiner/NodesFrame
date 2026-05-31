@@ -10,7 +10,7 @@ namespace Shell.Models
     [NodeConnector(Title = "输入值", Direction = ConnectorDirection.Input, ExpectedType = "Double")]
     [NodeConnector(Title = "满足", Direction = ConnectorDirection.Output, ExpectedType = "Double")]
     [NodeConnector(Title = "不满足", Direction = ConnectorDirection.Output, ExpectedType = "Double")]
-    public class ConditionNodeViewModel : NodeViewModel
+    public class ConditionNodeViewModel : NodeViewModel, IBranchNode
     {
         public record CompareOpItem(CompareOp Value, string Symbol);
 
@@ -31,6 +31,19 @@ namespace Shell.Models
             AddOutputConnector(new ConnectorViewModel { Title = "不满足" });
         }
 
+        // ── IBranchNode ──
+        public int ActiveOutputIndex { get; private set; }
+
+        // ── 判断模式 ──
+        [NodeProperty(Key = "mode", DisplayName = "判断模式", Group = "条件设置",
+            Options = "数值比较,变量判断")]
+        public string Mode { get; set; } = "数值比较";
+
+        // ── 条件变量名（仅 VariableCheck 模式） ──
+        [NodeProperty(Key = "conditionVariable", DisplayName = "条件变量", Group = "条件设置")]
+        public string ConditionVariableName { get; set; } = "";
+
+        // ── 原有属性保留 ──
         private CompareOp _operation = CompareOp.GreaterThan;
         public CompareOp Operation
         {
@@ -62,21 +75,35 @@ namespace Shell.Models
 
         public override void Execute()
         {
-            var val = Input.ElementAtOrDefault(0)?.Value ?? VariantValue.Null;
-            var dVal = val.TryGetDouble(out var d) ? d : 0;
+            bool result;
 
-            bool result = Operation switch
+            if (Mode == "变量判断")
             {
-                CompareOp.GreaterThan => dVal > Threshold,
-                CompareOp.LessThan => dVal < Threshold,
-                CompareOp.Equal => Math.Abs(dVal - Threshold) < 0.0001,
-                CompareOp.NotEqual => Math.Abs(dVal - Threshold) >= 0.0001,
-                CompareOp.GreaterOrEqual => dVal >= Threshold,
-                CompareOp.LessOrEqual => dVal <= Threshold,
-                _ => false
-            };
-            Output[0].Value = result ? val : VariantValue.Null;
-            Output[1].Value = result ? VariantValue.Null : val;
+                // 从 GlobalVariableManager 读取布尔变量
+                var variable = GlobalVariableManager?.GetVariable(ConditionVariableName);
+                result = variable?.Value.TryGetBoolean(out var b) == true && b;
+            }
+            else
+            {
+                // 原有数值比较逻辑
+                var val = Input.ElementAtOrDefault(0)?.Value ?? VariantValue.Null;
+                var dVal = val.TryGetDouble(out var d) ? d : 0;
+
+                result = Operation switch
+                {
+                    CompareOp.GreaterThan => dVal > Threshold,
+                    CompareOp.LessThan => dVal < Threshold,
+                    CompareOp.Equal => Math.Abs(dVal - Threshold) < 0.0001,
+                    CompareOp.NotEqual => Math.Abs(dVal - Threshold) >= 0.0001,
+                    CompareOp.GreaterOrEqual => dVal >= Threshold,
+                    CompareOp.LessOrEqual => dVal <= Threshold,
+                    _ => false
+                };
+            }
+
+            ActiveOutputIndex = result ? 0 : 1;
+            Output[0].Value = result ? VariantValue.FromBoolean(true) : VariantValue.Null;
+            Output[1].Value = result ? VariantValue.Null : VariantValue.FromBoolean(true);
         }
     }
 }
