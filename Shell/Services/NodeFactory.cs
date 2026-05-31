@@ -104,10 +104,14 @@ namespace Shell.Services
                     if (attr == null) continue;
 
                     var typeId = attr.NodeTypeId ?? type.Name;
+                    var category = attr.Category ?? "杂项";
                     _factoryRegistry[typeId] = () =>
                     {
                         var instance = (NodeViewModel)Activator.CreateInstance(type);
                         instance.Title = attr.DefaultTitle ?? type.Name;
+                        instance.NodeCategoryColor = !string.IsNullOrEmpty(attr.HeaderColor)
+                            ? attr.HeaderColor
+                            : (NodeViewModel.CategoryColors.TryGetValue(category, out var color) ? color : "#78909C");
                         return instance;
                     };
                 }

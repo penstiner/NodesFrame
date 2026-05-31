@@ -1,0 +1,139 @@
+<Window x:Class="Shell.Views.VariableManagerDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:srv="clr-namespace:Shell.Services"
+        Title="变量管理器" Width="620" Height="480"
+        WindowStartupLocation="CenterOwner"
+        WindowStyle="None" AllowsTransparency="True"
+        Background="Transparent" ResizeMode="CanResize">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolVis"/>
+    </Window.Resources>
+    <Border Background="#FF1E1E2E" CornerRadius="12" BorderBrush="#FF3F3F58" BorderThickness="1">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="24" ShadowDepth="4" Opacity="0.5"/>
+        </Border.Effect>
+        <Grid Margin="16,12">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- 标题栏 -->
+            <Grid Grid.Row="0" Margin="0,0,0,10">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="&#xf1de;" FontFamily="{StaticResource FontAwesome}"
+                               FontSize="16" Foreground="#42A5F5" VerticalAlignment="Center"/>
+                    <TextBlock Text=" 变量管理器" FontSize="18" FontWeight="Bold"
+                               Foreground="#E0E0E0" Margin="6,0,0,0" VerticalAlignment="Center"/>
+                </StackPanel>
+                <Button Content="&#xf00d;" FontFamily="{StaticResource FontAwesome}"
+                        FontSize="12" Width="28" Height="28"
+                        Background="Transparent" Foreground="#888"
+                        BorderThickness="0" Cursor="Hand"
+                        HorizontalAlignment="Right" Click="Close_Click"/>
+            </Grid>
+
+            <!-- 工具栏 -->
+            <Border Grid.Row="1" Background="#FF252535" CornerRadius="8" Padding="8,6" Margin="0,0,0,10">
+                <StackPanel Orientation="Horizontal">
+                    <Button Style="{StaticResource IconBtnSuccessStyle}" FontSize="12"
+                            Click="AddVariable_Click" ToolTip="新增变量"
+                            Width="32" Height="32" Margin="0,0,4,0">&#xf067;</Button>
+                    <Border Width="1" Background="#3F3F58" Margin="8,4"/>
+                    <TextBlock x:Name="VariableCount" Text="0 个变量"
+                               FontSize="12" Foreground="#888" VerticalAlignment="Center" Margin="8,0,0,0"/>
+                </StackPanel>
+            </Border>
+
+            <!-- 表头 -->
+            <Border Grid.Row="2" Background="Transparent">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <!-- 列头 -->
+                    <Grid Background="#FF252535" Margin="2,0" Height="30">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="110"/>
+                            <ColumnDefinition Width="80"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="36"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="名称" FontSize="11" FontWeight="SemiBold"
+                                   Foreground="#A0A0B0" VerticalAlignment="Center" Margin="8,0"/>
+                        <TextBlock Grid.Column="1" Text="类型" FontSize="11" FontWeight="SemiBold"
+                                   Foreground="#A0A0B0" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        <TextBlock Grid.Column="2" Text="当前值" FontSize="11" FontWeight="SemiBold"
+                                   Foreground="#A0A0B0" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        <TextBlock Grid.Column="3" Text="描述" FontSize="11" FontWeight="SemiBold"
+                                   Foreground="#A0A0B0" VerticalAlignment="Center" Margin="8,0"/>
+                    </Grid>
+
+                    <!-- 变量列表（处理器驱动） -->
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                        <ItemsControl x:Name="VariableList" Focusable="False">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Margin="2,1" Padding="8,6" CornerRadius="6"
+                                            Background="#12FFFFFF" BorderBrush="#18FFFFFF" BorderThickness="1">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="110"/>
+                                                <ColumnDefinition Width="80"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="100"/>
+                                                <ColumnDefinition Width="36"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBox Grid.Column="0"
+                                                     Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
+                                                     Background="Transparent" BorderThickness="0"
+                                                     Foreground="#90CAF9" FontSize="12" FontWeight="SemiBold"
+                                                     CaretBrush="#90CAF9" Padding="0" VerticalContentAlignment="Center"/>
+                                            <ComboBox Grid.Column="1" x:Name="TypeBox"
+                                                      ItemsSource="{Binding Source={x:Static srv:VariableTypeRegistry.TypeNames}}"
+                                                      SelectedItem="{Binding TypeName, UpdateSourceTrigger=PropertyChanged}"
+                                                      Background="#FF2A2A3C" Foreground="#B0B0D0"
+                                                      BorderBrush="#FF3F3F58" BorderThickness="1"
+                                                      FontSize="11" Padding="4,2" VerticalContentAlignment="Center"
+                                                      SelectionChanged="TypeBox_SelectionChanged"/>
+                                            <ContentControl Grid.Column="2" x:Name="ValueHost"
+                                                            VerticalAlignment="Center" HorizontalAlignment="Center"
+                                                            Loaded="ValueHost_Loaded"/>
+                                            <TextBox Grid.Column="3"
+                                                     Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}"
+                                                     Background="Transparent" BorderThickness="0"
+                                                     Foreground="#888" FontSize="11"
+                                                     CaretBrush="#888" Padding="0" VerticalContentAlignment="Center"/>
+                                            <Button Grid.Column="4" Width="28" Height="28"
+                                                    Background="Transparent" BorderThickness="0" Cursor="Hand"
+                                                    Foreground="#EF5350" FontFamily="{StaticResource FontAwesome}"
+                                                    FontSize="11" ToolTip="删除" Click="DeleteRow_Click">
+                                                <Button.Template>
+                                                    <ControlTemplate TargetType="Button">
+                                                        <Border x:Name="Bd" Background="Transparent" CornerRadius="4">
+                                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                        </Border>
+                                                        <ControlTemplate.Triggers>
+                                                            <Trigger Property="IsMouseOver" Value="True">
+                                                                <Setter TargetName="Bd" Property="Background" Value="#30EF5350"/>
+                                                            </Trigger>
+                                                        </ControlTemplate.Triggers>
+                                                    </ControlTemplate>
+                                                </Button.Template>
+                                                &#xf00d;
+                                            </Button>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
+        </Grid>
+    </Border>
+</Window>

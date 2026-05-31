@@ -42,9 +42,9 @@ namespace Shell.Views
                 CannyEdgeNodeViewModel => CannyEdgeEditTemplate ?? DefaultEditTemplate,
                 MorphologyNodeViewModel => MorphologyEditTemplate ?? DefaultEditTemplate,
                 ImageDisplayNodeViewModel => ImageDisplayEditTemplate ?? DefaultEditTemplate,
-                // ── 通用反射编辑器：VisionNodeBase 子类自动使用 ──
+                // ── 通用反射编辑器：所有带 [NodeProperty] 的节点自动使用 ──
                 VisionNodeBase => GenericEditTemplate ?? DefaultEditTemplate,
-                _ => DefaultEditTemplate
+                _ => GenericEditTemplate ?? DefaultEditTemplate
             };
         }
     }

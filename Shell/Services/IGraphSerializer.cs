@@ -12,9 +12,25 @@ namespace Shell.Services
         public int TargetConnectorIndex { get; set; }
     }
 
+    /// <summary>变量序列化 DTO</summary>
+    public class VariableData
+    {
+        public string Name { get; set; }
+        public string TypeName { get; set; }
+        public string Value { get; set; }
+        public string Description { get; set; }
+    }
+
+    /// <summary>属性绑定序列化 DTO</summary>
+    public class PropertyBindingData
+    {
+        public bool IsBound { get; set; }
+        public string VariableName { get; set; } = "";
+    }
+
     public interface IGraphSerializer
     {
-        string Serialize(IReadOnlyList<NodeViewModel> nodes, IReadOnlyList<ConnectionViewModel> connections);
-        (List<NodeViewModel> nodes, List<ConnectionData> connections) Deserialize(string json);
+        string Serialize(IReadOnlyList<NodeViewModel> nodes, IReadOnlyList<ConnectionViewModel> connections, VariableManager variableManager = null);
+        (List<NodeViewModel> nodes, List<ConnectionData> connections, List<VariableData> variables) Deserialize(string json);
     }
 }

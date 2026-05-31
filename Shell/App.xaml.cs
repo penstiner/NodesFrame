@@ -25,9 +25,7 @@ namespace Shell
         protected override void RegisterTypes(IContainerRegistry services)
         {
             services.RegisterForNavigation<MainWindow>();
-
-            // ── 核心服务 ──
-            services.RegisterSingleton<IGraphExecutor, GraphExecutor>();
+            // GraphExecutor 已移除，使用 FlowExecutor.RunAsync() 替代
             services.RegisterSingleton<IGraphSerializer, GraphSerializer>();
             services.RegisterSingleton<INodeDialogService, NodeDialogService>();
         }
@@ -114,6 +112,12 @@ namespace Shell
             mutex = new Mutex(true, "ShellApp", out bool ret);
             if (ret)
             {
+                // 注册变量类型处理器（扩展新类型只需 Register 新 Handler）
+                VariableTypeRegistry.Register(new BooleanTypeHandler());
+                VariableTypeRegistry.Register(new DoubleTypeHandler());
+                VariableTypeRegistry.Register(new Int32TypeHandler());
+                VariableTypeRegistry.Register(new StringTypeHandler());
+
                 base.OnStartup(e);
             }
             else

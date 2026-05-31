@@ -20,6 +20,9 @@ namespace Shell.Models.Attributes
         /// <summary>描述文本。</summary>
         public string Description { get; set; } = string.Empty;
 
+        /// <summary>节点头部覆盖色（十六进制字符串，如 "#26C6DA"）。留空则使用分类默认色。</summary>
+        public string HeaderColor { get; set; }
+
         /// <summary>节点类型标识符（用于序列化）。若未指定则使用类名。</summary>
         public string NodeTypeId { get; set; }
     }
@@ -50,6 +53,24 @@ namespace Shell.Models.Attributes
         /// PropertyItem 将在构造时调用该方法获取下拉选项（优先级高于 Options）。
         /// </summary>
         public string DynamicOptionsSource { get; set; }
+
+        /// <summary>是否允许绑定到变量。</summary>
+        public bool BindableToVariable { get; set; } = true;
+
+        /// <summary>
+        /// 若为 true，ResolveBindings 不会用变量值覆盖此属性。
+        /// 适用于属性存储的是变量名（而非变量值）的场景。
+        /// </summary>
+        public bool SkipBindingResolve { get; set; } = false;
+
+        /// <summary>属性描述文本。</summary>
+        public string Description { get; set; } = string.Empty;
+
+        /// <summary>数值最小值（仅 Number 类型有效）。</summary>
+        public double Min { get; set; } = double.MinValue;
+
+        /// <summary>数值最大值（仅 Number 类型有效）。</summary>
+        public double Max { get; set; } = double.MaxValue;
     }
 
     /// <summary>

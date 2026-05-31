@@ -166,7 +166,7 @@ namespace Shell.ViewModels
                 DefaultTitle = "延时",
                 Description = "将输入值延时传递到输出",
                 Category = "流程控制",
-                IconCode = "\uf017",
+                IconCode = Core.UI.ElaIcon.Clock,
                 ColorTag = "#FF26A69A"
             });
             flowCategory.Items.Add(new ToolBoxItem
@@ -176,7 +176,7 @@ namespace Shell.ViewModels
                 DefaultTitle = "判断",
                 Description = "比较输入值与阈值，路由到满足/不满足分支",
                 Category = "流程控制",
-                IconCode = "\uf074",
+                IconCode = Core.UI.ElaIcon.CodeBranch,
                 ColorTag = "#FFAB47BC"
             });
             flowCategory.Items.Add(new ToolBoxItem
@@ -186,7 +186,7 @@ namespace Shell.ViewModels
                 DefaultTitle = "循环",
                 Description = "将输入值按循环次数累乘输出",
                 Category = "流程控制",
-                IconCode = "\uf01e",
+                IconCode = Core.UI.ElaIcon.ArrowRotateRight,
                 ColorTag = "#FFEF5350"
             });
             Categories.Add(flowCategory);
@@ -197,9 +197,7 @@ namespace Shell.ViewModels
         /// </summary>
         public static string GetIconFontFamilyForNodeType(string nodeType)
         {
-            if (nodeType.StartsWith("Vision."))
-                return "iconfont";
-            return "FontAwesome";
+            return "ElaAwesome";
         }
 
         /// <summary>
@@ -209,40 +207,56 @@ namespace Shell.ViewModels
         {
             return nodeTypeId switch
             {
-                "Delay" => "\uf017",         // 时钟
-                "Condition" => "\uf074",     // 分叉
-                "Loop" => "\uf01e",          // 循环
-                "Constant" => "\uf1ec",      // 计算器
-                "Function" => "\uf121",      // 代码
-                "Display" => "\uf06e",       // 眼睛
-                "ImageDisplay" => "\uf03e",  // 图片
+                "Delay"                => Core.UI.ElaIcon.Clock,
+                "Condition"            => Core.UI.ElaIcon.CodeBranch,
+                "Loop"                 => Core.UI.ElaIcon.ArrowRotateRight,
+                "Constant"             => Core.UI.ElaIcon.Hashtag,
+                "Function"             => Core.UI.ElaIcon.ViWandMagicSparkles,
+                "Display"              => Core.UI.ElaIcon.Eye,
+                "ImageDisplay"         => Core.UI.ElaIcon.Image,
 
-                // 硬件采集节点（FontAwesome 字体）
-                "Hardware.CameraInit" => "\uf030",      // FontAwesome camera
-                "Hardware.CameraCapture" => "\uf030",   // FontAwesome camera
-                "Hardware.CameraClose" => "\uf057",     // FontAwesome times-circle
+                "Hardware.CameraInit"    => Core.UI.ElaIcon.Camera,
+                "Hardware.CameraCapture" => Core.UI.ElaIcon.Camera,
+                "Hardware.CameraClose"   => Core.UI.ElaIcon.CircleXmark,
 
-                // 流程控制节点（FontAwesome 字体）
-                "Flow.Start" => "\uf04b",              // FontAwesome play
-                "Flow.End" => "\uf04d",                // FontAwesome stop
+                "Flow.Start"       => Core.UI.ElaIcon.Play,
+                "Flow.End"         => Core.UI.ElaIcon.Stop,
+                "Flow.While"       => Core.UI.ElaIcon.Repeat,
+                "Flow.WaitSignal"  => Core.UI.ElaIcon.Clock,
 
-                // 视觉算法节点（iconfont 字体）
-                "Vision.GaussianBlur" => "\ue634",
-                "Vision.MedianBlur" => "\ue73f",
-                "Vision.CannyEdge" => "\ue707",
-                "Vision.Threshold" => "\ue765",
-                "Vision.AdaptiveThreshold" => "\ue656",
-                "Vision.BrightnessContrast" => "\ue608",
-                "Vision.CvtColor" => "\ue609",
-                "Vision.EqualizeHist" => "\ue8b5",
-                "Vision.Flip" => "\ue687",
-                "Vision.Morphology" => "\ue7b6",
-                "Vision.HoughLines" => "\ue7b1",
-                "Vision.Resize" => "\ue60f",
-                "Vision.ImageSource" => "\ue60a",
-                "Vision.ImageDisplay" => "\ue665",
+                "Vision.GaussianBlur"       => Core.UI.ElaIcon.ViGaussianBlur,
+                "Vision.MedianBlur"         => Core.UI.ElaIcon.ViMedianBlur,
+                "Vision.CannyEdge"          => Core.UI.ElaIcon.ViCannyEdge,
+                "Vision.Threshold"          => Core.UI.ElaIcon.ViThreshold,
+                "Vision.AdaptiveThreshold"  => Core.UI.ElaIcon.ViAdaptiveThreshold,
+                "Vision.BrightnessContrast" => Core.UI.ElaIcon.ViBrightnessContrast,
+                "Vision.CvtColor"           => Core.UI.ElaIcon.ViCvtColor,
+                "Vision.EqualizeHist"       => Core.UI.ElaIcon.ViEqualizeHist,
+                "Vision.Flip"               => Core.UI.ElaIcon.ViFlip,
+                "Vision.Morphology"         => Core.UI.ElaIcon.ViMorphology,
+                "Vision.HoughLines"         => Core.UI.ElaIcon.ViHoughLines,
+                "Vision.Resize"             => Core.UI.ElaIcon.ViResize,
+                "Vision.ImageSource"        => Core.UI.ElaIcon.ViImageSource,
+                "Vision.ImageDisplay"       => Core.UI.ElaIcon.ViImageDisplay,
+                "Vision.Sharpen"            => Core.UI.ElaIcon.ViSharpen,
+                "Vision.SobelEdge"          => Core.UI.ElaIcon.ViSobelEdge,
+                "Vision.BilateralFilter"    => Core.UI.ElaIcon.ViBilateralFilter,
+                "Vision.Rotate"             => Core.UI.ElaIcon.ViRotate,
+                "Vision.InRange"            => Core.UI.ElaIcon.ViInRange,
+                "Vision.HoughCircles"       => Core.UI.ElaIcon.ViHoughCircles,
+                "Vision.CLAHE"              => Core.UI.ElaIcon.ViCLAHE,
+                "Vision.GammaCorrection"    => Core.UI.ElaIcon.ViGammaCorrection,
+                "Vision.DistanceTransform"  => Core.UI.ElaIcon.ViDistanceTransform,
+                "Vision.GaussianNoise"      => Core.UI.ElaIcon.ViGaussianNoise,
+                "Vision.ConnectedComponents" => Core.UI.ElaIcon.ViConnectedComponents,
+                "Vision.TemplateMatch"      => Core.UI.ElaIcon.ViTemplateMatch,
+                "Vision.PerspectiveWarp"    => Core.UI.ElaIcon.ViPerspectiveWarp,
+                "Vision.Watershed"          => Core.UI.ElaIcon.ViWatershed,
+                "Vision.LaplacianEdge"      => Core.UI.ElaIcon.ViLaplacianEdge,
+                "Vision.RectROI"            => Core.UI.ElaIcon.ViRectROI,
+                "Vision.MorphGradient"      => Core.UI.ElaIcon.ViMorphGradient,
 
-                _ => "\ue634"                // 圆点（默认）
+                _ => Core.UI.ElaIcon.Circle,
             };
         }
 
@@ -279,6 +293,23 @@ namespace Shell.ViewModels
                 "Vision.Flip" => "#FF42A5F5",
                 "Vision.Resize" => "#FF42A5F5",
                 "Vision.Morphology" => "#FF42A5F5",
+                "Vision.Sharpen" => "#FFFFA726",
+                "Vision.SobelEdge" => "#FF26A69A",
+                "Vision.BilateralFilter" => "#FF5C6BC0",
+                "Vision.Rotate" => "#FF42A5F5",
+                "Vision.InRange" => "#FF66BB6A",
+                "Vision.HoughCircles" => "#FF26C6DA",
+                "Vision.CLAHE" => "#FF7E57C2",
+                "Vision.GammaCorrection" => "#FFFFA726",
+                "Vision.DistanceTransform" => "#FF26A69A",
+                "Vision.GaussianNoise" => "#FF78909C",
+                "Vision.ConnectedComponents" => "#FF66BB6A",
+                "Vision.TemplateMatch" => "#FFFFA726",
+                "Vision.PerspectiveWarp" => "#FF42A5F5",
+                "Vision.Watershed" => "#FF26C6DA",
+                "Vision.LaplacianEdge" => "#FF5C6BC0",
+                "Vision.RectROI" => "#FFAB47BC",
+                "Vision.MorphGradient" => "#FF7E57C2",
                 // 输入输出
                 "Vision.ImageSource" => "#FF26C6DA",
                 "Vision.ImageDisplay" => "#FF26C6DA",

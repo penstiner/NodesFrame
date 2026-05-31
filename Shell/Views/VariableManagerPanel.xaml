@@ -1,0 +1,110 @@
+﻿<UserControl x:Class="Shell.Views.VariableManagerPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignHeight="300" d:DesignWidth="280">
+    <UserControl.Resources>
+        <conv:StringToBoolConverter x:Key="StringToBoolConverter"
+            xmlns:conv="clr-namespace:Shell.Converter"/>
+        <BooleanToVisibilityConverter x:Key="BoolVis"/>
+    </UserControl.Resources>
+
+    <Grid Background="{DynamicResource VarPanelBackgroundBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- 标题栏 -->
+        <Border Grid.Row="0" Background="{DynamicResource ContrastBackgroundBrush}"
+                Padding="12,10" BorderBrush="{DynamicResource VarPanelBorderBrush}" BorderThickness="0,0,0,1">
+            <Grid>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="&#xf1de;" FontFamily="{StaticResource FontAwesome}"
+                               FontSize="14" Foreground="#42A5F5" VerticalAlignment="Center"/>
+                    <TextBlock Text=" 变量" FontSize="13" FontWeight="SemiBold"
+                               Foreground="{DynamicResource ToolboxItemForeground}" VerticalAlignment="Center"/>
+                    <Border CornerRadius="8" Background="#2042A5F5" Padding="6,1" Margin="6,0,0,0" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding VariableManager.Variables.Count, StringFormat={}{0}}"
+                                   FontSize="10" Foreground="#90CAF9"/>
+                    </Border>
+                </StackPanel>
+                <Button HorizontalAlignment="Right"
+                        Style="{StaticResource IconBtnAccentStyle}"
+                        Click="ManageVariables_Click"
+                        ToolTip="打开变量管理器">
+                    &#xf044;
+                </Button>
+            </Grid>
+        </Border>
+
+        <!-- 变量卡片列表 -->
+        <Grid Grid.Row="1">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="6,4">
+                <ItemsControl x:Name="VariableCards"
+                              ItemsSource="{Binding VariableManager.Variables}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border CornerRadius="8" Margin="2,3" Padding="10,8"
+                                Background="#15FFFFFF"
+                                BorderBrush="#20FFFFFF" BorderThickness="1"
+                                Cursor="Hand"
+                                MouseLeftButtonDown="Card_MouseLeftButtonDown">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="3"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <!-- 类型色条 -->
+                                <Border Grid.Column="0" CornerRadius="1.5" Width="3">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="Background" Value="#42A5F5"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding TypeName}" Value="Boolean">
+                                                    <Setter Property="Background" Value="#AB47BC"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding TypeName}" Value="Double">
+                                                    <Setter Property="Background" Value="#66BB6A"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding TypeName}" Value="Int32">
+                                                    <Setter Property="Background" Value="#FFA726"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding TypeName}" Value="String">
+                                                    <Setter Property="Background" Value="#26C6DA"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                </Border>
+                                <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                                    <DockPanel>
+                                        <Border CornerRadius="3" Background="#1AFFFFFF" Padding="4,1"
+                                                VerticalAlignment="Center" DockPanel.Dock="Right">
+                                            <TextBlock Text="{Binding TypeName}" FontSize="8" Foreground="#AAA"/>
+                                        </Border>
+                                        <TextBlock Text="{Binding Name}" FontSize="12" FontWeight="SemiBold"
+                                                   Foreground="#D0D0D0" VerticalAlignment="Center"
+                                                   TextTrimming="CharacterEllipsis"/>
+                                    </DockPanel>
+                                    <ContentControl x:Name="ValueDisplay"
+                                                    HorizontalContentAlignment="Center"
+                                                    Margin="0,3,0,0"
+                                                    Loaded="ValueDisplay_Loaded"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            </ScrollViewer>
+            <!-- 空状态 -->
+            <TextBlock x:Name="EmptyHint" Text="暂无变量，点击「管理」添加"
+                       FontSize="12" Foreground="#50FFFFFF"
+                       HorizontalAlignment="Center" VerticalAlignment="Center"
+                       Visibility="Collapsed"/>
+        </Grid>
+    </Grid>
+</UserControl>

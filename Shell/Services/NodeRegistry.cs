@@ -49,6 +49,9 @@ namespace Shell.Services
             /// <summary>节点描述。</summary>
             public string Description { get; init; }
 
+            /// <summary>节点头部覆盖色（十六进制字符串）。</summary>
+            public string HeaderColor { get; init; }
+
             /// <summary>连接器元数据列表。</summary>
             public List<ConnectorMetaInfo> Connectors { get; init; } = new();
 
@@ -104,6 +107,7 @@ namespace Shell.Services
                         DisplayName = attr.DisplayName ?? type.Name,
                         DefaultTitle = attr.DefaultTitle ?? type.Name,
                         Description = attr.Description ?? string.Empty,
+                        HeaderColor = attr.HeaderColor,
                         Connectors = connectors,
                         Factory = () => (NodeViewModel)Activator.CreateInstance(type)
                     };

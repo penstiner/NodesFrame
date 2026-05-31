@@ -18,6 +18,9 @@ namespace Shell.Services
 
         [JsonPropertyName("connections")]
         public List<ConnectionData> Connections { get; set; } = new List<ConnectionData>();
+
+        [JsonPropertyName("variables")]
+        public List<VariableData> Variables { get; set; } = new List<VariableData>();
     }
 
     public class NodeData
@@ -42,6 +45,18 @@ namespace Shell.Services
         /// </summary>
         [JsonPropertyName("properties")]
         public Dictionary<string, object> Properties { get; set; } = new Dictionary<string, object>();
+
+        /// <summary>
+        /// 属性绑定字典（Key = 属性键名, Value = 绑定信息）。
+        /// </summary>
+        [JsonPropertyName("bindings")]
+        public Dictionary<string, PropertyBindingData> Bindings { get; set; } = new Dictionary<string, PropertyBindingData>();
+
+        /// <summary>
+        /// 输出绑定字典（Key = 输出索引字符串, Value = 绑定信息）。
+        /// </summary>
+        [JsonPropertyName("outputBindings")]
+        public Dictionary<string, PropertyBindingData> OutputBindings { get; set; } = new Dictionary<string, PropertyBindingData>();
     }
 
     #endregion
@@ -62,7 +77,7 @@ namespace Shell.Services
         /// <summary>
         /// 将图的节点和连接序列化为 JSON 字符串。
         /// </summary>
-        public string Serialize(IReadOnlyList<NodeViewModel> nodes, IReadOnlyList<ConnectionViewModel> connections)
+        public string Serialize(IReadOnlyList<NodeViewModel> nodes, IReadOnlyList<ConnectionViewModel> connections, VariableManager variableManager = null)
         {
             var graph = new GraphData();
 
@@ -78,6 +93,35 @@ namespace Shell.Services
 
                 nd.NodeType = DetermineNodeType(node);
                 nd.Properties = ExtractProperties(node);
+
+                // ── 序列化属性绑定 ──
+                if (node.PropertyBindings.Count > 0)
+                {
+                    foreach (var kvp in node.PropertyBindings)
+                    {
+                        nd.Bindings[kvp.Key] = new PropertyBindingData
+                        {
+                            IsBound = kvp.Value.IsBound,
+                            VariableName = kvp.Value.BoundVariableName ?? ""
+                        };
+                    }
+                }
+
+                // ── 序列化输出绑定 ──
+                if (node.OutputBindingDict.Count > 0)
+                {
+                    foreach (var kvp in node.OutputBindingDict)
+                    {
+                        if (kvp.Value.IsBound && !string.IsNullOrEmpty(kvp.Value.BoundVariableName))
+                        {
+                            nd.OutputBindings[kvp.Key] = new PropertyBindingData
+                            {
+                                IsBound = kvp.Value.IsBound,
+                                VariableName = kvp.Value.BoundVariableName ?? ""
+                            };
+                        }
+                    }
+                }
 
                 graph.Nodes.Add(nd);
             }
@@ -101,14 +145,30 @@ namespace Shell.Services
                 });
             }
 
+            // ── 序列化变量 ──
+            if (variableManager != null)
+            {
+                foreach (var v in variableManager.Variables)
+                {
+                    graph.Variables.Add(new VariableData
+                    {
+                        Name = v.Name,
+                        TypeName = v.TypeName,
+                        Value = v.ValueString,
+                        Description = v.Description ?? ""
+                    });
+                }
+            }
+
             return JsonSerializer.Serialize(graph, _jsonOptions);
         }
 
         /// <summary>
-        /// 从 JSON 字符串反序列化，返回 Tuple(节点列表, 连接数据列表)。
+        /// 从 JSON 字符串反序列化，返回 Tuple(节点列表, 连接数据列表, 变量数据列表)。
         /// 连接数据需要由调用方配合 NodeFactory 重建 ConnectionViewModel。
+        /// 变量数据需要由调用方恢复到 VariableManager。
         /// </summary>
-        public (List<NodeViewModel> nodes, List<ConnectionData> connections) Deserialize(string json)
+        public (List<NodeViewModel> nodes, List<ConnectionData> connections, List<VariableData> variables) Deserialize(string json)
         {
             var graph = JsonSerializer.Deserialize<GraphData>(json, _jsonOptions);
             if (graph == null)
@@ -121,10 +181,45 @@ namespace Shell.Services
             {
                 var node = factory.CreateNode(nd);
                 if (node != null)
+                {
+                    // ── 恢复属性绑定 ──
+                    if (nd.Bindings != null && nd.Bindings.Count > 0)
+                    {
+                        foreach (var kvp in nd.Bindings)
+                        {
+                            var binding = new PropertyBinding
+                            {
+                                IsBound = kvp.Value.IsBound,
+                                BoundVariableName = kvp.Value.VariableName ?? ""
+                            };
+                            node.PropertyBindings[kvp.Key] = binding;
+                        }
+                    }
+
+                    // ── 恢复输出绑定 ──
+                    if (nd.OutputBindings != null && nd.OutputBindings.Count > 0)
+                    {
+                        foreach (var kvp in nd.OutputBindings)
+                        {
+                            var binding = new PropertyBinding
+                            {
+                                IsBound = kvp.Value.IsBound,
+                                BoundVariableName = kvp.Value.VariableName ?? ""
+                            };
+                            node.OutputBindingDict[kvp.Key] = binding;
+                        }
+                        // 重建 OutputBindings 集合（已包含从字典恢复的绑定）
+                        node.BuildOutputBindings();
+                    }
+
                     nodes.Add(node);
+                }
             }
 
-            return (nodes, graph.Connections);
+            // ── 向后兼容：旧文件无 variables 字段时返回空列表 ──
+            var variables = graph.Variables ?? new List<VariableData>();
+
+            return (nodes, graph.Connections, variables);
         }
 
         /// <summary>
