@@ -167,6 +167,19 @@ namespace Shell.Models
         /// <summary>获取原始装箱值，若为空则返回 null。</summary>
         public object GetRawValue() => IsNull ? null : _value;
 
+        /// <summary>
+        /// 根据目标类型尝试获取适配的值。用于变量绑定时将 VariantValue 转换为属性所需类型。
+        /// </summary>
+        public object GetValueForType(Type targetType)
+        {
+            if (targetType == typeof(double) && TryGetDouble(out var d)) return d;
+            if (targetType == typeof(int) && TryGetDouble(out var i)) return (int)i;
+            if (targetType == typeof(float) && TryGetDouble(out var f)) return (float)f;
+            if (targetType == typeof(bool) && TryGetBoolean(out var b)) return b;
+            if (targetType == typeof(string) && TryGetString(out var s)) return s;
+            return null;
+        }
+
         // ──────────── Equals / GetHashCode / ToString ────────────
 
         public bool Equals(VariantValue other)
