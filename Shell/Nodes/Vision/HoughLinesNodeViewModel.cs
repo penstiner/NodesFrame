@@ -19,15 +19,15 @@ namespace Shell.Models.Nodes.Vision
             });
         }
         private double _rho = 1;
-        [NodeProperty(Key = "rho", DisplayName = "ρ 分辨率", Group = "霍夫参数")] public double Rho { get => _rho; set => SetProperty(ref _rho, value); }
+        [NodeProperty(Key = "rho", DisplayName = "ρ 分辨率", Group = "霍夫参数", Min = 1, Max = 10)] public double Rho { get => _rho; set => SetProperty(ref _rho, value); }
         private double _theta = Math.PI / 180;
-        [NodeProperty(Key = "theta", DisplayName = "θ 角度 (弧度)", Group = "霍夫参数")] public double Theta { get => _theta; set => SetProperty(ref _theta, value); }
+        [NodeProperty(Key = "theta", DisplayName = "θ 角度 (弧度)", Group = "霍夫参数", Min = 0.001, Max = 3.14)] public double Theta { get => _theta; set => SetProperty(ref _theta, value); }
         private int _threshold = 80;
-        [NodeProperty(Key = "houghThreshold", DisplayName = "投票阈值", Group = "检测参数")] public int HoughThreshold { get => _threshold; set => SetProperty(ref _threshold, value); }
+        [NodeProperty(Key = "houghThreshold", DisplayName = "投票阈值", Group = "检测参数", Min = 1, Max = 500)] public int HoughThreshold { get => _threshold; set => SetProperty(ref _threshold, value); }
         private double _minLen = 50;
-        [NodeProperty(Key = "minLineLength", DisplayName = "最小线段长度", Group = "检测参数")] public double MinLineLength { get => _minLen; set => SetProperty(ref _minLen, value); }
+        [NodeProperty(Key = "minLineLength", DisplayName = "最小线段长度", Group = "检测参数", Min = 0, Max = 10000)] public double MinLineLength { get => _minLen; set => SetProperty(ref _minLen, value); }
         private double _maxGap = 10;
-        [NodeProperty(Key = "maxLineGap", DisplayName = "最大间隙", Group = "检测参数")] public double MaxLineGap { get => _maxGap; set => SetProperty(ref _maxGap, value); }
+        [NodeProperty(Key = "maxLineGap", DisplayName = "最大间隙", Group = "检测参数", Min = 0, Max = 1000)] public double MaxLineGap { get => _maxGap; set => SetProperty(ref _maxGap, value); }
 
         private int _lineCount;
         /// <summary>检测到的线段数量。</summary>

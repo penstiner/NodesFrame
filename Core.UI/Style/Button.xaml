@@ -3,6 +3,7 @@
     <FontFamily x:Key="FontAwesome">pack://application:,,,/Core.UI;component/Font/#FontAwesome</FontFamily>
     <FontFamily x:Key="iconfont">pack://application:,,,/Core.UI;component/Font/iconfont.ttf#iconfont</FontFamily>
     <FontFamily x:Key="visionicon">pack://application:,,,/Core.UI;component/Font/visionicon.ttf#visionicon</FontFamily>
+    <FontFamily x:Key="ElaAwesome">pack://application:,,,/Core.UI;component/Font/ElaAwesome.ttf#ElaAwesome</FontFamily>
 
     <Style TargetType="Button" x:Key="UserMsgButtonStyle">
         <Setter Property="Background" Value="Transparent"/>

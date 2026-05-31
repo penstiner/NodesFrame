@@ -9,12 +9,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Font\ElaAwesome.ttf" />
     <None Remove="Font\FontAwesome.otf" />
     <None Remove="Font\iconfont.ttf" />
     <None Remove="Font\visionicon.ttf" />
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Font\ElaAwesome.ttf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="Font\FontAwesome.otf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>

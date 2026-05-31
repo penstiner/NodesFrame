@@ -12,9 +12,9 @@ namespace Shell.Models.Nodes.Vision
     {
         public ThresholdNodeViewModel() : base("二值化") { }
         private double _thresh = 127;
-        [NodeProperty(Key = "threshold", DisplayName = "阈值", Group = "二值化")] public double ThresholdValue { get => _thresh; set => SetProperty(ref _thresh, value); }
+        [NodeProperty(Key = "threshold", DisplayName = "阈值", Group = "二值化", Min = 0, Max = 255)] public double ThresholdValue { get => _thresh; set => SetProperty(ref _thresh, value); }
         private double _maxVal = 255;
-        [NodeProperty(Key = "maxValue", DisplayName = "最大值", Group = "二值化")] public double MaxValue { get => _maxVal; set => SetProperty(ref _maxVal, value); }
+        [NodeProperty(Key = "maxValue", DisplayName = "最大值", Group = "二值化", Min = 0, Max = 255)] public double MaxValue { get => _maxVal; set => SetProperty(ref _maxVal, value); }
         private ThresholdTypes _type = ThresholdTypes.Binary;
         [NodeProperty(Key = "thresholdType")] public ThresholdTypes ThresholdType { get => _type; set => SetProperty(ref _type, value); }
         private int _si;

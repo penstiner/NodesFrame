@@ -14,9 +14,9 @@ namespace Shell.Models.Nodes.Vision
         private MorphTypes _op = MorphTypes.Dilate;
         [NodeProperty(Key = "morphOp")] public MorphTypes MorphOp { get => _op; set => SetProperty(ref _op, value); }
         private int _ks = 5;
-        [NodeProperty(Key = "kernelSize", DisplayName = "核大小", Group = "形态学参数")] public int KernelSize { get => _ks; set => SetProperty(ref _ks, value); }
+        [NodeProperty(Key = "kernelSize", DisplayName = "核大小", Group = "形态学参数", Min = 3, Max = 31)] public int KernelSize { get => _ks; set => SetProperty(ref _ks, value); }
         private int _iter = 1;
-        [NodeProperty(Key = "iterations", DisplayName = "迭代次数", Group = "形态学参数")] public int Iterations { get => _iter; set => SetProperty(ref _iter, value); }
+        [NodeProperty(Key = "iterations", DisplayName = "迭代次数", Group = "形态学参数", Min = 1, Max = 20)] public int Iterations { get => _iter; set => SetProperty(ref _iter, value); }
         private int _si;
         [NodeProperty(Key = "selectedOpIndex", DisplayName = "操作类型", Options = "膨胀 (Dilate),腐蚀 (Erode),开运算 (Open),闭运算 (Close)")]
         public int SelectedOpIndex { get => _si; set { if (SetProperty(ref _si, value)) MorphOp = value switch { 0 => MorphTypes.Dilate, 1 => MorphTypes.Erode, 2 => MorphTypes.Open, 3 => MorphTypes.Close, _ => MorphTypes.Dilate }; } }

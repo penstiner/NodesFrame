@@ -3,13 +3,15 @@
                     xmlns:models="clr-namespace:Shell.Models"
                     xmlns:vision="clr-namespace:Shell.Models.Nodes.Vision"
                     xmlns:views="clr-namespace:Shell.Views"
-                    xmlns:nodify="clr-namespace:Nodify;assembly=Nodify">
+                    xmlns:nodify="clr-namespace:Nodify;assembly=Nodify"
+                    xmlns:shared="clr-namespace:Nodify;assembly=Nodify.Shared">
 
     <!-- ══════════════════════════════════════ -->
     <!--  节点渲染模板选择器 (编辑器用)           -->
     <!-- ══════════════════════════════════════ -->
 
     <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+    <shared:StringToBrushConverter x:Key="StringToBrushConverter" />
 
     <!-- ═══ 节点头部模板（Path 矢量状态图标） ═══ -->
     <DataTemplate x:Key="NodeHeaderTemplate" DataType="{x:Type models:NodeViewModel}">
@@ -424,8 +426,8 @@
             <DataTemplate DataType="{x:Type models:NodeViewModel}">
                 <nodify:Node Header="{Binding}" HeaderTemplate="{StaticResource NodeHeaderTemplate}"
                              Input="{Binding Input}" Output="{Binding Output}"
-                             BorderBrush="#FF78909C" BorderThickness="1.5"
-                             HeaderBrush="{StaticResource BlueHeaderBrush}"
+                             BorderBrush="{Binding NodeCategoryColor, Converter={StaticResource StringToBrushConverter}}" BorderThickness="1.5"
+                             HeaderBrush="{Binding NodeCategoryColor, Converter={StaticResource StringToBrushConverter}}"
                              ContentBrush="#FFECEFF1" Background="#FFECEFF1"
                              Padding="0"
                              Effect="{DynamicResource NodeDropShadow}"

@@ -11,9 +11,9 @@ namespace Shell.Models.Nodes.Vision
     {
         public CannyEdgeNodeViewModel() : base("Canny 边缘") { }
         private double _t1 = 50;
-        [NodeProperty(Key = "threshold1", DisplayName = "低阈值", Group = "边缘检测")] public double Threshold1 { get => _t1; set => SetProperty(ref _t1, value); }
+        [NodeProperty(Key = "threshold1", DisplayName = "低阈值", Group = "边缘检测", Min = 0, Max = 500)] public double Threshold1 { get => _t1; set => SetProperty(ref _t1, value); }
         private double _t2 = 150;
-        [NodeProperty(Key = "threshold2", DisplayName = "高阈值", Group = "边缘检测")] public double Threshold2 { get => _t2; set => SetProperty(ref _t2, value); }
+        [NodeProperty(Key = "threshold2", DisplayName = "高阈值", Group = "边缘检测", Min = 0, Max = 500)] public double Threshold2 { get => _t2; set => SetProperty(ref _t2, value); }
         protected override ImageData ProcessImage(ImageData input) => VisionAlgorithmService.CannyEdge(input, Threshold1, Threshold2);
     }
 }

@@ -1,0 +1,111 @@
+﻿<UserControl x:Class="Core.UI.Controls.NumericKeypadWindow"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Core.UI.Controls"
+             mc:Ignorable="d" 
+             Height="420" Width="320"
+             Background="Transparent"
+             Focusable="True"
+             Loaded="UserControl_Loaded"
+             PreviewKeyDown="UserControl_PreviewKeyDown">
+    <UserControl.Resources>
+        <Style TargetType="Button">
+            <Setter Property="FontSize" Value="22"/>
+            <Setter Property="Margin" Value="4"/>
+            <Setter Property="Background" Value="#FCFCFC"/>
+            <Setter Property="BorderBrush" Value="#E5E5E5"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Foreground" Value="#1A1A1A"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" 
+                                BorderBrush="{TemplateBinding BorderBrush}" 
+                                BorderThickness="{TemplateBinding BorderThickness}" 
+                                CornerRadius="6">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#F6F6F6"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#EBEBEB"/>
+                                <Setter Property="Foreground" Value="#5F5F5F"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="AccentButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Background" Value="#005FB8"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="#005FB8"/>
+        </Style>
+
+        <Style x:Key="WarningButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Foreground" Value="#D13438"/>
+            <Setter Property="Background" Value="#FFF4F4"/>
+        </Style>
+    </UserControl.Resources>
+
+    <Border Background="#FAFAFA" BorderBrush="#E5E5E5" BorderThickness="1" CornerRadius="12" Padding="15" Margin="8">
+        <Border.Effect>
+            <DropShadowEffect Color="Black" Opacity="0.15" BlurRadius="16" ShadowDepth="4" Direction="270"/>
+        </Border.Effect>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0" Background="#F3F3F3" CornerRadius="6" Padding="8,6" Margin="0,0,0,6"
+                    MouseLeftButtonDown="DragBar_MouseLeftButtonDown"
+                    MouseMove="DragBar_MouseMove"
+                    MouseLeftButtonUp="DragBar_MouseLeftButtonUp">
+                <TextBlock Text="&#x6570;&#x5B57;&#x952E;&#x76D8;" Foreground="#666" FontSize="12" HorizontalAlignment="Center"/>
+            </Border>
+
+            <Border x:Name="displayBorder" Grid.Row="1" Background="White" BorderBrush="#E5E5E5" BorderThickness="1" CornerRadius="6" Padding="12" Margin="0,0,0,5">
+                <TextBox x:Name="txtDisplay" Text="0" TextAlignment="Right" FontSize="36" FontWeight="SemiBold"
+                         Foreground="#333" BorderThickness="0" Background="Transparent"
+                         Padding="0" VerticalAlignment="Stretch" VerticalContentAlignment="Center"
+                         PreviewTextInput="TxtDisplay_PreviewTextInput"/>
+            </Border>
+
+            <TextBlock x:Name="txtLimits" Grid.Row="2" Text="&#x8303;&#x56F4;: 0 ~ 100" Foreground="#8C8C8C" FontSize="12" Margin="0,0,2,4" HorizontalAlignment="Right"/>
+
+            <TextBlock x:Name="txtError" Grid.Row="3" Visibility="Collapsed" Text="&#x8F93;&#x5165;&#x503C;&#x8D85;&#x51FA;&#x8303;&#x56F4;" Foreground="#D13438" FontSize="12" Margin="0,0,2,10" HorizontalAlignment="Right"/>
+
+            <UniformGrid Grid.Row="4" Columns="4" Rows="4">
+                <Button Content="7" Click="BtnNum_Click"/>
+                <Button Content="8" Click="BtnNum_Click"/>
+                <Button Content="9" Click="BtnNum_Click"/>
+                <Button Content="&#x9000;&#x683C;" Click="BtnBack_Click" Style="{StaticResource WarningButton}" FontSize="18"/>
+
+                <Button Content="4" Click="BtnNum_Click"/>
+                <Button Content="5" Click="BtnNum_Click"/>
+                <Button Content="6" Click="BtnNum_Click"/>
+                <Button Content="&#x6E05;&#x7A7A;" Click="BtnClear_Click" Style="{StaticResource WarningButton}" FontSize="18"/>
+
+                <Button Content="1" Click="BtnNum_Click"/>
+                <Button Content="2" Click="BtnNum_Click"/>
+                <Button Content="3" Click="BtnNum_Click"/>
+                <Button Content="&#x53D6;&#x6D88;" Click="BtnCancel_Click" FontSize="18" Background="#F0F0F0"/>
+
+                <Button Content="+/-" Click="BtnSign_Click" FontSize="18"/>
+                <Button Content="0" Click="BtnNum_Click"/>
+                <Button Content="." Click="BtnNum_Click"/>
+                <Button Content="&#x786E;&#x8BA4;" Click="BtnEnter_Click" Style="{StaticResource AccentButton}"/>
+            </UniformGrid>
+        </Grid>
+    </Border>
+</UserControl>

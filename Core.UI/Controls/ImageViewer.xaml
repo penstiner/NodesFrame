@@ -1,0 +1,22 @@
+<UserControl x:Class="Core.UI.Controls.ImageViewer"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d"
+             d:DesignHeight="200" d:DesignWidth="200">
+    <Border x:Name="ViewportBorder"
+            Background="Transparent"
+            ClipToBounds="True"
+            MouseWheel="OnMouseWheel"
+            MouseLeftButtonDown="OnMouseLeftButtonDown"
+            MouseLeftButtonUp="OnMouseLeftButtonUp"
+            MouseMove="OnMouseMove"
+            Cursor="SizeAll">
+        <Image x:Name="ImageBox"
+               Source="{Binding Source, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+               Stretch="Uniform"
+               RenderTransformOrigin="0.5,0.5"
+               IsHitTestVisible="False"/>
+    </Border>
+</UserControl>

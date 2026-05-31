@@ -12,13 +12,13 @@ namespace Shell.Models.Nodes.Vision
     {
         public AdaptiveThresholdNodeViewModel() : base("自适应二值化") { }
         private double _maxVal = 255;
-        [NodeProperty(Key = "maxValue", DisplayName = "最大值", Group = "阈值参数")] public double MaxValue { get => _maxVal; set => SetProperty(ref _maxVal, value); }
+        [NodeProperty(Key = "maxValue", DisplayName = "最大值", Group = "阈值参数", Min = 0, Max = 255)] public double MaxValue { get => _maxVal; set => SetProperty(ref _maxVal, value); }
         private AdaptiveThresholdTypes _adaptiveMethod = AdaptiveThresholdTypes.GaussianC;
         [NodeProperty(Key = "adaptiveMethod")] public AdaptiveThresholdTypes AdaptiveMethod { get => _adaptiveMethod; set => SetProperty(ref _adaptiveMethod, value); }
         private int _blockSize = 11;
-        [NodeProperty(Key = "blockSize", DisplayName = "块大小 (奇数)", Group = "阈值参数")] public int BlockSize { get => _blockSize; set => SetProperty(ref _blockSize, value); }
+        [NodeProperty(Key = "blockSize", DisplayName = "块大小 (奇数)", Group = "阈值参数", Min = 3, Max = 51)] public int BlockSize { get => _blockSize; set => SetProperty(ref _blockSize, value); }
         private double _c = 2;
-        [NodeProperty(Key = "c", DisplayName = "常数 C", Group = "阈值参数")] public double C { get => _c; set => SetProperty(ref _c, value); }
+        [NodeProperty(Key = "c", DisplayName = "常数 C", Group = "阈值参数", Min = -50, Max = 50)] public double C { get => _c; set => SetProperty(ref _c, value); }
         protected override ImageData ProcessImage(ImageData input) =>
             VisionAlgorithmService.AdaptiveThreshold(input, MaxValue, AdaptiveMethod, ThresholdTypes.Binary, BlockSize, C);
     }
