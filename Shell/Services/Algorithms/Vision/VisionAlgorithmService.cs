@@ -285,5 +285,315 @@ namespace Shell.Services.Algorithms.Vision
             }
             return MatToImageData(colorSrc);
         }
+
+        /// <summary>图像锐化（Laplacian 增强）</summary>
+        public static ImageData Sharpen(ImageData input, double strength = 1.5)
+        {
+            using var src = ImageDataToMat(input);
+            if (src.Empty()) return input;
+            using var blurred = new Mat();
+            Cv2.GaussianBlur(src, blurred, new Size(3, 3), 1);
+            using var dst = new Mat();
+            Cv2.AddWeighted(src, 1 + strength, blurred, -strength, 0, dst);
+            return MatToImageData(dst);
+        }
+
+        /// <summary>Sobel 边缘检测</summary>
+        public static ImageData SobelEdge(ImageData input, int ksize = 3, double scale = 1.0)
+        {
+            using var src = ImageDataToMat(input);
+            if (src.Empty()) return input;
+            using var gray = src.Channels() == 1 ? src.Clone() : new Mat();
+            if (src.Channels() > 1) Cv2.CvtColor(src, gray, ColorConversionCodes.BGR2GRAY);
+            using var gradX = new Mat();
+            Cv2.Sobel(gray, gradX, MatType.CV_16S, 1, 0, ksize, scale);
+            using var absX = new Mat();
+            Cv2.ConvertScaleAbs(gradX, absX);
+            return MatToImageData(absX);
+        }
+
+        /// <summary>双边滤波（保边去噪）</summary>
+        public static ImageData BilateralFilter(ImageData input, int d = 9,
+            double sigmaColor = 75, double sigmaSpace = 75)
+        {
+            using var src = ImageDataToMat(input);
+            if (src.Empty()) return input;
+            using var dst = new Mat();
+            Cv2.BilateralFilter(src, dst, d, sigmaColor, sigmaSpace);
+            return MatToImageData(dst);
+        }
+
+        /// <summary>图像旋转</summary>
+        public static ImageData Rotate(ImageData input, double angle, double scale = 1.0)
+        {
+            using var src = ImageDataToMat(input);
+            if (src.Empty()) return input;
+            var center = new Point2f(src.Width / 2f, src.Height / 2f);
+            using var matrix = Cv2.GetRotationMatrix2D(center, angle, scale);
+            using var dst = new Mat();
+            Cv2.WarpAffine(src, dst, matrix, src.Size());
+            return MatToImageData(dst);
+        }
+
+        /// <summary>颜色范围提取（HSV InRange）</summary>
+        public static ImageData InRange(ImageData input,
+            int hMin, int sMin, int vMin, int hMax, int sMax, int vMax)
+        {
+            using var src = ImageDataToMat(input);
+            if (src.Empty()) return input;
+            using var hsv = new Mat();
+            Cv2.CvtColor(src, hsv, ColorConversionCodes.BGR2HSV);
+            using var mask = new Mat();
+            Cv2.InRange(hsv, new Scalar(hMin, sMin, vMin), new Scalar(hMax, sMax, vMax), mask);
+            using var dst = new Mat();
+            Cv2.BitwiseAnd(src, src, dst, mask);
+            return MatToImageData(dst);
+        }
+
+        /// <summary>霍夫圆检测（在图像上绘制检测到的圆）</summary>
+        public static ImageData HoughCircles(ImageData input, double dp, double minDist,
+            double param1, double param2, int minRadius, int maxRadius, out int circleCount)
+        {
+            circleCount = 0;
+            using var src = ImageDataToMat(input);
+            if (src.Empty()) return input;
+            using var gray = src.Channels() == 1 ? src.Clone() : new Mat();
+            if (src.Channels() > 1) Cv2.CvtColor(src, gray, ColorConversionCodes.BGR2GRAY);
+            var circles = Cv2.HoughCircles(gray, HoughModes.Gradient, dp, minDist,
+                param1, param2, minRadius, maxRadius);
+            using var colorSrc = src.Channels() == 3 ? src.Clone() : new Mat();
+            if (src.Channels() != 3) Cv2.CvtColor(src, colorSrc, ColorConversionCodes.GRAY2BGR);
+            if (circles != null && circles.Length > 0)
+            {
+                circleCount = circles.Length;
+                foreach (var c in circles)
+                    Cv2.Circle(colorSrc, (int)c.Center.X, (int)c.Center.Y, (int)c.Radius,
+                        Scalar.Green, 2);
+            }
+            return MatToImageData(colorSrc);
+        }
+
+        /// <summary>CLAHE 自适应直方图均衡</summary>
+        public static ImageData CLAHE(ImageData input, double clipLimit = 2.0,
+            int tileGridSize = 8)
+        {
+            using var src = ImageDataToMat(input);
+            if (src.Empty()) return input;
+            using var gray = src.Channels() == 1 ? src.Clone() : new Mat();
+            if (src.Channels() > 1) Cv2.CvtColor(src, gray, ColorConversionCodes.BGR2GRAY);
+            using var clahe = Cv2.CreateCLAHE(clipLimit, new Size(tileGridSize, tileGridSize));
+            using var dst = new Mat();
+            clahe.Apply(gray, dst);
+            return MatToImageData(dst);
+        }
+
+        /// <summary>伽马校正（亮度非线性调整）</summary>
+        public static ImageData GammaCorrection(ImageData input, double gamma = 1.0)
+        {
+            using var src = ImageDataToMat(input);
+            if (src.Empty()) return input;
+            using var dst = new Mat();
+            var lookUpTable = new Mat(1, 256, MatType.CV_8U);
+            for (int i = 0; i < 256; i++)
+                lookUpTable.Set<byte>(0, i, (byte)(Math.Pow(i / 255.0, 1.0 / gamma) * 255.0));
+            Cv2.LUT(src, lookUpTable, dst);
+            return MatToImageData(dst);
+        }
+
+        /// <summary>距离变换（前景距离图）</summary>
+        public static ImageData DistanceTransform(ImageData input,
+            DistanceTypes distanceType = DistanceTypes.L2, DistanceTransformMasks maskSize = DistanceTransformMasks.Mask3)
+        {
+            using var src = ImageDataToMat(input);
+            if (src.Empty()) return input;
+            using var gray = src.Channels() == 1 ? src.Clone() : new Mat();
+            if (src.Channels() > 1) Cv2.CvtColor(src, gray, ColorConversionCodes.BGR2GRAY);
+            using var binary = new Mat();
+            Cv2.Threshold(gray, binary, 127, 255, ThresholdTypes.Binary);
+            using var dist = new Mat();
+            Cv2.DistanceTransform(binary, dist, distanceType, maskSize);
+            Cv2.Normalize(dist, dist, 0, 255, NormTypes.MinMax);
+            using var dst = new Mat();
+            dist.ConvertTo(dst, MatType.CV_8U);
+            return MatToImageData(dst);
+        }
+
+        /// <summary>高斯噪声（模拟工业相机噪声）</summary>
+        public static ImageData AddGaussianNoise(ImageData input, double mean = 0, double stddev = 25)
+        {
+            using var src = ImageDataToMat(input);
+            if (src.Empty()) return input;
+            using var noise = new Mat(src.Size(), src.Type());
+            using var rand = new Mat(src.Size(), MatType.CV_64FC1);
+            Cv2.Randu(rand, Scalar.All(0), Scalar.All(1));
+            Cv2.Multiply(rand, Scalar.All(stddev), rand);
+            Cv2.Add(rand, Scalar.All(mean), rand);
+            rand.ConvertTo(noise, src.Type());
+            using var dst = new Mat();
+            Cv2.Add(src, noise, dst);
+            return MatToImageData(dst);
+        }
+
+        /// <summary>连通区域分析（染色标记）</summary>
+        public static ImageData ConnectedComponents(ImageData input, out int labelCount)
+        {
+            labelCount = 0;
+            using var src = ImageDataToMat(input);
+            if (src.Empty()) return input;
+            using var gray = src.Channels() == 1 ? src.Clone() : new Mat();
+            if (src.Channels() > 1) Cv2.CvtColor(src, gray, ColorConversionCodes.BGR2GRAY);
+            using var binary = new Mat();
+            Cv2.Threshold(gray, binary, 127, 255, ThresholdTypes.Binary);
+            using var labels = new Mat();
+            labelCount = Cv2.ConnectedComponents(binary, labels);
+            // 彩色渲染：归一化标签到 0-255
+            using var dst = new Mat(src.Size(), MatType.CV_8UC3);
+            var colors = new Vec3b[labelCount];
+            for (int i = 0; i < labelCount; i++)
+                colors[i] = new Vec3b((byte)(i * 37 % 255), (byte)(i * 73 % 255), (byte)(i * 131 % 255));
+            for (int r = 0; r < dst.Rows; r++)
+                for (int c = 0; c < dst.Cols; c++)
+                {
+                    int lbl = labels.At<int>(r, c);
+                    if (lbl >= 0 && lbl < labelCount)
+                        dst.Set(r, c, colors[lbl]);
+                }
+            return MatToImageData(dst);
+        }
+
+        /// <summary>模板匹配（归一化相关系数），返回匹配结果图 + 匹配位置</summary>
+        public static ImageData TemplateMatch(ImageData source, ImageData template,
+            TemplateMatchModes mode, out double minVal, out double maxVal,
+            out OpenCvSharp.Point minLoc, out OpenCvSharp.Point maxLoc)
+        {
+            minVal = maxVal = 0;
+            minLoc = maxLoc = new OpenCvSharp.Point();
+            using var src = ImageDataToMat(source);
+            using var tpl = ImageDataToMat(template);
+            if (src.Empty() || tpl.Empty()) return source;
+            using var result = new Mat();
+            Cv2.MatchTemplate(src, tpl, result, mode);
+            Cv2.MinMaxLoc(result, out minVal, out maxVal, out minLoc, out maxLoc);
+            // 在源图上画矩形标记匹配位置
+            using var dst = src.Clone();
+            var matchLoc = (mode == TemplateMatchModes.SqDiff || mode == TemplateMatchModes.SqDiffNormed)
+                ? minLoc : maxLoc;
+            Cv2.Rectangle(dst,
+                new Rect(matchLoc.X, matchLoc.Y, tpl.Width, tpl.Height),
+                Scalar.Red, 2);
+            return MatToImageData(dst);
+        }
+
+        /// <summary>透视矫正（4 点变换）</summary>
+        public static ImageData PerspectiveWarp(ImageData input,
+            Point2f[] srcPoints, int dstWidth, int dstHeight)
+        {
+            using var src = ImageDataToMat(input);
+            if (src.Empty() || srcPoints.Length != 4) return input;
+            var dstPoints = new Point2f[]
+            {
+                new Point2f(0, 0),
+                new Point2f(dstWidth - 1, 0),
+                new Point2f(dstWidth - 1, dstHeight - 1),
+                new Point2f(0, dstHeight - 1)
+            };
+            using var matrix = Cv2.GetPerspectiveTransform(srcPoints, dstPoints);
+            using var dst = new Mat();
+            Cv2.WarpPerspective(src, dst, matrix, new Size(dstWidth, dstHeight));
+            return MatToImageData(dst);
+        }
+
+        /// <summary>分水岭分割（基于距离变换标记）</summary>
+        public static ImageData Watershed(ImageData input, double fgThreshold = 0.4,
+            double bgThreshold = 0.3)
+        {
+            using var src = ImageDataToMat(input);
+            if (src.Empty()) return input;
+            using var gray = src.Channels() == 1 ? src.Clone() : new Mat();
+            if (src.Channels() > 1) Cv2.CvtColor(src, gray, ColorConversionCodes.BGR2GRAY);
+            // 二值化
+            using var binary = new Mat();
+            Cv2.Threshold(gray, binary, 0, 255, ThresholdTypes.BinaryInv | ThresholdTypes.Otsu);
+            // 去噪开运算
+            using var kernel = Cv2.GetStructuringElement(MorphShapes.Ellipse, new Size(3, 3));
+            using var opening = new Mat();
+            Cv2.MorphologyEx(binary, opening, MorphTypes.Open, kernel, iterations: 2);
+            // 背景区域（膨胀）
+            using var sureBg = new Mat();
+            Cv2.Dilate(opening, sureBg, kernel, iterations: 3);
+            // 距离变换 → 前景标记
+            using var dist = new Mat();
+            Cv2.DistanceTransform(opening, dist, DistanceTypes.L2, DistanceTransformMasks.Mask5);
+            Cv2.Normalize(dist, dist, 0, 1, NormTypes.MinMax);
+            using var sureFg = new Mat();
+            Cv2.Threshold(dist, sureFg, fgThreshold, 255, ThresholdTypes.Binary);
+            sureFg.ConvertTo(sureFg, MatType.CV_8UC1);
+            // 未知区域
+            using var unknown = new Mat();
+            Cv2.Subtract(sureBg, sureFg, unknown);
+            // 连通区域标记
+            using var markers32 = new Mat();
+            Cv2.ConnectedComponents(sureFg, markers32);
+            using var markers = new Mat();
+            markers32.ConvertTo(markers, MatType.CV_32SC1);
+            // Markers + 1
+            Cv2.Add(markers, Scalar.All(1), markers);
+            // 未知区域标记为 0
+            using var unknown8 = new Mat();
+            unknown.ConvertTo(unknown8, MatType.CV_8UC1);
+            for (int r = 0; r < markers.Rows; r++)
+                for (int c = 0; c < markers.Cols; c++)
+                    if (unknown8.At<byte>(r, c) > 128)
+                        markers.Set<int>(r, c, 0);
+            // 分水岭
+            using var colorSrc = src.Clone();
+            Cv2.Watershed(colorSrc, markers);
+            // 绘制红色边界
+            for (int r = 0; r < markers.Rows; r++)
+                for (int c = 0; c < markers.Cols; c++)
+                    if (markers.At<int>(r, c) == -1)
+                        colorSrc.Set(r, c, new Vec3b(0, 0, 255));
+            return MatToImageData(colorSrc);
+        }
+
+        /// <summary>拉普拉斯边缘检测</summary>
+        public static ImageData LaplacianEdge(ImageData input, int ksize = 3, double scale = 1.0)
+        {
+            using var src = ImageDataToMat(input);
+            if (src.Empty()) return input;
+            using var gray = src.Channels() == 1 ? src.Clone() : new Mat();
+            if (src.Channels() > 1) Cv2.CvtColor(src, gray, ColorConversionCodes.BGR2GRAY);
+            using var lap = new Mat();
+            Cv2.Laplacian(gray, lap, MatType.CV_16S, ksize, scale);
+            using var dst = new Mat();
+            Cv2.ConvertScaleAbs(lap, dst);
+            return MatToImageData(dst);
+        }
+
+        /// <summary>矩形 ROI 裁剪</summary>
+        public static ImageData RectROI(ImageData input, int x, int y, int width, int height)
+        {
+            using var src = ImageDataToMat(input);
+            if (src.Empty()) return input;
+            var roi = new Rect(
+                Math.Max(0, x), Math.Max(0, y),
+                Math.Min(width, src.Width - x),
+                Math.Min(height, src.Height - y));
+            using var dst = new Mat(src, roi);
+            return MatToImageData(dst.Clone());
+        }
+
+        /// <summary>形态学梯度（膨胀 - 腐蚀，突出边缘）</summary>
+        public static ImageData MorphGradient(ImageData input, MorphShapes shape,
+            int kernelSize = 3, int iterations = 1)
+        {
+            using var src = ImageDataToMat(input);
+            if (src.Empty()) return input;
+            var ks = Math.Max(3, kernelSize % 2 == 0 ? kernelSize + 1 : kernelSize);
+            using var kernel = Cv2.GetStructuringElement(shape, new Size(ks, ks));
+            using var dst = new Mat();
+            Cv2.MorphologyEx(src, dst, MorphTypes.Gradient, kernel, iterations: iterations);
+            return MatToImageData(dst);
+        }
     }
 }

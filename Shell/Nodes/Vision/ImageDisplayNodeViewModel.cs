@@ -15,6 +15,8 @@ namespace Shell.Models.Nodes.Vision
         NodeTypeId = "Vision.ImageDisplay")]
     [NodeConnector(Title = "输入图像", Direction = ConnectorDirection.Input,
         ExpectedType = "Object", Description = "ImageData 原始像素图像数据")]
+    [NodeConnector(Title = "完成", Direction = ConnectorDirection.Output,
+        ExpectedType = "Boolean", Description = "完成")]
     [NodeConnector(Title = "尺寸信息", Direction = ConnectorDirection.Output,
         ExpectedType = "String", Description = "图像尺寸描述")]
     public class ImageDisplayNodeViewModel : NodeViewModel
@@ -28,9 +30,14 @@ namespace Shell.Models.Nodes.Vision
             });
             AddOutputConnector(new ConnectorViewModel
             {
+                Title = "完成",
+                ExpectedType = System.TypeCode.Boolean
+            });
+            AddOutputConnector(new ConnectorViewModel
+            {
                 Title = "尺寸信息",
                 ExpectedType = System.TypeCode.String
-            });
+            }); 
         }
 
         private string _imageInfo = "等待输入...";
@@ -62,8 +69,10 @@ namespace Shell.Models.Nodes.Vision
                     Preview.Update(img);
                     HasImage = true;
 
+                    if (Output.Count > 1)
+                        Output[1].Value = VariantValue.FromString(ImageInfo);
                     if (Output.Count > 0)
-                        Output[0].Value = VariantValue.FromString(ImageInfo);
+                        Output[0].Value = VariantValue.FromBoolean(true);
                 }
                 catch (Exception ex)
                 {

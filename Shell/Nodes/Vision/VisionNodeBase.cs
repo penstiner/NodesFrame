@@ -47,14 +47,23 @@ namespace Shell.Models.Nodes.Vision
                 return;
             }
 
-            var result = ProcessImage(imageData);
-            if (result != null)
+            try
             {
-                if (Output.Count > 0)
-                    Output[0].Value = VariantValue.FromImageData(result);
+                var result = ProcessImage(imageData);
+                if (result != null)
+                {
+                    if (Output.Count > 0)
+                        Output[0].Value = VariantValue.FromImageData(result);
 
-                ImageInfo = result.InfoText;
-                Preview.Update(result);
+                    ImageInfo = result.InfoText;
+                    Preview.Update(result);
+                }
+            }
+            catch (Exception ex)
+            {
+                ImageInfo = $"处理失败: {ex.Message}";
+                throw new InvalidOperationException(
+                    $"[{Title}] 算法异常 (输入: {imageData.Width}×{imageData.Height}, {imageData.Channels}ch): {ex.Message}", ex);
             }
         }
     }

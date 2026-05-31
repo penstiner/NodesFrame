@@ -18,12 +18,19 @@ namespace Shell.Models.Nodes.Vision
         DefaultTitle = "图像源",
         Description = "从本地文件加载图像，输出 ImageData 格式图像数据",
         NodeTypeId = "Vision.ImageSource")]
+    [NodeConnector(Title = "触发", Direction = ConnectorDirection.Input,
+        ExpectedType = "Object", Description = "触发")]
     [NodeConnector(Title = "输出图像", Direction = ConnectorDirection.Output,
         ExpectedType = "Object", Description = "ImageData 原始像素图像数据")]
     public class ImageSourceNodeViewModel : NodeViewModel
     {
         public ImageSourceNodeViewModel()
         {
+            AddInputConnector(new ConnectorViewModel
+            {
+                Title = "触发",
+                ExpectedType = System.TypeCode.Object
+            });
             AddOutputConnector(new ConnectorViewModel
             {
                 Title = "输出图像",
