@@ -26,10 +26,10 @@ namespace Shell.ViewModels
         /// <summary>变量管理器，供节点绑定变量时使用。</summary>
         public VariableManager VariableManager { get; } = new VariableManager();
 
-        // Expose a collection so NodifyEditor.ItemsSource can enumerate nodes
+        // 节点集合
         public ObservableCollection<NodeViewModel> Nodes { get; } = new ObservableCollection<NodeViewModel>();
 
-        // 连接集合（用于在视图层绑定到 NodifyEditor.Connections）
+        // 连接集合
         public ObservableCollection<ConnectionViewModel> Connections { get; } = new ObservableCollection<ConnectionViewModel>();
 
         // 预备连接的视图模型，用于处理拖动创建连接的开始/结束命令
