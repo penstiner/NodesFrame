@@ -2,6 +2,7 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:models="clr-namespace:Shell.Models"
                     xmlns:vision="clr-namespace:Shell.Models.Nodes.Vision"
+                    xmlns:motion="clr-namespace:Shell.Models.Nodes.Motion"
                     xmlns:views="clr-namespace:Shell.Views"
                     xmlns:nodify="clr-namespace:Nodify;assembly=Nodify"
                     xmlns:shared="clr-namespace:Nodify;assembly=Nodify.Shared">
@@ -420,6 +421,52 @@
                 </nodify:Node>
             </DataTemplate>
         </views:NodeTemplateSelector.ImageDisplayTemplate>
+
+        <!-- ── 多轴定位节点 ── -->
+        <views:NodeTemplateSelector.MultiAxisMoveTemplate>
+            <DataTemplate DataType="{x:Type motion:MultiAxisMoveNodeViewModel}">
+                <nodify:Node Header="{Binding}" HeaderTemplate="{StaticResource NodeHeaderTemplate}"
+                             Input="{Binding Input}" Output="{Binding Output}"
+                             BorderBrush="#FFEF5350" BorderThickness="1.5"
+                             HeaderBrush="{StaticResource OrangeHeaderBrush}"
+                             ContentBrush="#FFFFF3E0" Background="#FFFFF3E0"
+                             Padding="0"
+                             Effect="{DynamicResource NodeDropShadow}"
+                             HeaderContainerStyle="{DynamicResource NodeHeaderStyle}"
+                             Foreground="White">
+                    <nodify:Node.InputConnectorTemplate>
+                        <DataTemplate DataType="{x:Type models:ConnectorViewModel}">
+                            <nodify:NodeInput Header="{Binding Title}"
+                                             IsConnected="{Binding IsConnected}"
+                                             Anchor="{Binding Anchor, Mode=OneWayToSource}"
+                                             ConnectorTemplate="{DynamicResource CircleConnectorTemplate}"
+                                             BorderBrush="{DynamicResource ConnectorStroke}"
+                                             Background="{DynamicResource ConnectorFill}" />
+                        </DataTemplate>
+                    </nodify:Node.InputConnectorTemplate>
+                    <nodify:Node.OutputConnectorTemplate>
+                        <DataTemplate DataType="{x:Type models:ConnectorViewModel}">
+                            <nodify:NodeOutput Header="{Binding Title}"
+                                              IsConnected="{Binding IsConnected}"
+                                              Anchor="{Binding Anchor, Mode=OneWayToSource}"
+                                              ConnectorTemplate="{DynamicResource CircleConnectorTemplate}"
+                                              BorderBrush="{DynamicResource ConnectorStroke}"
+                                              Background="{DynamicResource ConnectorFill}" />
+                        </DataTemplate>
+                    </nodify:Node.OutputConnectorTemplate>
+                    <StackPanel Orientation="Vertical" Margin="10,6" MinWidth="130">
+                        <TextBlock Text="多轴定位" FontWeight="SemiBold"
+                                   Foreground="#E65100" FontSize="11" />
+                        <TextBlock FontSize="9" Foreground="#BF360C">
+                            <Run Text="{Binding AxisConfigs.Count, Mode=OneWay}" FontWeight="Bold"/>
+                            <Run Text=" 轴配置" FontWeight="Normal"/>
+                        </TextBlock>
+                        <TextBlock Text="{Binding ExecutionTimeDisplay, Mode=OneWay}"
+                                   FontSize="9" Foreground="#999999" Margin="0,3,0,0"/>
+                    </StackPanel>
+                </nodify:Node>
+            </DataTemplate>
+        </views:NodeTemplateSelector.MultiAxisMoveTemplate>
 
         <!-- ── 默认模板（扩展节点） ── -->
         <views:NodeTemplateSelector.DefaultTemplate>

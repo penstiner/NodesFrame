@@ -2,6 +2,7 @@ using System.Windows;
 using System.Windows.Controls;
 using Shell.Models;
 using Shell.Models.Nodes.Vision;
+using Shell.Models.Nodes.Motion;
 
 namespace Shell.Views
 {
@@ -21,6 +22,7 @@ namespace Shell.Views
         public DataTemplate CannyEdgeEditTemplate { get; set; }
         public DataTemplate MorphologyEditTemplate { get; set; }
         public DataTemplate ImageDisplayEditTemplate { get; set; }
+        public DataTemplate MultiAxisMoveEditTemplate { get; set; }
         public DataTemplate GenericEditTemplate { get; set; }
         public DataTemplate DefaultEditTemplate { get; set; }
 
@@ -42,6 +44,7 @@ namespace Shell.Views
                 CannyEdgeNodeViewModel => CannyEdgeEditTemplate ?? DefaultEditTemplate,
                 MorphologyNodeViewModel => MorphologyEditTemplate ?? DefaultEditTemplate,
                 ImageDisplayNodeViewModel => ImageDisplayEditTemplate ?? DefaultEditTemplate,
+                MultiAxisMoveNodeViewModel => MultiAxisMoveEditTemplate ?? DefaultEditTemplate,
                 // ── 通用反射编辑器：所有带 [NodeProperty] 的节点自动使用 ──
                 VisionNodeBase => GenericEditTemplate ?? DefaultEditTemplate,
                 _ => GenericEditTemplate ?? DefaultEditTemplate

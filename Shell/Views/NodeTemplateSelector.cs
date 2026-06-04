@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using Shell.Models;
 using Shell.Models.Nodes.Vision;
+using Shell.Models.Nodes.Motion;
 using Shell.Services;
 
 namespace Shell.Views
@@ -24,6 +25,7 @@ namespace Shell.Views
         public DataTemplate ConditionTemplate { get; set; }
         public DataTemplate LoopTemplate { get; set; }
         public DataTemplate ImageDisplayTemplate { get; set; }
+        public DataTemplate MultiAxisMoveTemplate { get; set; }
         public DataTemplate DefaultTemplate { get; set; }
 
         /// <summary>
@@ -54,6 +56,7 @@ namespace Shell.Views
                 ConditionNodeViewModel => ConditionTemplate ?? DefaultTemplate,
                 LoopNodeViewModel => LoopTemplate ?? DefaultTemplate,
                 ImageDisplayNodeViewModel => ImageDisplayTemplate ?? DefaultTemplate,
+                MultiAxisMoveNodeViewModel => MultiAxisMoveTemplate ?? DefaultTemplate,
                 _ => DefaultTemplate
             };
         }

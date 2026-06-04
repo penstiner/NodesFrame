@@ -46,8 +46,8 @@ namespace Shell.ViewModels
 
             if (registryNodes.Count > 0)
             {
-                // 排除算术和运动控制分类
-                var excludedCategories = new HashSet<string> { "算术", "运动控制" };
+                // 排除算术分类
+                var excludedCategories = new HashSet<string> { "算术" };
                 foreach (var catName in registryCategories.Where(c => !excludedCategories.Contains(c)))
                 {
                     var items = registryNodes

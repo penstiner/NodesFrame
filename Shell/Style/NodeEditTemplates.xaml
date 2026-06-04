@@ -2,6 +2,7 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:models="clr-namespace:Shell.Models"
                     xmlns:vision="clr-namespace:Shell.Models.Nodes.Vision"
+                    xmlns:motion="clr-namespace:Shell.Models.Nodes.Motion"
                     xmlns:views="clr-namespace:Shell.Views"
                     xmlns:hc="https://handyorg.github.io/handycontrol"
                     xmlns:ctrl="clr-namespace:Core.UI.Controls;assembly=Core.UI">
@@ -714,6 +715,140 @@
                 </StackPanel>
             </DataTemplate>
         </views:NodeEditTemplateSelector.ImageDisplayEditTemplate>
+
+        <!-- ═══ 多轴定位节点（DataGrid 编辑） ═══ -->
+        <views:NodeEditTemplateSelector.MultiAxisMoveEditTemplate>
+            <DataTemplate DataType="{x:Type motion:MultiAxisMoveNodeViewModel}">
+                <StackPanel Margin="16,12">
+                    <TextBlock FontWeight="Bold" FontSize="15"
+                               Foreground="#FFA726" Margin="4,0,0,10">
+                        <Run Text="⚙ "/><Run Text="{Binding Title, Mode=OneWay}"/>
+                    </TextBlock>
+
+                    <!-- 节点名称 -->
+                    <Border Background="#FF1E1E2E" CornerRadius="6" Padding="12,10" Margin="0,0,0,10">
+                        <StackPanel>
+                            <TextBlock Text="节点名称" FontSize="11" Foreground="#888" Margin="0,0,0,6"/>
+                            <TextBox Text="{Binding Title, UpdateSourceTrigger=PropertyChanged}"
+                                     FontSize="14" Foreground="#FFCC80"
+                                     Background="#FF2A2A3C" BorderBrush="#FF3F3F58"
+                                     Padding="10,6" Style="{StaticResource DialogTextBox}"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- 定位方式下拉 -->
+                    <Border Background="#FF1E1E2E" CornerRadius="6" Padding="12,10" Margin="0,0,0,10">
+                        <StackPanel>
+                            <TextBlock Text="定位方式" FontSize="11" Foreground="#888" Margin="0,0,0,6"/>
+                            <ComboBox Width="160" SelectedIndex="{Binding MoveType, UpdateSourceTrigger=PropertyChanged}">
+                                <ComboBoxItem>绝对定位</ComboBoxItem>
+                                <ComboBoxItem>相对定位</ComboBoxItem>
+                            </ComboBox>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- 轴配置 DataGrid -->
+                    <Border Background="#FF1E1E2E" CornerRadius="6" Padding="8" Margin="0,0,0,8">
+                        <StackPanel>
+                            <Grid Margin="0,0,0,6">
+                                <TextBlock Text="轴运动配置" FontSize="12" FontWeight="SemiBold"
+                                           Foreground="#C0C0D0" VerticalAlignment="Center"/>
+                                <Button Content="+ 添加行" HorizontalAlignment="Right"
+                                        Width="70" Height="24" FontSize="11"
+                                        Background="#FF2E7D32" Foreground="White"
+                                        BorderThickness="0" Cursor="Hand"
+                                        Command="{Binding AddAxisCommand}"/>
+                            </Grid>
+                            <DataGrid ItemsSource="{Binding AxisConfigs}"
+                                      AutoGenerateColumns="False"
+                                      CanUserAddRows="False"
+                                      CanUserDeleteRows="False"
+                                      HeadersVisibility="Column"
+                                      Background="#FF2A2A3C"
+                                      Foreground="#E0E0E0"
+                                      BorderBrush="#FF3F3F58"
+                                      RowBackground="#FF2A2A3C"
+                                      AlternatingRowBackground="#FF2F2F42"
+                                      GridLinesVisibility="Horizontal"
+                                      HorizontalGridLinesBrush="#FF3F3F58"
+                                      SelectionUnit="Cell"
+                                      MinHeight="80" MaxHeight="260"
+                                      VerticalScrollBarVisibility="Auto">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="轴 ID" Width="60"
+                                                        Binding="{Binding AxisId, UpdateSourceTrigger=PropertyChanged}">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Foreground" Value="#90CAF9"/>
+                                                <Setter Property="VerticalAlignment" Value="Center"/>
+                                                <Setter Property="HorizontalAlignment" Value="Center"/>
+                                            </Style>
+                                        </DataGridTextColumn.ElementStyle>
+                                        <DataGridTextColumn.EditingElementStyle>
+                                            <Style TargetType="TextBox">
+                                                <Setter Property="Foreground" Value="White"/>
+                                                <Setter Property="Background" Value="#FF1E1E2E"/>
+                                                <Setter Property="BorderBrush" Value="#FF42A5F5"/>
+                                                <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                                            </Style>
+                                        </DataGridTextColumn.EditingElementStyle>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Header="速度 (mm/s)" Width="90"
+                                                        Binding="{Binding Speed, UpdateSourceTrigger=PropertyChanged}">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Foreground" Value="#A5D6A7"/>
+                                                <Setter Property="VerticalAlignment" Value="Center"/>
+                                                <Setter Property="HorizontalAlignment" Value="Center"/>
+                                            </Style>
+                                        </DataGridTextColumn.ElementStyle>
+                                        <DataGridTextColumn.EditingElementStyle>
+                                            <Style TargetType="TextBox">
+                                                <Setter Property="Foreground" Value="White"/>
+                                                <Setter Property="Background" Value="#FF1E1E2E"/>
+                                                <Setter Property="BorderBrush" Value="#FF42A5F5"/>
+                                                <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                                            </Style>
+                                        </DataGridTextColumn.EditingElementStyle>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Header="位置 (mm)" Width="90"
+                                                        Binding="{Binding Position, UpdateSourceTrigger=PropertyChanged}">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Foreground" Value="#FFCC80"/>
+                                                <Setter Property="VerticalAlignment" Value="Center"/>
+                                                <Setter Property="HorizontalAlignment" Value="Center"/>
+                                            </Style>
+                                        </DataGridTextColumn.ElementStyle>
+                                        <DataGridTextColumn.EditingElementStyle>
+                                            <Style TargetType="TextBox">
+                                                <Setter Property="Foreground" Value="White"/>
+                                                <Setter Property="Background" Value="#FF1E1E2E"/>
+                                                <Setter Property="BorderBrush" Value="#FF42A5F5"/>
+                                                <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                                            </Style>
+                                        </DataGridTextColumn.EditingElementStyle>
+                                    </DataGridTextColumn>
+                                    <DataGridTemplateColumn Header="" Width="50">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Button Content="✕" Width="24" Height="20"
+                                                        Background="Transparent"
+                                                        Foreground="#EF5350"
+                                                        BorderThickness="0" Cursor="Hand"
+                                                        FontSize="12"
+                                                        Command="{Binding DataContext.RemoveAxisCommand, RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}}"
+                                                        CommandParameter="{Binding}"/>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </DataTemplate>
+        </views:NodeEditTemplateSelector.MultiAxisMoveEditTemplate>
 
         <!-- ═══ 通用编辑模板（分组折叠 + 滚动，反射 [NodeProperty] 自动生成） ═══ -->
         <views:NodeEditTemplateSelector.GenericEditTemplate>
