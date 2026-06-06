@@ -31,7 +31,7 @@
     </Window.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="200"/>
+            <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="280"/>
         </Grid.ColumnDefinitions>
@@ -67,106 +67,174 @@
             </Grid>
         </Border>
 
-        <!-- 左侧工具箱 -->
-        <Grid Grid.Row="1" Grid.Column="0">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="auto"/>
-                <RowDefinition Height="auto"/>
-                <RowDefinition/>
-            </Grid.RowDefinitions>
-            <!-- 标题栏 -->
-            <Border Grid.Row="0" Background="{DynamicResource ContrastBackgroundBrush}" Padding="8,10">
-                <TextBlock Foreground="{DynamicResource ToolboxItemForeground}" FontSize="14" FontWeight="SemiBold">
-                    <Run Text="&#xf0b0;" FontFamily="{StaticResource FontAwesome}" FontSize="13"/>
-                    <Run Text=" 工具箱"/>
-                </TextBlock>
-            </Border>
-            <!-- ═══ 搜索框 ═══ -->
-            <Border Grid.Row="1" x:Name="SearchBorder"
-                    CornerRadius="8" Background="{DynamicResource ContrastBackgroundBrush}"
-                    BorderBrush="{DynamicResource ToolboxCardBorderBrush}" BorderThickness="1"
-                    Margin="8,8,8,4">
-                <Border.Style>
-                    <Style TargetType="Border">
-                        <Style.Triggers>
-                            <Trigger Property="IsKeyboardFocusWithin" Value="True">
-                                <Setter Property="BorderBrush" Value="{DynamicResource ToolboxSearchFocusBrush}"/>
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </Border.Style>
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <!-- 搜索图标 -->
-                    <TextBlock Grid.Column="0" Text="&#xf002;" FontFamily="{StaticResource FontAwesome}"
-                               FontSize="12" Foreground="#60FFFFFF" VerticalAlignment="Center" Margin="10,0,0,0"/>
-                    <!-- 搜索输入框 -->
-                    <hc:TextBox Grid.Column="0" Grid.ColumnSpan="3"
-                             hc:InfoElement.Placeholder="搜索节点..."
-                             Text="{Binding ToolBox.SearchText, UpdateSourceTrigger=PropertyChanged}"
-                             Background="Transparent" BorderThickness="0" Padding="28,6,28,6"
-                             Foreground="{DynamicResource ToolboxItemForeground}"
-                             CaretBrush="{DynamicResource ToolboxItemForeground}"
-                             VerticalContentAlignment="Center" FontSize="12"/>
-                    <!-- 清除按钮 -->
-                    <Button Grid.Column="2" Content="&#xf00d;" FontFamily="{StaticResource FontAwesome}"
-                            FontSize="10" Foreground="#60FFFFFF" Background="Transparent" BorderThickness="0"
-                            Command="{Binding ToolBox.ClearSearchCommand}" Cursor="Hand"
-                            Margin="0,0,8,0" Padding="4" VerticalAlignment="Center">
-                        <Button.Style>
-                            <Style TargetType="Button">
-                                <Setter Property="Visibility" Value="Collapsed"/>
+        <!-- 左侧工具箱（可折叠） -->
+        <Border Grid.Row="1" Grid.Column="0" Background="{DynamicResource BackgroundBrush}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="18"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- 工具箱主体 -->
+                <Grid Grid.Column="0" x:Name="ToolboxContent" Width="200" ClipToBounds="True">
+                    <Grid.Style>
+                        <Style TargetType="Grid">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsChecked, ElementName=ToolBoxToggle}" Value="False">
+                                    <DataTrigger.EnterActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetProperty="Width"
+                                                                 To="0" Duration="0:0:0.2"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </DataTrigger.EnterActions>
+                                    <DataTrigger.ExitActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetProperty="Width"
+                                                                 To="200" Duration="0:0:0.2"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </DataTrigger.ExitActions>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Grid.Style>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <!-- 标题栏 + 折叠按钮 -->
+                    <Border Grid.Row="0" Background="{DynamicResource ContrastBackgroundBrush}" Padding="8,10">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Foreground="{DynamicResource ToolboxItemForeground}" FontSize="14" FontWeight="SemiBold">
+                                <Run Text="&#xf0b0;" FontFamily="{StaticResource FontAwesome}" FontSize="13"/>
+                                <Run Text=" 工具箱"/>
+                            </TextBlock>
+                            <ToggleButton Grid.Column="1" x:Name="ToolBoxToggle"
+                                          FontFamily="{StaticResource FontAwesome}"
+                                          Content="&#xf053;" FontSize="10" Foreground="#666"
+                                          Background="Transparent" BorderThickness="0" Cursor="Hand"
+                                          ToolTip="折叠工具箱"
+                                          VerticalAlignment="Center" Padding="5,3" IsChecked="True">
+                                <ToggleButton.Style>
+                                    <Style TargetType="ToggleButton">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="ToggleButton">
+                                                    <Border x:Name="Bd"
+                                                            Background="{TemplateBinding Background}"
+                                                            CornerRadius="4"
+                                                            Padding="{TemplateBinding Padding}">
+                                                        <ContentPresenter HorizontalAlignment="Center"
+                                                                          VerticalAlignment="Center"/>
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter TargetName="Bd" Property="Background" Value="#2AFFFFFF"/>
+                                                            <Setter Property="Foreground" Value="#BBB"/>
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </ToggleButton.Style>
+                            </ToggleButton>
+                        </Grid>
+                    </Border>
+                    <!-- ═══ 搜索框 ═══ -->
+                    <Border Grid.Row="1" x:Name="SearchBorder"
+                            CornerRadius="8" Background="{DynamicResource ContrastBackgroundBrush}"
+                            BorderBrush="{DynamicResource ToolboxCardBorderBrush}" BorderThickness="1"
+                            Margin="8,8,8,4">
+                        <Border.Style>
+                            <Style TargetType="Border">
                                 <Style.Triggers>
-                                    <DataTrigger Binding="{Binding ToolBox.SearchText, Converter={StaticResource StringToVisibilityConverter}}" Value="Visible">
-                                        <Setter Property="Visibility" Value="Visible"/>
-                                    </DataTrigger>
+                                    <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                                        <Setter Property="BorderBrush" Value="{DynamicResource ToolboxSearchFocusBrush}"/>
+                                    </Trigger>
                                 </Style.Triggers>
                             </Style>
-                        </Button.Style>
-                    </Button>
-                </Grid>
-            </Border>
-            <!-- ═══ TreeView + 右侧分隔线 ═══ -->
-            <Grid Grid.Row="2">
-                <TreeView x:Name="ToolBoxTree" Background="{DynamicResource BackgroundBrush}"
-                         BorderThickness="0" Padding="0,8" Margin="0,0,1,0"
-                         ScrollViewer.VerticalScrollBarVisibility="Auto"
-                         ItemsSource="{Binding ToolBox.Categories}">
-                    <TreeView.Resources>
-                        <!-- 叶节点样式：移除展开按钮和缩进 -->
-                        <Style x:Key="LeafItemStyle" TargetType="TreeViewItem">
-                            <Setter Property="Padding" Value="0"/>
-                            <Setter Property="Margin" Value="0"/>
-                            <EventSetter Event="PreviewMouseLeftButtonDown" Handler="ToolBoxTree_PreviewMouseLeftButtonDown"/>
-                            <EventSetter Event="PreviewMouseLeftButtonUp" Handler="ToolBoxTree_PreviewMouseLeftButtonUp"/>
-                            <EventSetter Event="PreviewMouseMove" Handler="ToolBoxTree_PreviewMouseMove"/>
-                            <Setter Property="Template">
-                                <Setter.Value>
-                                    <ControlTemplate TargetType="TreeViewItem">
-                                        <Border Background="Transparent" Padding="{TemplateBinding Padding}">
-                                            <ContentPresenter ContentSource="Header"/>
-                                        </Border>
-                                    </ControlTemplate>
-                                </Setter.Value>
-                            </Setter>
-                        </Style>
-                        <!-- ═══ 分类标题模板 ═══ -->
-                        <HierarchicalDataTemplate DataType="{x:Type models:ToolBoxCategory}" ItemsSource="{Binding Items}"
-                                                 ItemContainerStyle="{StaticResource LeafItemStyle}">
-                            <Border Background="#10FFFFFF" CornerRadius="4" Padding="4,6" Margin="0,2">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                    </Grid.ColumnDefinitions>
-                                    <!-- 分类名 -->
-                                    <TextBlock Grid.Column="0" Text="{Binding Name}" FontSize="12" FontWeight="SemiBold"
-                                               Foreground="{DynamicResource ToolboxHeaderForeground}" VerticalAlignment="Center"/>
+                        </Border.Style>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <!-- 搜索图标 -->
+                            <TextBlock Grid.Column="0" Text="&#xf002;" FontFamily="{StaticResource FontAwesome}"
+                                       FontSize="12" Foreground="#60FFFFFF" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                            <!-- 搜索输入框 -->
+                            <hc:TextBox Grid.Column="0" Grid.ColumnSpan="3"
+                                     hc:InfoElement.Placeholder="搜索节点..."
+                                     Text="{Binding ToolBox.SearchText, UpdateSourceTrigger=PropertyChanged}"
+                                     Background="Transparent" BorderThickness="0" Padding="28,6,28,6"
+                                     Foreground="{DynamicResource ToolboxItemForeground}"
+                                     CaretBrush="{DynamicResource ToolboxItemForeground}"
+                                     VerticalContentAlignment="Center" FontSize="12"/>
+                            <!-- 清除按钮 -->
+                            <Button Grid.Column="2" Content="&#xf00d;" FontFamily="{StaticResource FontAwesome}"
+                                    FontSize="10" Foreground="#60FFFFFF" Background="Transparent" BorderThickness="0"
+                                    Command="{Binding ToolBox.ClearSearchCommand}" Cursor="Hand"
+                                    Margin="0,0,8,0" Padding="4" VerticalAlignment="Center">
+                                <Button.Style>
+                                    <Style TargetType="Button">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding ToolBox.SearchText, Converter={StaticResource StringToVisibilityConverter}}" Value="Visible">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+                        </Grid>
+                    </Border>
+                    <!-- ═══ TreeView + 右侧分隔线 ═══ -->
+                    <Grid Grid.Row="2">
+                        <TreeView x:Name="ToolBoxTree" Background="{DynamicResource BackgroundBrush}"
+                                 BorderThickness="0" Padding="0,8" Margin="0,0,1,0"
+                                 ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                 ItemsSource="{Binding ToolBox.Categories}">
+                            <TreeView.Resources>
+                                <!-- 叶节点样式：移除展开按钮和缩进 -->
+                                <Style x:Key="LeafItemStyle" TargetType="TreeViewItem">
+                                    <Setter Property="Padding" Value="0"/>
+                                    <Setter Property="Margin" Value="0"/>
+                                    <EventSetter Event="PreviewMouseLeftButtonDown" Handler="ToolBoxTree_PreviewMouseLeftButtonDown"/>
+                                    <EventSetter Event="PreviewMouseLeftButtonUp" Handler="ToolBoxTree_PreviewMouseLeftButtonUp"/>
+                                    <EventSetter Event="PreviewMouseMove" Handler="ToolBoxTree_PreviewMouseMove"/>
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="TreeViewItem">
+                                                <Border Background="Transparent" Padding="{TemplateBinding Padding}">
+                                                    <ContentPresenter ContentSource="Header"/>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                                <!-- ═══ 分类标题模板 ═══ -->
+                                <HierarchicalDataTemplate DataType="{x:Type models:ToolBoxCategory}" ItemsSource="{Binding Items}"
+                                                         ItemContainerStyle="{StaticResource LeafItemStyle}">
+                                    <Border Background="#10FFFFFF" CornerRadius="4" Padding="4,6" Margin="0,2">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <!-- 分类名 -->
+                                            <TextBlock Grid.Column="0" Text="{Binding Name}" FontSize="12" FontWeight="SemiBold"
+                                                       Foreground="{DynamicResource ToolboxHeaderForeground}" VerticalAlignment="Center"/>
                                     <!-- 计数徽章 -->
                                     <Border Grid.Column="1" CornerRadius="8" Background="{DynamicResource ToolboxBadgeBrush}"
                                             Padding="6,2" Margin="8,0,4,0" VerticalAlignment="Center" HorizontalAlignment="Right">
@@ -297,8 +365,63 @@
                         HorizontalAlignment="Right" Margin="0,0,0,0"/>
             </Grid>
         </Grid>
+        <!-- 折叠边栏（始终可见） -->
+        <Border Grid.Column="1" Width="28" Background="{DynamicResource ContrastBackgroundBrush}"
+                BorderBrush="{DynamicResource ToolboxSeparatorBrush}" BorderThickness="0,0,1,0">
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="{DynamicResource ToolboxItemHoverBrush}"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+            <ToggleButton FontFamily="{StaticResource FontAwesome}"
+                         Content="&#xf054;" FontSize="10" Foreground="#666"
+                         Background="Transparent" BorderThickness="0" Cursor="Hand"
+                         IsChecked="{Binding IsChecked, ElementName=ToolBoxToggle, Mode=TwoWay}"
+                         VerticalAlignment="Center" HorizontalAlignment="Center">
+                <ToggleButton.Style>
+                    <Style TargetType="ToggleButton">
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="ToggleButton">
+                                    <Border x:Name="Bd"
+                                            Background="{TemplateBinding Background}"
+                                            CornerRadius="3"
+                                            Width="22" Height="22"
+                                            Padding="0">
+                                        <ContentPresenter HorizontalAlignment="Center"
+                                                          VerticalAlignment="Center"/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="Bd" Property="Background" Value="#2AFFFFFF"/>
+                                            <Setter Property="Foreground" Value="#BBB"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsChecked, RelativeSource={RelativeSource Self}}" Value="True">
+                                <Setter Property="Content" Value="&#xf053;"/>
+                                <Setter Property="ToolTip" Value="折叠工具箱"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsChecked, RelativeSource={RelativeSource Self}}" Value="False">
+                                <Setter Property="Content" Value="&#xf054;"/>
+                                <Setter Property="ToolTip" Value="展开工具箱"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ToggleButton.Style>
+            </ToggleButton>
+        </Border>
+        </Grid>
+    </Border>
 
-        <Grid Grid.Row="1" Grid.Column="1" x:Name="EditorGrid">
+    <Grid Grid.Row="1" Grid.Column="1" x:Name="EditorGrid">
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto" />
                 <RowDefinition Height="*" />
@@ -333,6 +456,10 @@
                 <!-- 危险操作 -->
                 <Button ToolTip="清空" Command="{Binding ClearCommand}"
                         Style="{StaticResource IconBtnDangerStyle}">&#xf1f8;</Button>
+                <Rectangle Width="1" Height="18" Fill="#40FFFFFF" Margin="6,0" VerticalAlignment="Center"/>
+                <!-- 硬件 -->
+                <Button ToolTip="硬件配置（轴参数 / IO 信号）" Command="{Binding HardwareConfigCommand}"
+                        Style="{StaticResource IconBtnWarnStyle}">&#xf085;</Button>
                 <Rectangle Width="1" Height="18" Fill="#40FFFFFF" Margin="6,0" VerticalAlignment="Center"/>
                 <!-- 布局 -->
                 <Button ToolTip="自动布局" Command="{Binding AutoLayoutCommand}"
@@ -372,14 +499,15 @@
                         <Setter Property="BorderBrush" Value="Transparent" />
                         <EventSetter Event="MouseDoubleClick" Handler="ItemContainer_MouseDoubleClick" />
                         <Style.Triggers>
-                            <!-- 执行中：呼吸灯辉光（边框颜色脉动，执行完自动停止） -->
+                            <!-- 执行中：蓝色发散辉光（DropShadow 向外扩散） -->
                             <DataTrigger Binding="{Binding State}" Value="Running">
                                 <DataTrigger.EnterActions>
                                     <BeginStoryboard Name="BreathAnim">
                                         <Storyboard RepeatBehavior="Forever" AutoReverse="True">
-                                            <ColorAnimation Storyboard.TargetProperty="BorderBrush.Color"
-                                                            From="#3342A5F5" To="#FF42A5F5"
-                                                            Duration="0:0:0.6"/>
+                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.Effect).(DropShadowEffect.BlurRadius)"
+                                                             From="50" To="1050" Duration="0:0:0.6"/>
+                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.Effect).(DropShadowEffect.Opacity)"
+                                                             From="0.1" To="1.0" Duration="0:0:0.6"/>
                                         </Storyboard>
                                     </BeginStoryboard>
                                 </DataTrigger.EnterActions>
@@ -387,7 +515,37 @@
                                     <StopStoryboard BeginStoryboardName="BreathAnim"/>
                                 </DataTrigger.ExitActions>
                                 <Setter Property="BorderBrush" Value="#FF42A5F5"/>
-                                <Setter Property="BorderThickness" Value="3"/>
+                                <Setter Property="BorderThickness" Value="4"/>
+                                <Setter Property="Effect">
+                                    <Setter.Value>
+                                        <DropShadowEffect Color="#42A5F5" BlurRadius="50"
+                                                          ShadowDepth="0" Opacity="0.4"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </DataTrigger>
+                            <!-- 错误：红色发散辉光 -->
+                            <DataTrigger Binding="{Binding State}" Value="Error">
+                                <DataTrigger.EnterActions>
+                                    <BeginStoryboard Name="ErrorBreathAnim">
+                                        <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.Effect).(DropShadowEffect.BlurRadius)"
+                                                             From="50" To="1200" Duration="0:0:0.8"/>
+                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.Effect).(DropShadowEffect.Opacity)"
+                                                             From="0.1" To="1.0" Duration="0:0:0.8"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </DataTrigger.EnterActions>
+                                <DataTrigger.ExitActions>
+                                    <StopStoryboard BeginStoryboardName="ErrorBreathAnim"/>
+                                </DataTrigger.ExitActions>
+                                <Setter Property="BorderBrush" Value="#FFEF5350"/>
+                                <Setter Property="BorderThickness" Value="4"/>
+                                <Setter Property="Effect">
+                                    <Setter.Value>
+                                        <DropShadowEffect Color="#EF5350" BlurRadius="50"
+                                                          ShadowDepth="0" Opacity="0.4"/>
+                                    </Setter.Value>
+                                </Setter>
                             </DataTrigger>
                             <!-- 选中状态（最后，优先级最高） -->
                             <Trigger Property="IsSelected" Value="True">

@@ -25,7 +25,7 @@ namespace Shell.Views
         public DataTemplate ConditionTemplate { get; set; }
         public DataTemplate LoopTemplate { get; set; }
         public DataTemplate ImageDisplayTemplate { get; set; }
-        public DataTemplate MultiAxisMoveTemplate { get; set; }
+        public DataTemplate MotionControlTemplate { get; set; }
         public DataTemplate DefaultTemplate { get; set; }
 
         /// <summary>
@@ -56,7 +56,9 @@ namespace Shell.Views
                 ConditionNodeViewModel => ConditionTemplate ?? DefaultTemplate,
                 LoopNodeViewModel => LoopTemplate ?? DefaultTemplate,
                 ImageDisplayNodeViewModel => ImageDisplayTemplate ?? DefaultTemplate,
-                MultiAxisMoveNodeViewModel => MultiAxisMoveTemplate ?? DefaultTemplate,
+                MultiAxisMoveNodeViewModel => MotionControlTemplate ?? DefaultTemplate,
+                MotorMoveNodeViewModel => MotionControlTemplate ?? DefaultTemplate,
+                ControlCardInitViewModel => MotionControlTemplate ?? DefaultTemplate,
                 _ => DefaultTemplate
             };
         }

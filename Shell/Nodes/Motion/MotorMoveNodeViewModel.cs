@@ -1,80 +1,167 @@
+using System;
+using System.Diagnostics;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Hardware.Card.Interface;
 using Shell.Models.Attributes;
+using Shell.Services;
 
 namespace Shell.Models.Nodes.Motion
 {
     /// <summary>
-    /// 电机运动节点：控制电机按指定参数运动（示例节点，演示运动控制领域扩展）。
+    /// 单轴定位节点：驱动单个轴到目标位置，阻塞等待到位/报警/超时后输出完成信号。
+    /// 轴号、目标位置、运行速度为内部参数，双击节点弹窗设定。
     /// </summary>
     [Node(
         Category = "运动控制",
-        DisplayName = "电机运动",
-        DefaultTitle = "电机运动",
-        Description = "控制电机按指定位置、速度、加速度运动",
+        DisplayName = "单轴定位",
+        DefaultTitle = "单轴定位",
+        Description = "驱动单个轴按绝对/相对方式运动到目标位置，到位后输出完成信号",
         NodeTypeId = "Motion.MotorMove")]
-    [NodeConnector(Title = "目标位置", Direction = ConnectorDirection.Input,
-        ExpectedType = "Double", Description = "目标位置 (mm)")]
-    [NodeConnector(Title = "当前速度", Direction = ConnectorDirection.Input,
-        ExpectedType = "Double", Description = "运动速度 (mm/s)")]
-    [NodeConnector(Title = "完成信号", Direction = ConnectorDirection.Output,
-        ExpectedType = "Boolean", Description = "运动完成则为 true")]
+    [NodeConnector(Title = "启动", Direction = ConnectorDirection.Input,
+        ExpectedType = "Boolean", Description = "true 时启动运动并阻塞等待到位")]
+    [NodeConnector(Title = "完成", Direction = ConnectorDirection.Output,
+        ExpectedType = "Boolean", Description = "轴到位后为 true，超时/报警为 false")]
     public class MotorMoveNodeViewModel : NodeViewModel
     {
         public MotorMoveNodeViewModel()
         {
-            AddInputConnector(new ConnectorViewModel
-            {
-                Title = "目标位置",
-                ExpectedType = System.TypeCode.Double
-            });
-            AddInputConnector(new ConnectorViewModel
-            {
-                Title = "当前速度",
-                ExpectedType = System.TypeCode.Double
-            });
-            AddOutputConnector(new ConnectorViewModel
-            {
-                Title = "完成信号",
-                ExpectedType = System.TypeCode.Boolean
-            });
+            AddInputConnector(new ConnectorViewModel { Title = "启动", ExpectedType = TypeCode.Boolean });
+            AddOutputConnector(new ConnectorViewModel { Title = "完成", ExpectedType = TypeCode.Boolean });
         }
 
-        private double _targetPosition;
-        [NodeProperty(Key = "targetPosition")]
-        public double TargetPosition
+        // ── 轴参数 ──
+        private int _axisId;
+        [NodeProperty(Key = "axisId", DisplayName = "轴号", Group = "轴参数", BindableToVariable = false)]
+        public int AxisId
         {
-            get => _targetPosition;
-            set => SetProperty(ref _targetPosition, value);
+            get => _axisId;
+            set => SetProperty(ref _axisId, value);
         }
 
-        private double _speed = 100.0;
-        [NodeProperty(Key = "speed")]
+        private int _moveType;
+        [NodeProperty(Key = "moveType", DisplayName = "定位方式", Group = "轴参数",
+            Options = "绝对定位,相对定位", BindableToVariable = false)]
+        public int MoveType
+        {
+            get => _moveType;
+            set => SetProperty(ref _moveType, value);
+        }
+
+        private double _speed = 50;
+        [NodeProperty(Key = "speed", DisplayName = "默认速度 (mm/s)", Group = "运动参数")]
         public double Speed
         {
             get => _speed;
             set => SetProperty(ref _speed, value);
         }
 
-        private double _acceleration = 500.0;
-        [NodeProperty(Key = "acceleration")]
-        public double Acceleration
+        private double _position;
+        [NodeProperty(Key = "position", DisplayName = "默认位置 (mm)", Group = "运动参数")]
+        public double Position
         {
-            get => _acceleration;
-            set => SetProperty(ref _acceleration, value);
+            get => _position;
+            set => SetProperty(ref _position, value);
+        }
+
+        private double _timeout = 30000;
+        [NodeProperty(Key = "timeout", DisplayName = "超时时间 (ms)", Group = "运动参数", Min = 100, Max = 300000)]
+        public double Timeout
+        {
+            get => _timeout;
+            set => SetProperty(ref _timeout, value);
         }
 
         public override void Execute()
         {
-            var posInput = Input.ElementAtOrDefault(0)?.Value ?? VariantValue.Null;
-            var speedInput = Input.ElementAtOrDefault(1)?.Value ?? VariantValue.Null;
+            var card = CardManager.Card;
+            if (card == null || !card.Initialized) return;
 
-            var pos = posInput.TryGetDouble(out var p) ? p : TargetPosition;
-            var speed = speedInput.TryGetDouble(out var s) ? s : Speed;
+            // 检查启动信号
+            var startInput = Input.ElementAtOrDefault(0)?.Value ?? VariantValue.Null;
+            if (!(startInput.TryGetBoolean(out var b) && b)) return;
 
-            // 实际应用中：发送运动指令到电机控制器
-            // 此处演示：模拟运动完成
-            if (Output.Count > 0)
-                Output[0].Value = VariantValue.FromBoolean(true);
+            if (!DoMove(card))
+            {
+                State = ExecutionState.Error;
+                return;
+            }
+
+            // 阻塞等待：到位 / 报警 / 超时
+            var sw = Stopwatch.StartNew();
+            while (!card.GetAxisStatus(AxisId))
+            {
+                if (card.GetAlarmValue(AxisId))
+                {
+                    card.Stop(AxisId);
+                    State = ExecutionState.Error;
+                    return;
+                }
+                if (sw.Elapsed.TotalMilliseconds > Timeout)
+                {
+                    card.Stop(AxisId);
+                    State = ExecutionState.Error;
+                    return;
+                }
+                Thread.Sleep(20);
+            }
+
+            SetOutput(true);
+        }
+
+        public override async Task ExecuteAsync(CancellationToken ct = default)
+        {
+            var card = CardManager.Card;
+            if (card == null || !card.Initialized) return;
+
+            // 检查启动信号
+            var startInput = Input.ElementAtOrDefault(0)?.Value ?? VariantValue.Null;
+            if (!(startInput.TryGetBoolean(out var b) && b)) return;
+
+            // 开始执行：先输出 false，等待到位后输出 true
+            SetOutput(false);
+
+            if (!DoMove(card))
+            {
+                State = ExecutionState.Error;
+                return;
+            }
+
+            // 异步等待：到位 / 报警 / 超时 / 外部取消
+            var sw = Stopwatch.StartNew();
+            while (!card.GetAxisStatus(AxisId))
+            {
+                ct.ThrowIfCancellationRequested();
+
+                if (card.GetAlarmValue(AxisId))
+                {
+                    card.Stop(AxisId);
+                    State = ExecutionState.Error;
+                    return;
+                }
+                if (sw.Elapsed.TotalMilliseconds > Timeout)
+                {
+                    card.Stop(AxisId);
+                    State = ExecutionState.Error;
+                    return;
+                }
+                await Task.Delay(20, ct);
+            }
+
+            SetOutput(true);
+        }
+
+        private bool DoMove(IControlCard card)
+        {
+            return MoveType == 1
+                ? card.RelMove(AxisId, Speed, Position)
+                : card.AbsMove(AxisId, Speed, Position);
+        }
+
+        private void SetOutput(bool done)
+        {
+            if (Output.Count > 0) Output[0].Value = VariantValue.FromBoolean(done);
         }
     }
 }

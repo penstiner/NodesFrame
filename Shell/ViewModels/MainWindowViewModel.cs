@@ -75,6 +75,9 @@ namespace Shell.ViewModels
         public ICommand AddVariableCommand { get; }
         public ICommand RemoveVariableCommand { get; }
 
+        // 硬件配置命令
+        public ICommand HardwareConfigCommand { get; }
+
         private Variable _selectedVariable;
         /// <summary>当前在变量管理器中选中的变量。</summary>
         public Variable SelectedVariable
@@ -167,6 +170,7 @@ namespace Shell.ViewModels
 
             AddVariableCommand = new DelegateCommand(AddVariable);
             RemoveVariableCommand = new DelegateCommand(RemoveVariable, () => SelectedVariable != null);
+            HardwareConfigCommand = new DelegateCommand(OpenHardwareConfig);
 
             // 当历史状态变化时刷新撤销/重做按钮可用性
             GraphHistory.PropertyChanged += (s, e) =>
@@ -596,6 +600,18 @@ namespace Shell.ViewModels
             }
             ExecutionError = null;
             Debug.WriteLine("[Clear] 编辑器已清空");
+        }
+
+        /// <summary>
+        /// 打开硬件配置窗口（轴参数 / IO 信号）。
+        /// </summary>
+        private void OpenHardwareConfig()
+        {
+            var win = new HardwareConfigWindow
+            {
+                Owner = Application.Current.MainWindow
+            };
+            win.ShowDialog();
         }
 
         /// <summary>
