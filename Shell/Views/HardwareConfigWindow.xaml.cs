@@ -30,6 +30,7 @@ namespace Shell.Views
         private void ConfirmButton_Click(object sender, RoutedEventArgs e)
         {
             _vm.SaveToCard();
+            _vm.SaveToFile();
             DialogResult = true;
             Close();
         }

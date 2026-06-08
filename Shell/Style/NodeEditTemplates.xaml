@@ -229,13 +229,13 @@
                     <Border Background="{DynamicResource EditorCardBrush}" CornerRadius="6" Padding="12,10" Margin="0,0,0,10">
                         <StackPanel>
                             <TextBlock Text="值类型" FontSize="11" Foreground="#888" Margin="0,0,0,6"/>
-                            <ComboBox Width="220" SelectedValuePath="Tag"
+                            <hc:ComboBox Width="220" SelectedValuePath="Tag"
                                       SelectedValue="{Binding ConstantTypeTag, UpdateSourceTrigger=PropertyChanged}">
                                 <ComboBoxItem Tag="Double" Content="🔢 数值 (double)"/>
                                 <ComboBoxItem Tag="Int32" Content="🔹 整数 (int)"/>
                                 <ComboBoxItem Tag="Boolean" Content="✅ 布尔 (bool)"/>
                                 <ComboBoxItem Tag="String" Content="📝 字符串 (string)"/>
-                            </ComboBox>
+                            </hc:ComboBox>
                         </StackPanel>
                     </Border>
                     <Border Background="#FF1E1E2E" CornerRadius="6" Padding="12,10">
@@ -262,13 +262,13 @@
                     <Border Background="#FF1E1E2E" CornerRadius="6" Padding="12,10" Margin="0,0,0,15">
                         <StackPanel>
                             <TextBlock Text="运算方式" FontSize="11" Foreground="#888" Margin="0,0,0,6"/>
-                            <ComboBox Width="220" SelectedValuePath="Tag"
+                            <hc:ComboBox Width="220" SelectedValuePath="Tag"
                                       SelectedValue="{Binding Op, UpdateSourceTrigger=PropertyChanged}">
                                 <ComboBoxItem Tag="Add" Content="➕ 加法 (A + B)"/>
                                 <ComboBoxItem Tag="Subtract" Content="➖ 减法 (A − B)"/>
                                 <ComboBoxItem Tag="Multiply" Content="✖ 乘法 (A × B)"/>
                                 <ComboBoxItem Tag="Divide" Content="➗ 除法 (A ÷ B)"/>
-                            </ComboBox>
+                            </hc:ComboBox>
                         </StackPanel>
                     </Border>
                     <Border Background="#FF1A2744" CornerRadius="8" Padding="16,12"
@@ -357,7 +357,7 @@
                     <Border Background="{DynamicResource EditorCardBrush}" CornerRadius="6" Padding="12,10" Margin="0,0,0,10">
                         <StackPanel>
                             <TextBlock Text="比较方式" FontSize="11" Foreground="#888" Margin="0,0,0,6"/>
-                            <ComboBox Width="220"
+                            <hc:ComboBox Width="220"
                                       ItemsSource="{x:Static models:ConditionNodeViewModel.AvailableCompareOps}"
                                       DisplayMemberPath="Symbol"
                                       SelectedValuePath="Value"
@@ -503,12 +503,12 @@
                     <Border Background="#FF1E1E2E" CornerRadius="6" Padding="12,10">
                         <StackPanel>
                             <TextBlock Text="转换类型" FontSize="11" Foreground="#888" Margin="0,0,0,6"/>
-                            <ComboBox Width="220" SelectedValuePath="Tag"
+                            <hc:ComboBox Width="220" SelectedValuePath="Tag"
                                       SelectedValue="{Binding SelectedIndex, UpdateSourceTrigger=PropertyChanged}">
                                 <ComboBoxItem Tag="0">🌑 灰度 (BGR→GRAY)</ComboBoxItem>
                                 <ComboBoxItem Tag="1">🎨 HSV (BGR→HSV)</ComboBoxItem>
                                 <ComboBoxItem Tag="2">🔬 Lab (BGR→Lab)</ComboBoxItem>
-                            </ComboBox>
+                            </hc:ComboBox>
                         </StackPanel>
                     </Border>
                 </StackPanel>
@@ -524,12 +524,12 @@
                     <Border Background="{DynamicResource EditorCardBrush}" CornerRadius="6" Padding="12,10" Margin="0,0,0,10">
                         <StackPanel>
                             <TextBlock Text="阈值类型" FontSize="11" Foreground="#888" Margin="0,0,0,6"/>
-                            <ComboBox Width="220" SelectedValuePath="Tag"
+                            <hc:ComboBox Width="220" SelectedValuePath="Tag"
                                       SelectedValue="{Binding SelectedTypeIndex, UpdateSourceTrigger=PropertyChanged}">
                                 <ComboBoxItem Tag="0">⬛ Binary</ComboBoxItem>
                                 <ComboBoxItem Tag="1">⬜ BinaryInv</ComboBoxItem>
                                 <ComboBoxItem Tag="2">📊 Otsu</ComboBoxItem>
-                            </ComboBox>
+                            </hc:ComboBox>
                         </StackPanel>
                     </Border>
                     <Border Background="{DynamicResource EditorCardBrush}" CornerRadius="6" Padding="12,10" Margin="0,0,0,10">
@@ -650,13 +650,13 @@
                     <Border Background="{DynamicResource EditorCardBrush}" CornerRadius="6" Padding="12,10" Margin="0,0,0,10">
                         <StackPanel>
                             <TextBlock Text="操作类型" FontSize="11" Foreground="#888" Margin="0,0,0,6"/>
-                            <ComboBox Width="220" SelectedValuePath="Tag"
+                            <hc:ComboBox Width="220" SelectedValuePath="Tag"
                                       SelectedValue="{Binding SelectedOpIndex, UpdateSourceTrigger=PropertyChanged}">
                                 <ComboBoxItem Tag="0">🔲 膨胀 (Dilate)</ComboBoxItem>
                                 <ComboBoxItem Tag="1">🔳 腐蚀 (Erode)</ComboBoxItem>
                                 <ComboBoxItem Tag="2">⭕ 开运算 (Open)</ComboBoxItem>
                                 <ComboBoxItem Tag="3">⭕ 闭运算 (Close)</ComboBoxItem>
-                            </ComboBox>
+                            </hc:ComboBox>
                         </StackPanel>
                     </Border>
                     <Border Background="{DynamicResource EditorCardBrush}" CornerRadius="6" Padding="12,10" Margin="0,0,0,10">
@@ -740,10 +740,10 @@
                     <Border Background="#FF1E1E2E" CornerRadius="6" Padding="12,10" Margin="0,0,0,10">
                         <StackPanel>
                             <TextBlock Text="定位方式" FontSize="11" Foreground="#888" Margin="0,0,0,6"/>
-                            <ComboBox Width="160" SelectedIndex="{Binding MoveType, UpdateSourceTrigger=PropertyChanged}">
+                            <hc:ComboBox Width="160" SelectedIndex="{Binding MoveType, UpdateSourceTrigger=PropertyChanged}">
                                 <ComboBoxItem>绝对定位</ComboBoxItem>
                                 <ComboBoxItem>相对定位</ComboBoxItem>
-                            </ComboBox>
+                            </hc:ComboBox>
                         </StackPanel>
                     </Border>
 
@@ -850,6 +850,249 @@
             </DataTemplate>
         </views:NodeEditTemplateSelector.MultiAxisMoveEditTemplate>
 
+        <!-- ═══ 等待信号节点 ═══ -->
+        <views:NodeEditTemplateSelector.AwaitInputEditTemplate>
+            <DataTemplate DataType="{x:Type motion:AwaitInPutNodeViewModel}">
+                <StackPanel Margin="16,12">
+                    <TextBlock FontWeight="Bold" FontSize="15"
+                               Foreground="#66BB6A" Margin="4,0,0,10">
+                        <Run Text="⚙ "/><Run Text="{Binding Title, Mode=OneWay}"/>
+                    </TextBlock>
+
+                    <!-- 节点名称 -->
+                    <Border Background="{DynamicResource EditorCardBrush}" CornerRadius="6" Padding="12,10" Margin="0,0,0,10">
+                        <StackPanel>
+                            <TextBlock Text="节点名称" FontSize="11" Foreground="#888" Margin="0,0,0,6"/>
+                            <TextBox Text="{Binding Title, UpdateSourceTrigger=PropertyChanged}"
+                                     FontSize="14" Foreground="#90CAF9"
+                                     Background="#FF2A2A3C" BorderBrush="#FF3F3F58"
+                                     Padding="10,6" Style="{StaticResource DialogTextBox}"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- 信号配置列表 -->
+                    <Border Background="{DynamicResource EditorCardBrush}" CornerRadius="6" Padding="12,10">
+                        <StackPanel>
+                            <DockPanel Margin="0,0,0,10">
+                                <Button DockPanel.Dock="Right"
+                                        Content="＋ 添加信号"
+                                        Command="{Binding AddSignalCommand}"
+                                        Width="90" Height="28"
+                                        Background="#FF1565C0" Foreground="White"
+                                        BorderThickness="0" Cursor="Hand"
+                                        FontSize="11" Margin="0,0,0,0">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}"
+                                                    CornerRadius="4" Padding="8,4">
+                                                <ContentPresenter HorizontalAlignment="Center"
+                                                                  VerticalAlignment="Center"/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Background" Value="#FF1E88E5"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+                                <TextBlock Text="📡 信号配置" FontSize="12"
+                                           FontWeight="SemiBold" Foreground="#90A4AE"
+                                           VerticalAlignment="Center"/>
+                            </DockPanel>
+
+                            <ItemsControl ItemsSource="{Binding SignalConfigs}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate DataType="{x:Type motion:SignalConfig}">
+                                        <Border Background="#FF252535" CornerRadius="6"
+                                                Padding="8,6" Margin="0,0,0,6">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="100"/>
+                                                    <ColumnDefinition Width="32"/>
+                                                </Grid.ColumnDefinitions>
+
+                                                <!-- 信号选择 -->
+                                                <hc:ComboBox Grid.Column="0"
+                                                             ItemsSource="{Binding FilteredSignals}"
+                                                             DisplayMemberPath="Name"
+                                                             SelectedItem="{Binding SelectedSignal, UpdateSourceTrigger=PropertyChanged}"
+                                                             Margin="0,0,6,0"
+                                                             HorizontalContentAlignment="Center"
+                                                             IsSynchronizedWithCurrentItem="False"/>
+
+                                                <!-- 判断条件 -->
+                                                <hc:ComboBox Grid.Column="1"
+                                                             SelectedIndex="{Binding Condition, UpdateSourceTrigger=PropertyChanged}"
+                                                             Margin="3,0"
+                                                             HorizontalContentAlignment="Center">
+                                                    <ComboBoxItem Content="低电平" HorizontalContentAlignment="Center"/>
+                                                    <ComboBoxItem Content="高电平" HorizontalContentAlignment="Center"/>
+                                                </hc:ComboBox>
+
+                                                <!-- 删除按钮 -->
+                                                <Button Grid.Column="2"
+                                                        Content="✕"
+                                                        Width="22" Height="22"
+                                                        Padding="0"
+                                                        Background="Transparent"
+                                                        Foreground="#EF5350"
+                                                        BorderThickness="0" Cursor="Hand"
+                                                        FontSize="11"
+                                                        ToolTip="移除该信号"
+                                                        Command="{Binding DataContext.RemoveSignalCommand, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"
+                                                        CommandParameter="{Binding}">
+                                                    <Button.Template>
+                                                        <ControlTemplate TargetType="Button">
+                                                            <Border Background="{TemplateBinding Background}"
+                                                                    CornerRadius="3">
+                                                                <ContentPresenter HorizontalAlignment="Center"
+                                                                                  VerticalAlignment="Center"/>
+                                                            </Border>
+                                                            <ControlTemplate.Triggers>
+                                                                <Trigger Property="IsMouseOver" Value="True">
+                                                                    <Setter Property="Background" Value="#33EF5350"/>
+                                                                </Trigger>
+                                                            </ControlTemplate.Triggers>
+                                                        </ControlTemplate>
+                                                    </Button.Template>
+                                                </Button>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </DataTemplate>
+        </views:NodeEditTemplateSelector.AwaitInputEditTemplate>
+
+        <!-- ═══ 输出信号节点 ═══ -->
+        <views:NodeEditTemplateSelector.OutputSignalEditTemplate>
+            <DataTemplate DataType="{x:Type motion:OutputSignalNodeViewModel}">
+                <StackPanel Margin="16,12">
+                    <TextBlock FontWeight="Bold" FontSize="15"
+                               Foreground="#FFB74D" Margin="4,0,0,10">
+                        <Run Text="⚙ "/><Run Text="{Binding Title, Mode=OneWay}"/>
+                    </TextBlock>
+
+                    <!-- 节点名称 -->
+                    <Border Background="{DynamicResource EditorCardBrush}" CornerRadius="6" Padding="12,10" Margin="0,0,0,10">
+                        <StackPanel>
+                            <TextBlock Text="节点名称" FontSize="11" Foreground="#888" Margin="0,0,0,6"/>
+                            <TextBox Text="{Binding Title, UpdateSourceTrigger=PropertyChanged}"
+                                     FontSize="14" Foreground="#90CAF9"
+                                     Background="#FF2A2A3C" BorderBrush="#FF3F3F58"
+                                     Padding="10,6" Style="{StaticResource DialogTextBox}"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- 输出信号配置列表 -->
+                    <Border Background="{DynamicResource EditorCardBrush}" CornerRadius="6" Padding="12,10">
+                        <StackPanel>
+                            <DockPanel Margin="0,0,0,10">
+                                <Button DockPanel.Dock="Right"
+                                        Content="＋ 添加信号"
+                                        Command="{Binding AddSignalCommand}"
+                                        Width="90" Height="28"
+                                        Background="#FF1565C0" Foreground="White"
+                                        BorderThickness="0" Cursor="Hand"
+                                        FontSize="11" Margin="0,0,0,0">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}"
+                                                    CornerRadius="4" Padding="8,4">
+                                                <ContentPresenter HorizontalAlignment="Center"
+                                                                  VerticalAlignment="Center"/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Background" Value="#FF1E88E5"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+                                <TextBlock Text="🔌 输出信号配置" FontSize="12"
+                                           FontWeight="SemiBold" Foreground="#90A4AE"
+                                           VerticalAlignment="Center"/>
+                            </DockPanel>
+
+                            <ItemsControl ItemsSource="{Binding SignalConfigs}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate DataType="{x:Type motion:OutputSignalConfig}">
+                                        <Border Background="#FF252535" CornerRadius="6"
+                                                Padding="8,6" Margin="0,0,0,6">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="88"/>
+                                                    <ColumnDefinition Width="32"/>
+                                                </Grid.ColumnDefinitions>
+
+                                                <!-- 信号选择 -->
+                                                <hc:ComboBox Grid.Column="0"
+                                                             ItemsSource="{Binding FilteredSignals}"
+                                                             DisplayMemberPath="Name"
+                                                             SelectedItem="{Binding SelectedSignal, UpdateSourceTrigger=PropertyChanged}"
+                                                             Margin="0,0,6,0"
+                                                             HorizontalContentAlignment="Center"
+                                                             IsSynchronizedWithCurrentItem="False"/>
+
+                                                <!-- 目标状态 -->
+                                                <hc:ComboBox Grid.Column="1"
+                                                             SelectedIndex="{Binding TargetState, UpdateSourceTrigger=PropertyChanged}"
+                                                             Margin="3,0"
+                                                             HorizontalContentAlignment="Center">
+                                                    <ComboBoxItem Content="OFF" HorizontalContentAlignment="Center"/>
+                                                    <ComboBoxItem Content="ON" HorizontalContentAlignment="Center"/>
+                                                </hc:ComboBox>
+
+                                                <!-- 删除按钮 -->
+                                                <Button Grid.Column="2"
+                                                        Content="✕"
+                                                        Width="22" Height="22"
+                                                        Padding="0"
+                                                        Background="Transparent"
+                                                        Foreground="#EF5350"
+                                                        BorderThickness="0" Cursor="Hand"
+                                                        FontSize="11"
+                                                        ToolTip="移除该信号"
+                                                        Command="{Binding DataContext.RemoveSignalCommand, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"
+                                                        CommandParameter="{Binding}">
+                                                    <Button.Template>
+                                                        <ControlTemplate TargetType="Button">
+                                                            <Border Background="{TemplateBinding Background}"
+                                                                    CornerRadius="3">
+                                                                <ContentPresenter HorizontalAlignment="Center"
+                                                                                  VerticalAlignment="Center"/>
+                                                            </Border>
+                                                            <ControlTemplate.Triggers>
+                                                                <Trigger Property="IsMouseOver" Value="True">
+                                                                    <Setter Property="Background" Value="#33EF5350"/>
+                                                                </Trigger>
+                                                            </ControlTemplate.Triggers>
+                                                        </ControlTemplate>
+                                                    </Button.Template>
+                                                </Button>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <!-- 操作说明 -->
+                            <TextBlock Text="触发后一次性写入全部信号，结果输出是否全部成功。"
+                                       FontSize="10" Foreground="#607D8B"
+                                       HorizontalAlignment="Center" Margin="0,10,0,0"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </DataTemplate>
+        </views:NodeEditTemplateSelector.OutputSignalEditTemplate>
+
         <!-- ═══ 通用编辑模板（分组折叠 + 滚动，反射 [NodeProperty] 自动生成） ═══ -->
         <views:NodeEditTemplateSelector.GenericEditTemplate>
             <DataTemplate DataType="{x:Type models:NodeViewModel}">
@@ -934,7 +1177,7 @@
                                                         <Run Text="{Binding ConnectorTitle, Mode=OneWay}" FontWeight="SemiBold"/>
                                                     </TextBlock>
                                                 </DockPanel>
-                                                <ComboBox ItemsSource="{Binding AvailableVariables}"
+                                                <hc:ComboBox ItemsSource="{Binding AvailableVariables}"
                                                           SelectedItem="{Binding BoundVariableName, UpdateSourceTrigger=PropertyChanged}"
                                                           Visibility="{Binding IsBound, Converter={StaticResource BooleanToVisibilityConverter}}"
                                                           Width="220"

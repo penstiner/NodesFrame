@@ -23,6 +23,8 @@ namespace Shell.Views
         public DataTemplate MorphologyEditTemplate { get; set; }
         public DataTemplate ImageDisplayEditTemplate { get; set; }
         public DataTemplate MultiAxisMoveEditTemplate { get; set; }
+        public DataTemplate AwaitInputEditTemplate { get; set; }
+        public DataTemplate OutputSignalEditTemplate { get; set; }
         public DataTemplate GenericEditTemplate { get; set; }
         public DataTemplate DefaultEditTemplate { get; set; }
 
@@ -45,6 +47,8 @@ namespace Shell.Views
                 MorphologyNodeViewModel => MorphologyEditTemplate ?? DefaultEditTemplate,
                 ImageDisplayNodeViewModel => ImageDisplayEditTemplate ?? DefaultEditTemplate,
                 MultiAxisMoveNodeViewModel => MultiAxisMoveEditTemplate ?? DefaultEditTemplate,
+                AwaitInPutNodeViewModel => AwaitInputEditTemplate ?? DefaultEditTemplate,
+                OutputSignalNodeViewModel => OutputSignalEditTemplate ?? DefaultEditTemplate,
                 // ── 通用反射编辑器：所有带 [NodeProperty] 的节点自动使用 ──
                 VisionNodeBase => GenericEditTemplate ?? DefaultEditTemplate,
                 _ => GenericEditTemplate ?? DefaultEditTemplate

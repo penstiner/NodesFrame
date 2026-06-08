@@ -58,7 +58,9 @@ namespace Shell.Views
                 ImageDisplayNodeViewModel => ImageDisplayTemplate ?? DefaultTemplate,
                 MultiAxisMoveNodeViewModel => MotionControlTemplate ?? DefaultTemplate,
                 MotorMoveNodeViewModel => MotionControlTemplate ?? DefaultTemplate,
-                ControlCardInitViewModel => MotionControlTemplate ?? DefaultTemplate,
+                ControlCardInitNodeViewModel => MotionControlTemplate ?? DefaultTemplate,
+                AwaitInPutNodeViewModel => MotionControlTemplate ?? DefaultTemplate,
+                OutputSignalNodeViewModel => MotionControlTemplate ?? DefaultTemplate,
                 _ => DefaultTemplate
             };
         }

@@ -1,17 +1,14 @@
 using System;
 using System.Diagnostics;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Hardware.Card.Interface;
 using Shell.Models.Attributes;
-using Shell.Services;
 
 namespace Shell.Models.Nodes.Motion
 {
     /// <summary>
     /// 单轴定位节点：驱动单个轴到目标位置，阻塞等待到位/报警/超时后输出完成信号。
-    /// 轴号、目标位置、运行速度为内部参数，双击节点弹窗设定。
     /// </summary>
     [Node(
         Category = "运动控制",
@@ -23,15 +20,8 @@ namespace Shell.Models.Nodes.Motion
         ExpectedType = "Boolean", Description = "true 时启动运动并阻塞等待到位")]
     [NodeConnector(Title = "完成", Direction = ConnectorDirection.Output,
         ExpectedType = "Boolean", Description = "轴到位后为 true，超时/报警为 false")]
-    public class MotorMoveNodeViewModel : NodeViewModel
+    public class MotorMoveNodeViewModel : MotionNodeBase
     {
-        public MotorMoveNodeViewModel()
-        {
-            AddInputConnector(new ConnectorViewModel { Title = "启动", ExpectedType = TypeCode.Boolean });
-            AddOutputConnector(new ConnectorViewModel { Title = "完成", ExpectedType = TypeCode.Boolean });
-        }
-
-        // ── 轴参数 ──
         private int _axisId;
         [NodeProperty(Key = "axisId", DisplayName = "轴号", Group = "轴参数", BindableToVariable = false)]
         public int AxisId
@@ -75,12 +65,9 @@ namespace Shell.Models.Nodes.Motion
 
         public override void Execute()
         {
-            var card = CardManager.Card;
+            var card = Card;
             if (card == null || !card.Initialized) return;
-
-            // 检查启动信号
-            var startInput = Input.ElementAtOrDefault(0)?.Value ?? VariantValue.Null;
-            if (!(startInput.TryGetBoolean(out var b) && b)) return;
+            if (!GetInputBool()) return;
 
             if (!DoMove(card))
             {
@@ -88,7 +75,6 @@ namespace Shell.Models.Nodes.Motion
                 return;
             }
 
-            // 阻塞等待：到位 / 报警 / 超时
             var sw = Stopwatch.StartNew();
             while (!card.GetAxisStatus(AxisId))
             {
@@ -107,20 +93,16 @@ namespace Shell.Models.Nodes.Motion
                 Thread.Sleep(20);
             }
 
-            SetOutput(true);
+            SetOutputBool(true);
         }
 
         public override async Task ExecuteAsync(CancellationToken ct = default)
         {
-            var card = CardManager.Card;
+            var card = Card;
             if (card == null || !card.Initialized) return;
+            if (!GetInputBool()) return;
 
-            // 检查启动信号
-            var startInput = Input.ElementAtOrDefault(0)?.Value ?? VariantValue.Null;
-            if (!(startInput.TryGetBoolean(out var b) && b)) return;
-
-            // 开始执行：先输出 false，等待到位后输出 true
-            SetOutput(false);
+            SetOutputBool(false);
 
             if (!DoMove(card))
             {
@@ -128,7 +110,6 @@ namespace Shell.Models.Nodes.Motion
                 return;
             }
 
-            // 异步等待：到位 / 报警 / 超时 / 外部取消
             var sw = Stopwatch.StartNew();
             while (!card.GetAxisStatus(AxisId))
             {
@@ -149,7 +130,7 @@ namespace Shell.Models.Nodes.Motion
                 await Task.Delay(20, ct);
             }
 
-            SetOutput(true);
+            SetOutputBool(true);
         }
 
         private bool DoMove(IControlCard card)
@@ -157,11 +138,6 @@ namespace Shell.Models.Nodes.Motion
             return MoveType == 1
                 ? card.RelMove(AxisId, Speed, Position)
                 : card.AbsMove(AxisId, Speed, Position);
-        }
-
-        private void SetOutput(bool done)
-        {
-            if (Output.Count > 0) Output[0].Value = VariantValue.FromBoolean(done);
         }
     }
 }

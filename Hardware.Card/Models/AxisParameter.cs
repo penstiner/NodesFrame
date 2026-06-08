@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace Hardware.Card.Models
@@ -12,6 +13,7 @@ namespace Hardware.Card.Models
         public string Name { get; set; }
         public ushort CardID { get; set; }
         public ushort AxisID { get; set; }
+        [JsonIgnore]
         public object Threadlock { get; set; } = new object();
         public double AccTime { get; set; } = 0.2;
         /// <summary>

@@ -195,7 +195,8 @@ namespace Shell.Services
                 else if (rawVal is JsonElement je)
                 {
                     var targetType = Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType;
-                    var converted = JsonSerializer.Deserialize(je.GetRawText(), targetType);
+                    var converted = JsonSerializer.Deserialize(je.GetRawText(), targetType,
+                        new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
                     prop.SetValue(node, converted);
                 }
             }

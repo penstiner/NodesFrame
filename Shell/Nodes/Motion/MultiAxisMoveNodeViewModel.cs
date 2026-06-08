@@ -44,7 +44,8 @@ namespace Shell.Models.Nodes.Motion
             { if (cfg != null) AxisConfigs.Remove(cfg); });
         }
 
-        public ObservableCollection<AxisConfig> AxisConfigs { get; } = new();
+        [NodeProperty(Key = "axisConfigs", DisplayName = "轴配置列表", Group = "轴参数")]
+        public ObservableCollection<AxisConfig> AxisConfigs { get; set; } = new();
 
         public ICommand AddAxisCommand { get; }
         public ICommand RemoveAxisCommand { get; }
