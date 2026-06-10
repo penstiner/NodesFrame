@@ -499,15 +499,15 @@
                         <Setter Property="BorderBrush" Value="Transparent" />
                         <EventSetter Event="MouseDoubleClick" Handler="ItemContainer_MouseDoubleClick" />
                         <Style.Triggers>
-                            <!-- 执行中：蓝色发散辉光（DropShadow 向外扩散） -->
+                            <!-- 执行中：蓝色呼吸辉光（边框脉冲，无 DropShadow 避免软件渲染） -->
                             <DataTrigger Binding="{Binding State}" Value="Running">
                                 <DataTrigger.EnterActions>
                                     <BeginStoryboard Name="BreathAnim">
                                         <Storyboard RepeatBehavior="Forever" AutoReverse="True">
-                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.Effect).(DropShadowEffect.BlurRadius)"
-                                                             From="50" To="1050" Duration="0:0:0.6"/>
-                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.Effect).(DropShadowEffect.Opacity)"
-                                                             From="0.1" To="1.0" Duration="0:0:0.6"/>
+                                            <ThicknessAnimation Storyboard.TargetProperty="BorderThickness"
+                                                             From="2" To="6" Duration="0:0:0.6"/>
+                                            <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                             From="0.85" To="1.0" Duration="0:0:0.6"/>
                                         </Storyboard>
                                     </BeginStoryboard>
                                 </DataTrigger.EnterActions>
@@ -516,22 +516,17 @@
                                 </DataTrigger.ExitActions>
                                 <Setter Property="BorderBrush" Value="#FF42A5F5"/>
                                 <Setter Property="BorderThickness" Value="4"/>
-                                <Setter Property="Effect">
-                                    <Setter.Value>
-                                        <DropShadowEffect Color="#42A5F5" BlurRadius="50"
-                                                          ShadowDepth="0" Opacity="0.4"/>
-                                    </Setter.Value>
-                                </Setter>
+                                <Setter Property="Opacity" Value="1.0"/>
                             </DataTrigger>
-                            <!-- 错误：红色发散辉光 -->
+                            <!-- 错误：红色呼吸辉光 -->
                             <DataTrigger Binding="{Binding State}" Value="Error">
                                 <DataTrigger.EnterActions>
                                     <BeginStoryboard Name="ErrorBreathAnim">
                                         <Storyboard RepeatBehavior="Forever" AutoReverse="True">
-                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.Effect).(DropShadowEffect.BlurRadius)"
-                                                             From="50" To="1200" Duration="0:0:0.8"/>
-                                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.Effect).(DropShadowEffect.Opacity)"
-                                                             From="0.1" To="1.0" Duration="0:0:0.8"/>
+                                            <ThicknessAnimation Storyboard.TargetProperty="BorderThickness"
+                                                             From="2" To="6" Duration="0:0:0.8"/>
+                                            <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                             From="0.85" To="1.0" Duration="0:0:0.8"/>
                                         </Storyboard>
                                     </BeginStoryboard>
                                 </DataTrigger.EnterActions>
@@ -540,12 +535,7 @@
                                 </DataTrigger.ExitActions>
                                 <Setter Property="BorderBrush" Value="#FFEF5350"/>
                                 <Setter Property="BorderThickness" Value="4"/>
-                                <Setter Property="Effect">
-                                    <Setter.Value>
-                                        <DropShadowEffect Color="#EF5350" BlurRadius="50"
-                                                          ShadowDepth="0" Opacity="0.4"/>
-                                    </Setter.Value>
-                                </Setter>
+                                <Setter Property="Opacity" Value="1.0"/>
                             </DataTrigger>
                             <!-- 选中状态（最后，优先级最高） -->
                             <Trigger Property="IsSelected" Value="True">

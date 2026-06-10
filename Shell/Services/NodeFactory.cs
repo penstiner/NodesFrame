@@ -105,15 +105,21 @@ namespace Shell.Services
 
                     var typeId = attr.NodeTypeId ?? type.Name;
                     var category = attr.Category ?? "杂项";
-                    _factoryRegistry[typeId] = () =>
+                    var factory = () =>
                     {
-                        var instance = (NodeViewModel)Activator.CreateInstance(type);
+                        var instance = (NodeViewModel)Activator.CreateInstance(type)!;
                         instance.Title = attr.DefaultTitle ?? type.Name;
                         instance.NodeCategoryColor = !string.IsNullOrEmpty(attr.HeaderColor)
                             ? attr.HeaderColor
                             : (NodeViewModel.CategoryColors.TryGetValue(category, out var color) ? color : "#78909C");
                         return instance;
                     };
+                    _factoryRegistry[typeId] = factory;
+
+                    // 注册旧版 ID 别名，保证改名后旧存档仍可加载
+                    if (attr.LegacyTypeIds is { Length: > 0 })
+                        foreach (var legacy in attr.LegacyTypeIds)
+                            _factoryRegistry.TryAdd(legacy, factory);
                 }
             }
             catch

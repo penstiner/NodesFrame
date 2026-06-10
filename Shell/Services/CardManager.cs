@@ -1,3 +1,4 @@
+using System;
 using Hardware.Card.Interface;
 
 namespace Shell.Services
@@ -9,19 +10,34 @@ namespace Shell.Services
     public static class CardManager
     {
         private static IControlCard? _card;
+        private static readonly object _lock = new();
 
         /// <summary>当前激活的控制卡实例。</summary>
-        public static IControlCard? Card => _card;
+        public static IControlCard? Card
+        {
+            get { lock (_lock) return _card; }
+        }
 
         /// <summary>控制卡是否已就绪。</summary>
-        public static bool IsReady => _card != null && _card.Initialized;
+        public static bool IsReady
+        {
+            get { lock (_lock) return _card != null && _card.Initialized; }
+        }
 
-        /// <summary>
-        /// 注册控制卡实例（通常在 App 启动 / 初始化时调用一次）。
-        /// </summary>
+        /// <summary>注册控制卡实例（通常在 App 启动 / 初始化时调用一次）。</summary>
         public static void Register(IControlCard card)
         {
-            _card = card;
+            lock (_lock) _card = card ?? throw new ArgumentNullException(nameof(card));
+        }
+
+        /// <summary>注销控制卡实例，释放引用。关闭节点应调用此方法。</summary>
+        public static void Unregister()
+        {
+            lock (_lock)
+            {
+                if (_card is IDisposable d) d.Dispose();
+                _card = null;
+            }
         }
     }
 }
