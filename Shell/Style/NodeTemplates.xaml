@@ -425,7 +425,7 @@
         <!-- ── 多轴定位节点 ── -->
         <!-- ═══ 运动控制类节点通用模板（多轴定位、单轴定位等） ═══ -->
         <views:NodeTemplateSelector.MotionControlTemplate>
-            <DataTemplate DataType="{x:Type motion:MultiAxisMoveNodeViewModel}">
+            <DataTemplate DataType="{x:Type models:NodeViewModel}">
                 <nodify:Node Header="{Binding}" HeaderTemplate="{StaticResource NodeHeaderTemplate}"
                              Input="{Binding Input}" Output="{Binding Output}"
                              BorderBrush="#FFFFA000" BorderThickness="1.5"

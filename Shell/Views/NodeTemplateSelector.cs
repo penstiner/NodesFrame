@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using Shell.Models;
+using Shell.Models.Nodes.Flow;
 using Shell.Models.Nodes.Vision;
 using Shell.Models.Nodes.Motion;
 using Shell.Services;
@@ -56,11 +57,14 @@ namespace Shell.Views
                 ConditionNodeViewModel => ConditionTemplate ?? DefaultTemplate,
                 LoopNodeViewModel => LoopTemplate ?? DefaultTemplate,
                 ImageDisplayNodeViewModel => ImageDisplayTemplate ?? DefaultTemplate,
-                MultiAxisMoveNodeViewModel => MotionControlTemplate ?? DefaultTemplate,
+
+                ResetAxisNodeViewModel => MotionControlTemplate ?? DefaultTemplate,
                 MotorMoveNodeViewModel => MotionControlTemplate ?? DefaultTemplate,
                 ControlCardInitNodeViewModel => MotionControlTemplate ?? DefaultTemplate,
-                AwaitInPutNodeViewModel => MotionControlTemplate ?? DefaultTemplate,
+                ControlCardCloseNodeViewModel => MotionControlTemplate ?? DefaultTemplate,
+                AwaitInputNodeViewModel => MotionControlTemplate ?? DefaultTemplate,
                 OutputSignalNodeViewModel => MotionControlTemplate ?? DefaultTemplate,
+                SyncNodeViewModel => DefaultTemplate,
                 _ => DefaultTemplate
             };
         }
