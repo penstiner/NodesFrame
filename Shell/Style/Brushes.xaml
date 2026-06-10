@@ -116,5 +116,13 @@
     <SolidColorBrush x:Key="DialogFooterBrush" Color="#FF222233"/>
     <SolidColorBrush x:Key="DialogBorderBrush" Color="#FF3F3F58"/>
     <SolidColorBrush x:Key="EditorCardBrush" Color="#FF1E1E2E"/>
+    <!-- 卡片行背景（ItemsControl 内各行） -->
+    <SolidColorBrush x:Key="CardRowBrush" Color="#FF252535"/>
+    <!-- 编辑控件通用暗底 -->
+    <SolidColorBrush x:Key="EditControlBgBrush" Color="#FF2A2A3C"/>
+    <SolidColorBrush x:Key="EditControlBorderBrush" Color="#FF3F3F58"/>
+    <!-- 辅助文字 -->
+    <SolidColorBrush x:Key="HintTextBrush" Color="#78909C"/>
+    <SolidColorBrush x:Key="SectionTextBrush" Color="#90A4AE"/>
 
 </ResourceDictionary>

@@ -442,8 +442,8 @@
                                 <DataGridTextColumn Header="RegID" Width="60"
                                                     Binding="{Binding RegID}" IsReadOnly="True"
                                                     ElementStyle="{StaticResource CellCenterStyle}"/>
-                                <!-- 名称 -->
-                                <DataGridTextColumn Header="名称" Width="180"
+                                <!-- 名称 (自动填充剩余宽度) -->
+                                <DataGridTextColumn Header="名称" Width="*"
                                                     Binding="{Binding Name, UpdateSourceTrigger=LostFocus}"
                                                     ElementStyle="{StaticResource CellCenterStyle}"
                                                     EditingElementStyle="{StaticResource DarkTextEditStyle}"/>

@@ -14,10 +14,10 @@
         <Style TargetType="Button">
             <Setter Property="FontSize" Value="22"/>
             <Setter Property="Margin" Value="4"/>
-            <Setter Property="Background" Value="#FCFCFC"/>
-            <Setter Property="BorderBrush" Value="#E5E5E5"/>
+            <Setter Property="Background" Value="#FF2A2A3C"/>
+            <Setter Property="BorderBrush" Value="#FF3F3F58"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Foreground" Value="#1A1A1A"/>
+            <Setter Property="Foreground" Value="#E0E0E0"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
@@ -30,11 +30,11 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#F6F6F6"/>
+                                <Setter Property="Background" Value="#FF3D3D5A"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter Property="Background" Value="#EBEBEB"/>
-                                <Setter Property="Foreground" Value="#5F5F5F"/>
+                                <Setter Property="Background" Value="#FF505070"/>
+                                <Setter Property="Foreground" Value="#FFFFFF"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -43,21 +43,18 @@
         </Style>
 
         <Style x:Key="AccentButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
-            <Setter Property="Background" Value="#005FB8"/>
+            <Setter Property="Background" Value="#FF1565C0"/>
             <Setter Property="Foreground" Value="White"/>
-            <Setter Property="BorderBrush" Value="#005FB8"/>
+            <Setter Property="BorderBrush" Value="#FF1565C0"/>
         </Style>
 
         <Style x:Key="WarningButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
-            <Setter Property="Foreground" Value="#D13438"/>
-            <Setter Property="Background" Value="#FFF4F4"/>
+            <Setter Property="Foreground" Value="#EF5350"/>
+            <Setter Property="Background" Value="#33EF5350"/>
         </Style>
     </UserControl.Resources>
 
-    <Border Background="#FAFAFA" BorderBrush="#E5E5E5" BorderThickness="1" CornerRadius="12" Padding="15" Margin="8">
-        <Border.Effect>
-            <DropShadowEffect Color="Black" Opacity="0.15" BlurRadius="16" ShadowDepth="4" Direction="270"/>
-        </Border.Effect>
+    <Border Background="#FF1E1E2E" BorderBrush="#FF3F3F58" BorderThickness="1" CornerRadius="12" Padding="15" Margin="8">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -67,23 +64,23 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <Border Grid.Row="0" Background="#F3F3F3" CornerRadius="6" Padding="8,6" Margin="0,0,0,6"
+            <Border Grid.Row="0" Background="#FF252535" CornerRadius="6" Padding="8,6" Margin="0,0,0,6"
                     MouseLeftButtonDown="DragBar_MouseLeftButtonDown"
                     MouseMove="DragBar_MouseMove"
                     MouseLeftButtonUp="DragBar_MouseLeftButtonUp">
-                <TextBlock Text="&#x6570;&#x5B57;&#x952E;&#x76D8;" Foreground="#666" FontSize="12" HorizontalAlignment="Center"/>
+                <TextBlock Text="&#x6570;&#x5B57;&#x952E;&#x76D8;" Foreground="#90A4AE" FontSize="12" HorizontalAlignment="Center"/>
             </Border>
 
-            <Border x:Name="displayBorder" Grid.Row="1" Background="White" BorderBrush="#E5E5E5" BorderThickness="1" CornerRadius="6" Padding="12" Margin="0,0,0,5">
+            <Border x:Name="displayBorder" Grid.Row="1" Background="#FF2A2A3C" BorderBrush="#FF3F3F58" BorderThickness="1" CornerRadius="6" Padding="12" Margin="0,0,0,5">
                 <TextBox x:Name="txtDisplay" Text="0" TextAlignment="Right" FontSize="36" FontWeight="SemiBold"
-                         Foreground="#333" BorderThickness="0" Background="Transparent"
+                         Foreground="#90CAF9" BorderThickness="0" Background="Transparent"
                          Padding="0" VerticalAlignment="Stretch" VerticalContentAlignment="Center"
                          PreviewTextInput="TxtDisplay_PreviewTextInput"/>
             </Border>
 
-            <TextBlock x:Name="txtLimits" Grid.Row="2" Text="&#x8303;&#x56F4;: 0 ~ 100" Foreground="#8C8C8C" FontSize="12" Margin="0,0,2,4" HorizontalAlignment="Right"/>
+            <TextBlock x:Name="txtLimits" Grid.Row="2" Text="&#x8303;&#x56F4;: 0 ~ 100" Foreground="#78909C" FontSize="12" Margin="0,0,2,4" HorizontalAlignment="Right"/>
 
-            <TextBlock x:Name="txtError" Grid.Row="3" Visibility="Collapsed" Text="&#x8F93;&#x5165;&#x503C;&#x8D85;&#x51FA;&#x8303;&#x56F4;" Foreground="#D13438" FontSize="12" Margin="0,0,2,10" HorizontalAlignment="Right"/>
+            <TextBlock x:Name="txtError" Grid.Row="3" Visibility="Collapsed" Text="&#x8F93;&#x5165;&#x503C;&#x8D85;&#x51FA;&#x8303;&#x56F4;" Foreground="#EF5350" FontSize="12" Margin="0,0,2,10" HorizontalAlignment="Right"/>
 
             <UniformGrid Grid.Row="4" Columns="4" Rows="4">
                 <Button Content="7" Click="BtnNum_Click"/>
@@ -99,7 +96,7 @@
                 <Button Content="1" Click="BtnNum_Click"/>
                 <Button Content="2" Click="BtnNum_Click"/>
                 <Button Content="3" Click="BtnNum_Click"/>
-                <Button Content="&#x53D6;&#x6D88;" Click="BtnCancel_Click" FontSize="18" Background="#F0F0F0"/>
+                <Button Content="&#x53D6;&#x6D88;" Click="BtnCancel_Click" FontSize="18" Background="#FF37474F" Foreground="#B0BEC5"/>
 
                 <Button Content="+/-" Click="BtnSign_Click" FontSize="18"/>
                 <Button Content="0" Click="BtnNum_Click"/>
