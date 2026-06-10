@@ -1,19 +1,21 @@
 # Shell 流程编辑器 — 开发者指南
 
-> 版本: 2.0 | 目标框架: .NET 8.0 + WPF | 更新: 2026-05-29
+> 版本: 3.0 | 目标框架: .NET 8.0 + WPF | 更新: 2026-06-11
 
 ## 目录
 
 1. [架构概览](#1-架构概览)
-2. [快速上手：5 分钟创建一个新节点](#2-快速上手5-分钟创建一个新节点)
-3. [属性系统详解](#3-属性系统详解)
-4. [通用属性编辑器](#4-通用属性编辑器)
-5. [视觉算法节点开发](#5-视觉算法节点开发)
-6. [序列化与持久化](#6-序列化与持久化)
-7. [工具箱注册与分类](#7-工具箱注册与分类)
-8. [主题与样式](#8-主题与样式)
-9. [执行引擎](#9-执行引擎)
-10. [常见问题](#10-常见问题)
+2. [快速上手：视觉节点](#2-快速上手视觉节点)
+3. [快速上手：运动控制节点](#3-快速上手运动控制节点)
+4. [属性系统详解](#4-属性系统详解)
+5. [FilteredConfigBase 泛型基类](#5-filteredconfigbase-泛型基类)
+6. [通用属性编辑器](#6-通用属性编辑器)
+7. [视觉算法节点开发](#7-视觉算法节点开发)
+8. [序列化与持久化](#8-序列化与持久化)
+9. [工具箱注册与分类](#9-工具箱注册与分类)
+10. [主题与样式](#10-主题与样式)
+11. [执行引擎](#11-执行引擎)
+12. [常见问题](#12-常见问题)
 
 ---
 
@@ -55,15 +57,16 @@ Shell/
 
 | 原则 | 说明 |
 |------|------|
-| **模板方法模式** | 视觉节点只需重写 `ProcessImage(byte[] → byte[])` |
+| **模板方法模式** | 视觉节点重写 `ProcessImage`，运动节点继承 `MotionNodeBase` |
 | **属性驱动** | `[Node]` / `[NodeProperty]` 标记 + 反射自动生成 UI |
-| **纯静态算法** | `VisionAlgorithmService` 零 UI 依赖，可独立测试 |
-| **拓扑执行** | Kahn 算法按依赖顺序执行，自动检测环 |
-| **零模板新增** | 新增节点只需写 C# 代码，无需 XAML |
+| **泛型配置基类** | `FilteredConfigBase<TItem, TSelf>` 封装下拉选择、过滤、缓存、安全快照 |
+| **集合管理模式** | `ConfigCollectionHelper` 统一管理多行配置的增删刷新逻辑 |
+| **流式执行** | FlowExecutor 5 步流水线 + ILoopNode 统一循环管理 |
+| **硬件抽象** | `IControlCard` 接口 + `CardManager` 版本号同步，解耦硬件与 UI |
 
 ---
 
-## 2. 快速上手：5 分钟创建一个新节点
+## 2. 快速上手：视觉节点
 
 ### 示例：创建一个「图像锐化」节点
 
@@ -137,7 +140,92 @@ namespace Shell.Models.Nodes.Vision
 
 ---
 
-## 3. 属性系统详解
+## 3. 快速上手：运动控制节点
+
+### 示例：创建一个「停止轴」节点
+
+运动控制节点遵循统一的模式：**配置模型** + **节点 ViewModel** + **编辑模板**。
+
+#### 步骤 1：创建配置模型（继承 FilteredConfigBase）
+
+```csharp
+// 新建文件: Models/Nodes/Motion/StopConfig.cs
+
+using Hardware.Card.Models;
+using Shell.Services;
+
+namespace Shell.Models.Nodes.Motion
+{
+    public sealed class StopConfig : FilteredConfigBase<AxisParameter, StopConfig>
+    {
+        [JsonPropertyName("AxisId")]
+        public int AxisId { get => Id; set => Id = value; }
+
+        // 只需实现 3 个抽象方法，基类自动提供下拉绑定/过滤/缓存/安全快照
+        protected override IList<AxisParameter>? GetAllItems() => CardManager.Card?.AxisList;
+        protected override int GetItemId(AxisParameter item) => item.RegID;
+        protected override string? GetItemName(AxisParameter item) => item.Name;
+    }
+}
+```
+
+#### 步骤 2：创建节点 ViewModel
+
+```csharp
+// 新建文件: Nodes/Motion/StopNodeViewModel.cs
+
+[Node(Category = "运动控制", DisplayName = "停止轴",
+      DefaultTitle = "停止轴", NodeTypeId = "Motion.Stop")]
+public class StopNodeViewModel : MotionNodeBase
+{
+    public StopNodeViewModel()
+    {
+        ConfigCollectionHelper.Initialize<AxisParameter, StopConfig>(
+            AxisConfigs,
+            () => ConfigCollectionHelper.CreateConfig<AxisParameter, StopConfig>(...),
+            out var add, out var remove);
+        AddAxisCommand = add; RemoveAxisCommand = remove;
+    }
+
+    [NodeProperty(Key = "axisConfigs", DisplayName = "停止轴列表")]
+    public ObservableCollection<StopConfig> AxisConfigs { get; set; } = new();
+
+    public override void Execute()
+    {
+        foreach (var cfg in AxisConfigs) Card?.Stop(cfg.AxisId);
+        SetOutputBool(true);
+    }
+}
+```
+
+#### 步骤 3：注册编辑模板并创建 XAML
+
+在 `NodeEditTemplateSelector.cs` 添加 `StopEditTemplate` 属性，在 `NodeEditTemplates.xaml` 中添加 ItemsControl + ComboBox 模板（参考现有 `VMoveEditTemplate`）。
+
+**完成！** 新节点自动支持：
+- ✅ 下拉选择轴（过滤已选、自动排除兄弟行选择）
+- ✅ 多行添加/删除
+- ✅ 硬件配置变更自动同步（CardManager 版本号机制）
+- ✅ JSON 序列化/反序列化
+
+### 现有运动控制节点速览
+
+| 节点 | 配置模型 | 硬件 API | 特点 |
+|------|---------|---------|------|
+| 轴运动 | `MotorMoveConfig` | `AbsMove`/`RelMove` | 多轴 + 定位方式 |
+| 电机复位 | `ResetAxisConfig` | `ProcessHomeMove` | 多轴 + 速度 |
+| 等待输入 | `SignalConfig` | `ReadIn` | 多信号 + 判断条件 |
+| 输出信号 | `OutputSignalConfig` | `WriteState` | 批量 ON/OFF |
+| 停止轴 | `StopConfig` | `Stop` | 多轴停止 |
+| 连续运动 | `VMoveConfig` | `VMove` | 匀速不停 |
+| 轴IO检测 | `SensorCheckConfig` | `GetORGStatus`/`GetPEL`/`GetNEL` | 多轴 + ON/OFF |
+| 控制卡初始化 | `AxisInitConfig` | `Init` + 参数配置 | 脉冲/传感器/使能 |
+| 控制卡关闭 | — | `Close` | 释放资源 |
+| 同步 | — | — | 多入1出，动态端口 |
+
+---
+
+## 4. 属性系统详解
 
 ### 3.1 `[Node]` — 节点注册
 
@@ -169,11 +257,28 @@ public int KernelSize { get; set; }
 
 | C# 类型 | 编辑器控件 | 说明 |
 |---------|-----------|------|
-| `double` / `float` / `int` / `long` | `TextBox` | 自动解析数值 |
+| `double` / `float` / `int` / `long` | `NumericTextBox` | 支持 Min/Max 范围限制，Float/Int 模式 |
 | `bool` | `CheckBox` | |
 | `string` | `TextBox` | |
 | 任何 `enum` | `ComboBox` | 自动枚举所有值作为选项 |
-| **任意类型 + `Options="..."`** | `ComboBox` | 强制下拉，选项由 Options 指定 |
+| 任意类型 + `Options="..."` | `ComboBox` | 强制下拉，选项由 Options 指定 |
+| 任意类型 + `DynamicOptionsSource="方法名"` | `ComboBox` | 运行时调用节点方法获取动态选项 |
+
+**数值属性增强 (`Min` / `Max` / `DynamicOptionsSource`)：**
+
+```csharp
+// 带范围限制的数值输入
+[NodeProperty(Key = "speed", DisplayName = "速度", Min = 1, Max = 500)]
+public double Speed { get; set; }
+
+// 动态下拉：调用节点上的 GetCameraList 方法获取选项
+[NodeProperty(Key = "device", DisplayName = "相机",
+    DynamicOptionsSource = "GetCameraList")]
+public string DeviceId { get; set; }
+
+// 节点上需要定义对应方法
+public IEnumerable<string> GetCameraList() => CameraManager.GetDeviceNames();
+```
 
 **`Options` 用法详解：**
 
@@ -198,9 +303,59 @@ public int SelectedModeIndex { get; set; }
 
 > ⚠️ `[NodeConnector]` 仅用于工具箱提示和文档生成。**实际连接器必须在构造函数中创建**（VisionNodeBase 已自动创建输入/输出图像连接器）。
 
+## 5. FilteredConfigBase 泛型基类
+
+所有需要"下拉选择硬件资源 + 排除兄弟行已选项"的配置模型都继承此类。
+
+### 基类提供的功能
+
+| 功能 | 实现 |
+|------|------|
+| **下拉数据源** | `FilteredItems`（缓存 + 版本检测，硬件变更自动重建） |
+| **选择绑定** | `SelectedItem`（回查硬件原始列表，setter 自动解析 Id/Name） |
+| **过滤已选** | `Siblings` 集合，BuildFiltered 排除兄弟行 `Id>=0` 的项 |
+| **安全快照** | `try { new List<TItem>(all); }` 防止硬件线程并发修改 |
+| **未选保护** | `Id` 默认 `-1`，过滤时排除 `<0` 的值，避免误伤真实 `RegID=0` |
+| **版本同步** | `_lastCardVersion` 与 `CardManager.CardVersion` 比较，配置变更自动刷新 |
+
+### 子类契约
+
+```csharp
+public sealed class MyConfig : FilteredConfigBase<AxisParameter, MyConfig>
+{
+    // 1. 序列化属性（映射到基类 Id）
+    [JsonPropertyName("AxisId")]
+    public int AxisId { get => Id; set => Id = value; }
+
+    // 2. 自定义参数
+    public double Speed { get; set; }
+
+    // 3. 抽象方法实现
+    protected override IList<AxisParameter>? GetAllItems() => CardManager.Card?.AxisList;
+    protected override int GetItemId(AxisParameter item) => item.RegID;
+    protected override string? GetItemName(AxisParameter item) => item.Name;
+}
+```
+
+### ConfigCollectionHelper 辅助类
+
+封装了四个运动节点中重复的模式：
+
+```csharp
+// 一行代码完成初始化：首项 + 增删命令 + Siblings 注入 + 刷新调度
+ConfigCollectionHelper.Initialize<AxisParameter, MyConfig>(
+    configs,
+    () => ConfigCollectionHelper.CreateConfig<AxisParameter, MyConfig>(configs, ScheduleRefresh),
+    out var addCmd, out var removeCmd);
+```
+
+- `CreateConfig` 自动订阅 PropertyChanged → Id 变化 → ScheduleRefresh
+- `ScheduleRefresh` 使用 `Dispatcher.BeginInvoke(Background, ...)` 防止重入
+- 添加时自动选择第一个可用项（`AddOne` 方法）
+
 ---
 
-## 4. 通用属性编辑器
+## 6. 通用属性编辑器
 
 ### 运作流程
 
@@ -225,11 +380,12 @@ GenericEditTemplate:
 
 ```
 PropertyItem.EditorType 确定顺序:
-  1. attr.Options 非空?          → "Enum"  → ComboBox
-  2. 属性类型是 double/int 等?   → "Number" → TextBox
-  3. 属性类型是 bool?            → "Boolean" → CheckBox
-  4. 属性类型是 enum?            → "Enum"   → ComboBox
-  5. 其他                       → "Text"   → TextBox
+  1. attr.DynamicOptionsSource 非空? → "Enum" → ComboBox（动态选项）
+  2. attr.Options 非空?           → "Enum" → ComboBox（静态选项）
+  3. 属性类型是 double/int 等?    → "Number" → NumericTextBox（支持 Min/Max）
+  4. 属性类型是 bool?             → "Boolean" → CheckBox
+  5. 属性类型是 enum?             → "Enum" → ComboBox
+  6. 其他                        → "Text" → TextBox
 ```
 
 ### 何时需要专用模板？
@@ -238,7 +394,7 @@ PropertyItem.EditorType 确定顺序:
 
 ---
 
-## 5. 视觉算法节点开发
+## 7. 视觉算法节点开发
 
 ### VisionNodeBase 契约
 
@@ -320,7 +476,7 @@ inputVal.TryGetBytes(out var bytes);
 
 ---
 
-## 6. 序列化与持久化
+## 8. 序列化与持久化
 
 所有 `[NodeProperty]` 标记的属性**自动参与 JSON 序列化**：
 
@@ -337,9 +493,23 @@ inputVal.TryGetBytes(out var bytes);
 加载: JSON 文件 → GraphSerializer.Deserialize() → NodeFactory 还原
 ```
 
+### 改名兼容
+
+改名后旧存档无法加载？在 `[Node]` 中添加 `LegacyTypeIds`：
+
+```csharp
+[Node(
+    Category = "运动控制",
+    NodeTypeId = "Motion.Stop",           // 新 ID
+    LegacyTypeIds = new[] { "Motion.LegacyStop" }  // 旧 ID 别名
+)]
+```
+
+`NodeFactory` 启动时会同时注册新旧两种 ID 到同一个工厂函数。
+
 ---
 
-## 7. 工具箱注册与分类
+## 9. 工具箱注册与分类
 
 ### 自动注册
 
@@ -359,14 +529,14 @@ var excluded = new HashSet<string> { "算术", "运动控制" };
 | Category | 用途 | 示例 |
 |----------|------|------|
 | `输入` | 数据源 | Constant |
-| `输入输出` | 图像加载/显示 | ImageSource, ImageDisplay |
-| `输出` | 观测 | Display |
-| `流程控制` | 执行逻辑 | Delay, Condition, Loop |
+| `流程控制` | 执行逻辑 | Delay, Condition, Loop, Sync |
 | `视觉算法` | 图像处理 | GaussianBlur, Canny... |
+| `运动控制` | 硬件运动 | MotorMove, ResetAxis, Stop, VMove... |
+| `硬件采集` | 相机 | HikCamera |
 
 ---
 
-## 8. 主题与样式
+## 10. 主题与样式
 
 ### 图标按钮
 
@@ -392,25 +562,27 @@ IconBtnPurpleStyle   <!-- 紫 — 自动布局 -->
 
 ---
 
-## 9. 执行引擎
+## 11. 执行引擎
 
 系统有双执行引擎：
 
 ### 9.1 FlowExecutor（流式执行器）— 主引擎
 
-从 `FlowStart` 节点出发，沿连接边逐节点步进：
+5 步流水线：`TryExecuteNode → PropagateOutputs → ManageLoopStack → ResolveNextNode → TryLoopBack`
 
-```
-while (current != null) {
-    current.ExecuteAsync(ct);           // 异步执行（支持轮询等待）
-    PropagateOutputs(current);          // 数据传播到所有下游
-    ExecuteSideBranches(current, ...);  // 多回路旁路 BFS 递归执行
-    循环栈管理 (WhileNode / LoopNode);
-    next = ResolveNextNode(current);    // 回环节点优先
-    if (next == null && 栈非空) next = 栈顶;  // 自动回跳
-    current = next;
+统一循环管理接口 `ILoopNode`：
+
+```csharp
+public interface ILoopNode
+{
+    bool IsLooping { get; }
+    void OnLoopEnter();
+    void OnLoopExit();
+    string LoopDescription { get; }
 }
 ```
+
+`WhileNode`、`LoopNode`、`WaitSignalNode` 均实现此接口，`ManageLoopStack` 统一处理压栈/出栈。
 
 | 节点类型 | 接口 | Output[0] | Output[1] | 执行器行为 |
 |---------|------|----------|----------|-----------|
@@ -457,7 +629,7 @@ while (current != null) {
 
 ---
 
-## 10. 常见问题
+## 12. 常见问题
 
 **Q: 新节点没出现在工具箱？**
 → 检查是否有 `[Node]` 属性、Category 是否被排除、重新构建确保 DLL 更新。
@@ -468,24 +640,33 @@ while (current != null) {
 **Q: 参数在弹窗中不显示？**
 → 检查属性是否标记了 `[NodeProperty]`，是否有 public getter/setter。
 
-**Q: 下拉框空白？**
-→ 检查 `Options` 格式（逗号分隔），确认 `EnumOption` 使用属性而非字段。
+**Q: 运动控制节点的下拉框空白？**
+→ 确认硬件配置窗口已保存（底部版本号会递增）。FilteredConfigBase 通过 `CardManager.CardVersion` 自动检测变更。若仍空白，检查 `GetAllItems()` 返回的列表是否正确。
+
+**Q: 新增配置行后第一项消失了？**
+→ 旧版默认 `Id=0` 会与真实 `RegID=0` 冲突。现已修复为 `Id=-1` 表示"未选择"，且 `BuildFiltered` 排除 `Id<0` 的兄弟行。
+
+**Q: 运动控制节点如何新增？**
+→ 三步：创建继承 `FilteredConfigBase<T>` 的配置模型 → 创建继承 `MotionNodeBase` 的 ViewModel → 在 `NodeEditTemplates.xaml` 中添加 ItemsControl+ComboBox 模板。参考 `StopNodeViewModel` 或 `VMoveNodeViewModel`。
+
+**Q: 硬件配置修改后节点下拉不更新？**
+→ 硬件配置窗口保存时调用 `CardManager.NotifyChanged()` → 版本号递增 → 节点下次访问 `FilteredItems` 时检测版本差异自动重建。
 
 **Q: 序列化后加载失败？**
-→ 检查 `NodeTypeId` 唯一性，是否与 JSON 中 `type` 字段一致。
+→ 检查 `NodeTypeId` 唯一性，是否与 JSON 中 `type` 字段一致。改名后可通过 `LegacyTypeIds` 保持兼容。
 
-**Q: 如何创建非视觉节点（纯逻辑）？**
-→ 继承 `NodeViewModel`（而非 `VisionNodeBase`），手动创建连接器，标记 `[Node]` + `[NodeProperty]` 即可。
+**Q: 如何创建纯逻辑节点？**
+→ 继承 `NodeViewModel`（而非 `VisionNodeBase`），手动创建连接器，标记 `[Node]` + `[NodeProperty]` 即可。参考 `SyncNodeViewModel`（动态端口）。
 
 **Q: 等待信号节点收到信号但变量没复位？**
 → 检查 SignalVariable 是否正确绑定（属性面板 🔗 下拉选择变量，勿手动输入）。
 
-**Q: 回环连线后流程不循环？**
-→ 确认 ImageDisplay 的「完成」连到 WaitSignal 的「回环」。多连接时回环节点优先。
+**Q: 下拉框空白（通用）？**
+→ 检查 `Options` 格式（逗号分隔），确认 `EnumOption` 使用属性而非字段。
 
-**Q: 多回路中某节点没执行？**
-→ 旁路 BFS 自动执行。若节点是 WhileNode/WaitSignalNode/FlowEnd 则被跳过。
+**Q: 数值输入如何限制范围？**
+→ 使用 `[NodeProperty(Min = 0, Max = 255)]` 或 `DynamicOptionsSource` 动态选项。
 
 ---
 
-> 📝 **黄金法则：只需写好 `[Node]` + `[NodeProperty]` + `ProcessImage()`，其余全部自动生成。**
+> 📝 **黄金法则：视觉节点写 `[Node]` + `[NodeProperty]` + `ProcessImage()`；运动节点写 `FilteredConfigBase<T>` + `MotionNodeBase` + XAML 模板。其余自动生成。**

@@ -95,7 +95,12 @@ namespace Shell.ViewModels
             card.AxisList = Axes.ToList();
             card.InBitList = Inputs.ToList();
             card.OutBitList = Outputs.ToList();
+            CardManager.NotifyChanged();
+            OnPropertyChanged(nameof(CardVersionDisplay));
         }
+
+        /// <summary>当前配置版本号，保存后自动更新。</summary>
+        public string CardVersionDisplay => $"配置版本:  {CardManager.CardVersion}.0.0.0";
 
         /// <summary>将硬件配置保存到本地 JSON 文件。</summary>
         public void SaveToFile()

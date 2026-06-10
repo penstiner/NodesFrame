@@ -770,7 +770,7 @@
                             <!-- 列标题 -->
                             <Grid Margin="0,0,0,4">
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*" MinWidth="200"/>
                                     <ColumnDefinition Width="110"/>
                                     <ColumnDefinition Width="32"/>
                                 </Grid.ColumnDefinitions>
@@ -787,7 +787,7 @@
                                                 Padding="8,6" Margin="0,0,0,6">
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="*" MinWidth="200"/>
                                                     <ColumnDefinition Width="110"/>
                                                     <ColumnDefinition Width="32"/>
                                                 </Grid.ColumnDefinitions>
@@ -918,7 +918,7 @@
                             <!-- 列标题 -->
                             <Grid Margin="0,0,0,4">
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*" MinWidth="200"/>
                                     <ColumnDefinition Width="80"/>
                                     <ColumnDefinition Width="105"/>
                                     <ColumnDefinition Width="105"/>
@@ -941,7 +941,7 @@
                                                 Padding="8,6" Margin="0,0,0,6">
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="*" MinWidth="200"/>
                                                     <ColumnDefinition Width="80"/>
                                                     <ColumnDefinition Width="105"/>
                                                     <ColumnDefinition Width="105"/>
@@ -1039,6 +1039,454 @@
             </DataTemplate>
         </views:NodeEditTemplateSelector.MotorMoveEditTemplate>
 
+        <!-- ═══ 停止轴节点 ═══ -->
+        <views:NodeEditTemplateSelector.StopEditTemplate>
+            <DataTemplate DataType="{x:Type motion:StopNodeViewModel}">
+                <StackPanel Margin="16,12">
+                    <TextBlock FontWeight="Bold" FontSize="15" Foreground="#E53935" Margin="4,0,0,10">
+                        <Run Text="⚙ "/><Run Text="{Binding Title, Mode=OneWay}"/>
+                    </TextBlock>
+                    <Border Background="{DynamicResource EditorCardBrush}" CornerRadius="6" Padding="12,10" Margin="0,0,0,10">
+                        <StackPanel>
+                            <TextBlock Text="节点名称" FontSize="11" Foreground="#888" Margin="0,0,0,6"/>
+                            <TextBox Text="{Binding Title, UpdateSourceTrigger=PropertyChanged}" FontSize="14"
+                                     Foreground="#90CAF9" Background="#FF2A2A3C" BorderBrush="#FF3F3F58"
+                                     Padding="10,6" Style="{StaticResource DialogTextBox}"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Background="{DynamicResource EditorCardBrush}" CornerRadius="6" Padding="12,10">
+                        <StackPanel>
+                            <DockPanel Margin="0,0,0,10">
+                                <Button DockPanel.Dock="Right" Content="＋ 添加轴"
+                                        Command="{Binding AddAxisCommand}" Width="84" Height="28"
+                                        Background="#FF1565C0" Foreground="White"
+                                        BorderThickness="0" Cursor="Hand" FontSize="11">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}" CornerRadius="4" Padding="8,4">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Background" Value="#FF1E88E5"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+                                <TextBlock Text="🛑 停止轴列表" FontSize="12" FontWeight="SemiBold"
+                                           Foreground="#90A4AE" VerticalAlignment="Center"/>
+                            </DockPanel>
+                            <Grid Margin="0,0,0,4">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" MinWidth="200"/>
+                                    <ColumnDefinition Width="32"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="轴名称" FontSize="10" Foreground="#78909C" HorizontalAlignment="Center"/>
+                            </Grid>
+                            <ItemsControl ItemsSource="{Binding AxisConfigs}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate DataType="{x:Type motion:StopConfig}">
+                                        <Border Background="#FF252535" CornerRadius="6" Padding="8,6" Margin="0,0,0,6">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" MinWidth="200"/>
+                                                    <ColumnDefinition Width="32"/>
+                                                </Grid.ColumnDefinitions>
+                                                <hc:ComboBox Grid.Column="0"
+                                                             ItemsSource="{Binding FilteredItems}"
+                                                             DisplayMemberPath="Name"
+                                                             SelectedItem="{Binding SelectedItem, UpdateSourceTrigger=PropertyChanged}"
+                                                             Margin="0,0,6,0" HorizontalContentAlignment="Center"
+                                                             IsSynchronizedWithCurrentItem="False"/>
+                                                <Button Grid.Column="1" Content="✕" Width="22" Height="22" Padding="0"
+                                                        Background="Transparent" Foreground="#EF5350"
+                                                        BorderThickness="0" Cursor="Hand" FontSize="11"
+                                                        ToolTip="移除该轴"
+                                                        Command="{Binding DataContext.RemoveAxisCommand, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"
+                                                        CommandParameter="{Binding}">
+                                                    <Button.Template>
+                                                        <ControlTemplate TargetType="Button">
+                                                            <Border Background="{TemplateBinding Background}" CornerRadius="3">
+                                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                            </Border>
+                                                            <ControlTemplate.Triggers>
+                                                                <Trigger Property="IsMouseOver" Value="True">
+                                                                    <Setter Property="Background" Value="#33EF5350"/>
+                                                                </Trigger>
+                                                            </ControlTemplate.Triggers>
+                                                        </ControlTemplate>
+                                                    </Button.Template>
+                                                </Button>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <TextBlock Text="触发后对所有选定轴执行减速停止。"
+                                       FontSize="10" Foreground="#607D8B" HorizontalAlignment="Center" Margin="0,10,0,0"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </DataTemplate>
+        </views:NodeEditTemplateSelector.StopEditTemplate>
+
+        <!-- ═══ 连续运动节点 ═══ -->
+        <views:NodeEditTemplateSelector.VMoveEditTemplate>
+            <DataTemplate DataType="{x:Type motion:VMoveNodeViewModel}">
+                <StackPanel Margin="16,12">
+                    <TextBlock FontWeight="Bold" FontSize="15" Foreground="#FFA726" Margin="4,0,0,10">
+                        <Run Text="⚙ "/><Run Text="{Binding Title, Mode=OneWay}"/>
+                    </TextBlock>
+                    <Border Background="{DynamicResource EditorCardBrush}" CornerRadius="6" Padding="12,10" Margin="0,0,0,10">
+                        <StackPanel>
+                            <TextBlock Text="节点名称" FontSize="11" Foreground="#888" Margin="0,0,0,6"/>
+                            <TextBox Text="{Binding Title, UpdateSourceTrigger=PropertyChanged}" FontSize="14"
+                                     Foreground="#90CAF9" Background="#FF2A2A3C" BorderBrush="#FF3F3F58"
+                                     Padding="10,6" Style="{StaticResource DialogTextBox}"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Background="{DynamicResource EditorCardBrush}" CornerRadius="6" Padding="12,10">
+                        <StackPanel>
+                            <DockPanel Margin="0,0,0,10">
+                                <Button DockPanel.Dock="Right" Content="＋ 添加轴"
+                                        Command="{Binding AddAxisCommand}" Width="84" Height="28"
+                                        Background="#FF1565C0" Foreground="White"
+                                        BorderThickness="0" Cursor="Hand" FontSize="11">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}" CornerRadius="4" Padding="8,4">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Background" Value="#FF1E88E5"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+                                <TextBlock Text="🏃 连续运动配置" FontSize="12" FontWeight="SemiBold"
+                                           Foreground="#90A4AE" VerticalAlignment="Center"/>
+                            </DockPanel>
+                            <Grid Margin="0,0,0,4">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" MinWidth="200"/>
+                                    <ColumnDefinition Width="110"/>
+                                    <ColumnDefinition Width="32"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="轴名称" FontSize="10" Foreground="#78909C" HorizontalAlignment="Center"/>
+                                <TextBlock Grid.Column="1" Text="速度" FontSize="10" Foreground="#78909C" HorizontalAlignment="Center"/>
+                            </Grid>
+                            <ItemsControl ItemsSource="{Binding AxisConfigs}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate DataType="{x:Type motion:VMoveConfig}">
+                                        <Border Background="#FF252535" CornerRadius="6" Padding="8,6" Margin="0,0,0,6">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" MinWidth="200"/>
+                                                    <ColumnDefinition Width="110"/>
+                                                    <ColumnDefinition Width="32"/>
+                                                </Grid.ColumnDefinitions>
+                                                <hc:ComboBox Grid.Column="0"
+                                                             ItemsSource="{Binding FilteredItems}"
+                                                             DisplayMemberPath="Name"
+                                                             SelectedItem="{Binding SelectedItem, UpdateSourceTrigger=PropertyChanged}"
+                                                             Margin="0,0,6,0" HorizontalContentAlignment="Center"
+                                                             IsSynchronizedWithCurrentItem="False"/>
+                                                <StackPanel Grid.Column="1" Orientation="Horizontal"
+                                                            VerticalAlignment="Center" Margin="3,0">
+                                                    <ctrl:NumericTextBox
+                                                             Text="{Binding Speed, UpdateSourceTrigger=PropertyChanged}"
+                                                             NumberKind="Float" PMinValue="1" PMaxValue="500"
+                                                             EnableKeypad="False" ToolTip="速度 1~500"
+                                                             FontSize="12" FontWeight="Bold"
+                                                             Foreground="#A5D6A7" HorizontalContentAlignment="Center"
+                                                             Background="#FF2A2A3C" BorderBrush="#FF3F3F58" Width="64"/>
+                                                    <TextBlock Text="mm/s" FontSize="10" Foreground="#78909C"
+                                                               VerticalAlignment="Center" Margin="3,0,0,0"/>
+                                                </StackPanel>
+                                                <Button Grid.Column="2" Content="✕" Width="22" Height="22" Padding="0"
+                                                        Background="Transparent" Foreground="#EF5350"
+                                                        BorderThickness="0" Cursor="Hand" FontSize="11"
+                                                        ToolTip="移除该轴"
+                                                        Command="{Binding DataContext.RemoveAxisCommand, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"
+                                                        CommandParameter="{Binding}">
+                                                    <Button.Template>
+                                                        <ControlTemplate TargetType="Button">
+                                                            <Border Background="{TemplateBinding Background}" CornerRadius="3">
+                                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                            </Border>
+                                                            <ControlTemplate.Triggers>
+                                                                <Trigger Property="IsMouseOver" Value="True">
+                                                                    <Setter Property="Background" Value="#33EF5350"/>
+                                                                </Trigger>
+                                                            </ControlTemplate.Triggers>
+                                                        </ControlTemplate>
+                                                    </Button.Template>
+                                                </Button>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <TextBlock Text="启动后轴保持匀速运动，不会自动停止，需配合急停节点使用。"
+                                       FontSize="10" Foreground="#607D8B" HorizontalAlignment="Center" Margin="0,10,0,0"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </DataTemplate>
+        </views:NodeEditTemplateSelector.VMoveEditTemplate>
+
+        <!-- ═══ 轴IO检测节点 ═══ -->
+        <views:NodeEditTemplateSelector.SensorCheckEditTemplate>
+            <DataTemplate DataType="{x:Type motion:SensorCheckNodeViewModel}">
+                <StackPanel Margin="16,12">
+                    <TextBlock FontWeight="Bold" FontSize="15" Foreground="#66BB6A" Margin="4,0,0,10">
+                        <Run Text="⚙ "/><Run Text="{Binding Title, Mode=OneWay}"/>
+                    </TextBlock>
+                    <Border Background="{DynamicResource EditorCardBrush}" CornerRadius="6" Padding="12,10" Margin="0,0,0,10">
+                        <StackPanel>
+                            <TextBlock Text="节点名称" FontSize="11" Foreground="#888" Margin="0,0,0,6"/>
+                            <TextBox Text="{Binding Title, UpdateSourceTrigger=PropertyChanged}" FontSize="14"
+                                     Foreground="#90CAF9" Background="#FF2A2A3C" BorderBrush="#FF3F3F58"
+                                     Padding="10,6" Style="{StaticResource DialogTextBox}"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Background="{DynamicResource EditorCardBrush}" CornerRadius="6" Padding="12,10">
+                        <StackPanel>
+                            <DockPanel Margin="0,0,0,10">
+                                <Button DockPanel.Dock="Right" Content="＋ 添加检测"
+                                        Command="{Binding AddSensorCommand}" Width="84" Height="28"
+                                        Background="#FF1565C0" Foreground="White"
+                                        BorderThickness="0" Cursor="Hand" FontSize="11">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}" CornerRadius="4" Padding="8,4">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Background" Value="#FF1E88E5"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+                                <TextBlock Text="📡 轴IO检测" FontSize="12" FontWeight="SemiBold"
+                                           Foreground="#90A4AE" VerticalAlignment="Center"/>
+                            </DockPanel>
+                            <Grid Margin="0,0,0,4">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" MinWidth="200"/>
+                                    <ColumnDefinition Width="100"/>
+                                    <ColumnDefinition Width="80"/>
+                                    <ColumnDefinition Width="32"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="轴名称" FontSize="10" Foreground="#78909C" HorizontalAlignment="Center"/>
+                                <TextBlock Grid.Column="1" Text="传感器" FontSize="10" Foreground="#78909C" HorizontalAlignment="Center"/>
+                                <TextBlock Grid.Column="2" Text="状态" FontSize="10" Foreground="#78909C" HorizontalAlignment="Center"/>
+                            </Grid>
+                            <ItemsControl ItemsSource="{Binding SensorConfigs}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate DataType="{x:Type motion:SensorCheckConfig}">
+                                        <Border Background="#FF252535" CornerRadius="6" Padding="8,6" Margin="0,0,0,6">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" MinWidth="200"/>
+                                                    <ColumnDefinition Width="100"/>
+                                                    <ColumnDefinition Width="80"/>
+                                                    <ColumnDefinition Width="32"/>
+                                                </Grid.ColumnDefinitions>
+                                                <hc:ComboBox Grid.Column="0"
+                                                             ItemsSource="{Binding FilteredItems}"
+                                                             DisplayMemberPath="Name"
+                                                             SelectedItem="{Binding SelectedItem, UpdateSourceTrigger=PropertyChanged}"
+                                                             Margin="0,0,6,0" HorizontalContentAlignment="Center"
+                                                             IsSynchronizedWithCurrentItem="False"/>
+                                                <hc:ComboBox Grid.Column="1"
+                                                             SelectedIndex="{Binding SensorType, UpdateSourceTrigger=PropertyChanged}"
+                                                             HorizontalContentAlignment="Center" Margin="2,0">
+                                                    <ComboBoxItem Content="原点"/>
+                                                    <ComboBoxItem Content="正限位"/>
+                                                    <ComboBoxItem Content="负限位"/>
+                                                </hc:ComboBox>
+                                                <hc:ComboBox Grid.Column="2"
+                                                             SelectedIndex="{Binding ExpectedState, UpdateSourceTrigger=PropertyChanged}"
+                                                             HorizontalContentAlignment="Center" Margin="2,0">
+                                                    <ComboBoxItem Content="ON"/>
+                                                    <ComboBoxItem Content="OFF"/>
+                                                </hc:ComboBox>
+                                                <Button Grid.Column="3" Content="✕" Width="22" Height="22" Padding="0"
+                                                        Background="Transparent" Foreground="#EF5350"
+                                                        BorderThickness="0" Cursor="Hand" FontSize="11"
+                                                        ToolTip="移除"
+                                                        Command="{Binding DataContext.RemoveSensorCommand, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"
+                                                        CommandParameter="{Binding}">
+                                                    <Button.Template>
+                                                        <ControlTemplate TargetType="Button">
+                                                            <Border Background="{TemplateBinding Background}" CornerRadius="3">
+                                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                            </Border>
+                                                            <ControlTemplate.Triggers>
+                                                                <Trigger Property="IsMouseOver" Value="True">
+                                                                    <Setter Property="Background" Value="#33EF5350"/>
+                                                                </Trigger>
+                                                            </ControlTemplate.Triggers>
+                                                        </ControlTemplate>
+                                                    </Button.Template>
+                                                </Button>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <TextBlock Text="触发后检查所有传感器状态，全部匹配期望值时输出 true。"
+                                       FontSize="10" Foreground="#607D8B" HorizontalAlignment="Center" Margin="0,10,0,0"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </DataTemplate>
+        </views:NodeEditTemplateSelector.SensorCheckEditTemplate>
+
+        <!-- ═══ 控制卡初始化节点（轴参数配置） ═══ -->
+        <views:NodeEditTemplateSelector.ControlCardInitEditTemplate>
+            <DataTemplate DataType="{x:Type motion:ControlCardInitNodeViewModel}">
+                <StackPanel Margin="16,12">
+                    <TextBlock FontWeight="Bold" FontSize="15"
+                               Foreground="#EF5350" Margin="4,0,0,10">
+                        <Run Text="⚙ "/><Run Text="{Binding Title, Mode=OneWay}"/>
+                    </TextBlock>
+                    <Border Background="{DynamicResource EditorCardBrush}" CornerRadius="6" Padding="12,10" Margin="0,0,0,10">
+                        <StackPanel>
+                            <TextBlock Text="节点名称" FontSize="11" Foreground="#888" Margin="0,0,0,6"/>
+                            <TextBox Text="{Binding Title, UpdateSourceTrigger=PropertyChanged}"
+                                     FontSize="14" Foreground="#90CAF9"
+                                     Background="#FF2A2A3C" BorderBrush="#FF3F3F58"
+                                     Padding="10,6" Style="{StaticResource DialogTextBox}"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Background="{DynamicResource EditorCardBrush}" CornerRadius="6" Padding="12,10">
+                        <StackPanel>
+                            <DockPanel Margin="0,0,0,10">
+                                <Button DockPanel.Dock="Right" Content="＋ 添加轴"
+                                        Command="{Binding AddAxisCommand}" Width="84" Height="28"
+                                        Background="#FF1565C0" Foreground="White"
+                                        BorderThickness="0" Cursor="Hand" FontSize="11">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}"
+                                                    CornerRadius="4" Padding="8,4">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Background" Value="#FF1E88E5"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+                                <TextBlock Text="🔧 轴参数配置" FontSize="12"
+                                           FontWeight="SemiBold" Foreground="#90A4AE" VerticalAlignment="Center"/>
+                            </DockPanel>
+                            <Grid Margin="0,0,0,4">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" MinWidth="200"/>
+                                    <ColumnDefinition Width="100"/>
+                                    <ColumnDefinition Width="68"/>
+                                    <ColumnDefinition Width="68"/>
+                                    <ColumnDefinition Width="68"/>
+                                    <ColumnDefinition Width="48"/>
+                                    <ColumnDefinition Width="32"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="轴名称" FontSize="10" Foreground="#78909C" HorizontalAlignment="Center"/>
+                                <TextBlock Grid.Column="1" Text="脉冲模式" FontSize="10" Foreground="#78909C" HorizontalAlignment="Center"/>
+                                <TextBlock Grid.Column="2" Text="原点" FontSize="10" Foreground="#78909C" HorizontalAlignment="Center"/>
+                                <TextBlock Grid.Column="3" Text="正限位" FontSize="10" Foreground="#78909C" HorizontalAlignment="Center"/>
+                                <TextBlock Grid.Column="4" Text="负限位" FontSize="10" Foreground="#78909C" HorizontalAlignment="Center"/>
+                                <TextBlock Grid.Column="5" Text="使能" FontSize="10" Foreground="#78909C" HorizontalAlignment="Center"/>
+                            </Grid>
+                            <ItemsControl ItemsSource="{Binding AxisConfigs}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate DataType="{x:Type motion:AxisInitConfig}">
+                                        <Border Background="#FF252535" CornerRadius="6" Padding="8,6" Margin="0,0,0,6">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" MinWidth="200"/>
+                                                    <ColumnDefinition Width="100"/>
+                                                    <ColumnDefinition Width="68"/>
+                                                    <ColumnDefinition Width="68"/>
+                                                    <ColumnDefinition Width="68"/>
+                                                    <ColumnDefinition Width="48"/>
+                                                    <ColumnDefinition Width="32"/>
+                                                </Grid.ColumnDefinitions>
+                                                <hc:ComboBox Grid.Column="0"
+                                                             ItemsSource="{Binding FilteredItems}"
+                                                             DisplayMemberPath="Name"
+                                                             SelectedItem="{Binding SelectedItem, UpdateSourceTrigger=PropertyChanged}"
+                                                             Margin="0,0,6,0" HorizontalContentAlignment="Center"
+                                                             IsSynchronizedWithCurrentItem="False"/>
+                                                <hc:ComboBox Grid.Column="1"
+                                                             SelectedIndex="{Binding PulseMode, UpdateSourceTrigger=PropertyChanged}"
+                                                             HorizontalContentAlignment="Center" Margin="2,0">
+                                                    <ComboBoxItem Content="脉冲+方向"/>
+                                                    <ComboBoxItem Content="双脉冲"/>
+                                                </hc:ComboBox>
+                                                <hc:ComboBox Grid.Column="2"
+                                                             SelectedIndex="{Binding OrgLogic, UpdateSourceTrigger=PropertyChanged}"
+                                                             HorizontalContentAlignment="Center" Margin="2,0">
+                                                    <ComboBoxItem Content="低"/>
+                                                    <ComboBoxItem Content="高"/>
+                                                </hc:ComboBox>
+                                                <hc:ComboBox Grid.Column="3"
+                                                             SelectedIndex="{Binding PelLogic, UpdateSourceTrigger=PropertyChanged}"
+                                                             HorizontalContentAlignment="Center" Margin="2,0">
+                                                    <ComboBoxItem Content="低"/>
+                                                    <ComboBoxItem Content="高"/>
+                                                </hc:ComboBox>
+                                                <hc:ComboBox Grid.Column="4"
+                                                             SelectedIndex="{Binding NelLogic, UpdateSourceTrigger=PropertyChanged}"
+                                                             HorizontalContentAlignment="Center" Margin="2,0">
+                                                    <ComboBoxItem Content="低"/>
+                                                    <ComboBoxItem Content="高"/>
+                                                </hc:ComboBox>
+                                                <CheckBox Grid.Column="5"
+                                                          IsChecked="{Binding EnableServo, UpdateSourceTrigger=PropertyChanged}"
+                                                          HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                <Button Grid.Column="6" Content="✕" Width="22" Height="22" Padding="0"
+                                                        Background="Transparent" Foreground="#EF5350"
+                                                        BorderThickness="0" Cursor="Hand" FontSize="11"
+                                                        ToolTip="移除该轴"
+                                                        Command="{Binding DataContext.RemoveAxisCommand, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}"
+                                                        CommandParameter="{Binding}">
+                                                    <Button.Template>
+                                                        <ControlTemplate TargetType="Button">
+                                                            <Border Background="{TemplateBinding Background}" CornerRadius="3">
+                                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                            </Border>
+                                                            <ControlTemplate.Triggers>
+                                                                <Trigger Property="IsMouseOver" Value="True">
+                                                                    <Setter Property="Background" Value="#33EF5350"/>
+                                                                </Trigger>
+                                                            </ControlTemplate.Triggers>
+                                                        </ControlTemplate>
+                                                    </Button.Template>
+                                                </Button>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <TextBlock Text="初始化成功后依次配置各轴的脉冲模式、传感器电平和伺服使能。"
+                                       FontSize="10" Foreground="#607D8B"
+                                       HorizontalAlignment="Center" Margin="0,10,0,0"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </DataTemplate>
+        </views:NodeEditTemplateSelector.ControlCardInitEditTemplate>
+
         <!-- ═══ 等待信号节点 ═══ -->
         <views:NodeEditTemplateSelector.AwaitInputEditTemplate>
             <DataTemplate DataType="{x:Type motion:AwaitInputNodeViewModel}">
@@ -1097,7 +1545,7 @@
                                                 Padding="8,6" Margin="0,0,0,6">
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="*" MinWidth="200"/>
                                                     <ColumnDefinition Width="100"/>
                                                     <ColumnDefinition Width="32"/>
                                                 </Grid.ColumnDefinitions>

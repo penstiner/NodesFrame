@@ -510,12 +510,17 @@
 
             <!-- 底部按钮 -->
             <Border Grid.Row="2" Background="#FF222233" CornerRadius="0,0,8,8" Padding="18,14">
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                    <Button Content="取 消" Margin="0,0,14,0" Click="CancelButton_Click"
-                            Style="{StaticResource DialogCancelBtn}"/>
-                    <Button Content="✓ 确 定" Click="ConfirmButton_Click"
-                            Style="{StaticResource DialogConfirmBtn}"/>
-                </StackPanel>
+                <Grid>
+                    <TextBlock Text="{Binding CardVersionDisplay}" 
+                               FontSize="11" Foreground="#607D8B"
+                               VerticalAlignment="Center" Margin="4,0,0,0"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Content="取 消" Margin="0,0,14,0" Click="CancelButton_Click"
+                                Style="{StaticResource DialogCancelBtn}"/>
+                        <Button Content="✓ 确 定" Click="ConfirmButton_Click"
+                                Style="{StaticResource DialogConfirmBtn}"/>
+                    </StackPanel>
+                </Grid>
             </Border>
         </Grid>
     </Border>

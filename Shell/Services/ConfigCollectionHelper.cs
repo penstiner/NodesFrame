@@ -19,9 +19,9 @@ namespace Shell.Services
             where TConfig : FilteredConfigBase<TItem, TConfig>, new()
             where TItem : class
         {
-            configs.Add(newConfig());
+            AddOne<TItem, TConfig>(configs, newConfig());
 
-            addCmd = new DelegateCommand(() => configs.Add(newConfig()));
+            addCmd = new DelegateCommand(() => AddOne<TItem, TConfig>(configs, newConfig()));
             removeCmd = new DelegateCommand<TConfig>(cfg =>
             {
                 if (cfg != null) { configs.Remove(cfg); foreach (var c in configs) c.NotifyFilteredChanged(); }
@@ -33,6 +33,19 @@ namespace Shell.Services
                     foreach (TConfig item in e.NewItems) item.Siblings = configs;
                 foreach (var c in configs) c.NotifyFilteredChanged();
             };
+        }
+
+        /// <summary>添加一项并自动选择第一个可用项，避免空白行。</summary>
+        private static void AddOne<TItem, TConfig>(ObservableCollection<TConfig> configs, TConfig cfg)
+            where TConfig : FilteredConfigBase<TItem, TConfig>
+            where TItem : class
+        {
+            configs.Add(cfg);
+
+            // 添加后 FilteredItems 已由 CollectionChanged → RefreshAll 重建，
+            // 此时选中第一个可用项，避免空行导致的保存错误
+            if (cfg.FilteredItems.Count > 0)
+                cfg.SelectedItem = cfg.FilteredItems[0];
         }
 
         public static TConfig CreateConfig<TItem, TConfig>(

@@ -23,6 +23,10 @@ namespace Shell.Views
         public DataTemplate CannyEdgeEditTemplate { get; set; }
         public DataTemplate MorphologyEditTemplate { get; set; }
         public DataTemplate ImageDisplayEditTemplate { get; set; }
+        public DataTemplate ControlCardInitEditTemplate { get; set; }
+        public DataTemplate StopEditTemplate { get; set; }
+        public DataTemplate VMoveEditTemplate { get; set; }
+        public DataTemplate SensorCheckEditTemplate { get; set; }
         public DataTemplate ResetAxesEditTemplate { get; set; }
         public DataTemplate MotorMoveEditTemplate { get; set; }
         public DataTemplate AwaitInputEditTemplate { get; set; }
@@ -49,6 +53,10 @@ namespace Shell.Views
                 MorphologyNodeViewModel => MorphologyEditTemplate ?? DefaultEditTemplate,
                 ImageDisplayNodeViewModel => ImageDisplayEditTemplate ?? DefaultEditTemplate,
                 ResetAxisNodeViewModel => ResetAxesEditTemplate ?? DefaultEditTemplate,
+                ControlCardInitNodeViewModel => ControlCardInitEditTemplate ?? DefaultEditTemplate,
+                StopNodeViewModel => StopEditTemplate ?? DefaultEditTemplate,
+                VMoveNodeViewModel => VMoveEditTemplate ?? DefaultEditTemplate,
+                SensorCheckNodeViewModel => SensorCheckEditTemplate ?? DefaultEditTemplate,
                 MotorMoveNodeViewModel => MotorMoveEditTemplate ?? DefaultEditTemplate,
                 AwaitInputNodeViewModel => AwaitInputEditTemplate ?? DefaultEditTemplate,
                 OutputSignalNodeViewModel => OutputSignalEditTemplate ?? DefaultEditTemplate,

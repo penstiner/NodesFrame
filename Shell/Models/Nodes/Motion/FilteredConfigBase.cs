@@ -18,10 +18,11 @@ namespace Shell.Models.Nodes.Motion
         where TItem : class
         where TSelf : FilteredConfigBase<TItem, TSelf>
     {
-        private int _id;
+        private int _id = -1;
         private string _name = "";
         private List<TItem> _filteredCache = new();
         private bool _filteredValid;
+        private int _lastCardVersion = -1;  // 检测 CardManager 配置变更
 
         /// <summary>配置项 ID（对应硬件的 RegID），子类通过具体属性暴露给 JSON。</summary>
         [JsonIgnore]
@@ -42,16 +43,18 @@ namespace Shell.Models.Nodes.Motion
         [JsonIgnore]
         public ObservableCollection<TSelf>? Siblings { get; set; }
 
-        /// <summary>过滤后的下拉数据源（缓存 + 惰性重算）。</summary>
+        /// <summary>过滤后的下拉数据源（缓存 + 版本检测：硬件配置变更时自动重建）。</summary>
         [JsonIgnore]
         public List<TItem> FilteredItems
         {
             get
             {
-                if (!_filteredValid || (_filteredCache.Count == 0 && CardManager.Card != null))
+                bool configChanged = _lastCardVersion != CardManager.CardVersion;
+                if (!_filteredValid || configChanged)
                 {
                     _filteredCache = BuildFiltered();
-                    _filteredValid = true;
+                    _filteredValid = _filteredCache.Count > 0;
+                    _lastCardVersion = CardManager.CardVersion;
                 }
                 return _filteredCache;
             }
@@ -92,7 +95,7 @@ namespace Shell.Models.Nodes.Motion
             try { snapshot = new List<TItem>(all); }
             catch { return _filteredCache; }
 
-            var used = Siblings?.Where(c => !ReferenceEquals(c, this)).Select(c => c.Id).ToHashSet()
+            var used = Siblings?.Where(c => !ReferenceEquals(c, this) && c.Id >= 0).Select(c => c.Id).ToHashSet()
                        ?? new HashSet<int>();
             return snapshot.Where(item => !used.Contains(GetItemId(item))).ToList();
         }
