@@ -7,6 +7,7 @@ using Hardware.Card.Interface;
 using Hardware.Card.Models;
 using Nodify;
 using Shell.Models.Attributes;
+using Shell.Services;
 
 namespace Shell.Models.Nodes.Motion
 {
@@ -20,56 +21,28 @@ namespace Shell.Models.Nodes.Motion
         ExpectedType = "Boolean", Description = "true 时开始等待信号")]
     [NodeConnector(Title = "结果", Direction = ConnectorDirection.Output,
         ExpectedType = "Boolean", Description = "全部信号就绪后为 true")]
-    public class AwaitInPutNodeViewModel : MotionNodeBase
+    public class AwaitInputNodeViewModel : MotionNodeBase
     {
-        public AwaitInPutNodeViewModel()
+        public AwaitInputNodeViewModel()
         {
-            SignalConfigs.Add(NewSignalConfig());
-
-            AddSignalCommand = new DelegateCommand(() => SignalConfigs.Add(NewSignalConfig()));
-            RemoveSignalCommand = new DelegateCommand<SignalConfig>(cfg =>
-            {
-                if (cfg != null) { SignalConfigs.Remove(cfg); RefreshAllFilters(); }
-            });
-
-            // 集合变化时刷新所有行的过滤列表
-            SignalConfigs.CollectionChanged += (s, e) =>
-            {
-                if (e.NewItems != null)
-                    foreach (SignalConfig item in e.NewItems) item.Siblings = SignalConfigs;
-                RefreshAllFilters();
-            };
+            ConfigCollectionHelper.Initialize<IOParameter, SignalConfig>(
+                SignalConfigs,
+                () => SignalConfigFactory(),
+                out var add, out var remove);
+            AddSignalCommand = add;
+            RemoveSignalCommand = remove;
         }
 
-        private SignalConfig NewSignalConfig()
-        {
-            var cfg = new SignalConfig { Siblings = SignalConfigs };
-            cfg.PropertyChanged += (s, e) =>
-            {
-                if (e.PropertyName == nameof(SignalConfig.RegId))
-                    ScheduleRefresh();
-            };
-            return cfg;
-        }
-
-        /// <summary>延迟刷新：避免在 PropertyChanged 回调链内同步修改 ItemsSource 导致重入 / 栈溢出。</summary>
-        private void ScheduleRefresh()
-        {
-            System.Windows.Application.Current.Dispatcher.BeginInvoke(
-                System.Windows.Threading.DispatcherPriority.Background,
-                new Action(RefreshAllFilters));
-        }
-
-        private void RefreshAllFilters()
-        {
-            foreach (var cfg in SignalConfigs) cfg.NotifyFilteredChanged();
-        }
+        private SignalConfig SignalConfigFactory() =>
+            ConfigCollectionHelper.CreateConfig<IOParameter, SignalConfig>(SignalConfigs, ScheduleRefresh);
 
         [NodeProperty(Key = "signalConfigs", DisplayName = "信号配置列表", Group = "信号参数")]
         public ObservableCollection<SignalConfig> SignalConfigs { get; set; } = new();
-
         public ICommand AddSignalCommand { get; }
         public ICommand RemoveSignalCommand { get; }
+
+        private void ScheduleRefresh() => ConfigCollectionHelper.ScheduleRefresh(RefreshAllFilters);
+        private void RefreshAllFilters() { foreach (var c in SignalConfigs) c.NotifyFilteredChanged(); }
 
         public override void Execute()
         {
@@ -78,8 +51,14 @@ namespace Shell.Models.Nodes.Motion
             if (!GetInputBool()) return;
             if (SignalConfigs.Count == 0) return;
 
+            var sw = System.Diagnostics.Stopwatch.StartNew();
             while (!AllSignalsActive(card))
             {
+                if (sw.ElapsedMilliseconds > 30000) // 30s 超时保护
+                {
+                    State = ExecutionState.Error;
+                    return;
+                }
                 Thread.Sleep(20);
             }
 

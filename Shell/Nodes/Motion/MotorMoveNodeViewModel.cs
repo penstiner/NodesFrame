@@ -1,143 +1,145 @@
 using System;
-using System.Diagnostics;
+using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using Hardware.Card.Interface;
+using Hardware.Card.Models;
+using Nodify;
 using Shell.Models.Attributes;
+using Shell.Services;
 
 namespace Shell.Models.Nodes.Motion
 {
     /// <summary>
-    /// 单轴定位节点：驱动单个轴到目标位置，阻塞等待到位/报警/超时后输出完成信号。
+    /// 电机运动节点：下拉选轴 → 配置定位方式/速度/位置 → 同时启动全部轴运动。
     /// </summary>
     [Node(
         Category = "运动控制",
-        DisplayName = "单轴定位",
-        DefaultTitle = "单轴定位",
-        Description = "驱动单个轴按绝对/相对方式运动到目标位置，到位后输出完成信号",
+        DisplayName = "轴运动",
+        DefaultTitle = "轴运动",
+        Description = "驱动一个或多个轴按绝对/相对方式运动到目标位置，全部到位后输出完成信号",
         NodeTypeId = "Motion.MotorMove")]
     [NodeConnector(Title = "启动", Direction = ConnectorDirection.Input,
-        ExpectedType = "Boolean", Description = "true 时启动运动并阻塞等待到位")]
+        ExpectedType = "Boolean", Description = "上升沿触发：false→true 时启动全部轴")]
+    [NodeConnector(Title = "运行中", Direction = ConnectorDirection.Output,
+        ExpectedType = "Boolean", Description = "任一轴运动中则为 true")]
     [NodeConnector(Title = "完成", Direction = ConnectorDirection.Output,
-        ExpectedType = "Boolean", Description = "轴到位后为 true，超时/报警为 false")]
-    public class MotorMoveNodeViewModel : MotionNodeBase
+        ExpectedType = "Boolean", Description = "全部轴到位后为 true")]
+    public class MotorMoveNodeViewModel : NodeViewModel
     {
-        private int _axisId;
-        [NodeProperty(Key = "axisId", DisplayName = "轴号", Group = "轴参数", BindableToVariable = false)]
-        public int AxisId
+        public MotorMoveNodeViewModel()
         {
-            get => _axisId;
-            set => SetProperty(ref _axisId, value);
+            AddInputConnector(new ConnectorViewModel { Title = "启动", ExpectedType = TypeCode.Boolean });
+            AddOutputConnector(new ConnectorViewModel { Title = "运行中", ExpectedType = TypeCode.Boolean });
+            AddOutputConnector(new ConnectorViewModel { Title = "完成", ExpectedType = TypeCode.Boolean });
+
+            ConfigCollectionHelper.Initialize<AxisParameter, MotorMoveConfig>(
+                Configs,
+                () => ConfigFactory(),
+                out var add, out var remove);
+            AddConfigCommand = add;
+            RemoveConfigCommand = remove;
         }
 
-        private int _moveType;
-        [NodeProperty(Key = "moveType", DisplayName = "定位方式", Group = "轴参数",
-            Options = "绝对定位,相对定位", BindableToVariable = false)]
-        public int MoveType
-        {
-            get => _moveType;
-            set => SetProperty(ref _moveType, value);
-        }
+        private MotorMoveConfig ConfigFactory() =>
+            ConfigCollectionHelper.CreateConfig<AxisParameter, MotorMoveConfig>(Configs, ScheduleRefresh);
 
-        private double _speed = 50;
-        [NodeProperty(Key = "speed", DisplayName = "默认速度 (mm/s)", Group = "运动参数")]
-        public double Speed
-        {
-            get => _speed;
-            set => SetProperty(ref _speed, value);
-        }
+        [NodeProperty(Key = "configs", DisplayName = "轴配置列表", Group = "轴参数")]
+        public ObservableCollection<MotorMoveConfig> Configs { get; set; } = new();
+        public ICommand AddConfigCommand { get; }
+        public ICommand RemoveConfigCommand { get; }
 
-        private double _position;
-        [NodeProperty(Key = "position", DisplayName = "默认位置 (mm)", Group = "运动参数")]
-        public double Position
-        {
-            get => _position;
-            set => SetProperty(ref _position, value);
-        }
+        private void ScheduleRefresh() => ConfigCollectionHelper.ScheduleRefresh(RefreshAllFilters);
+        private void RefreshAllFilters() { foreach (var c in Configs) c.NotifyFilteredChanged(); }
 
-        private double _timeout = 30000;
-        [NodeProperty(Key = "timeout", DisplayName = "超时时间 (ms)", Group = "运动参数", Min = 100, Max = 300000)]
-        public double Timeout
-        {
-            get => _timeout;
-            set => SetProperty(ref _timeout, value);
-        }
+        private bool _prevStart;
+        private bool _motionLaunched;
 
         public override void Execute()
         {
-            var card = Card;
-            if (card == null || !card.Initialized) return;
-            if (!GetInputBool()) return;
+            var card = CardManager.Card;
+            if (card == null || !card.Initialized) { SetOutputs(false, false); return; }
 
-            if (!DoMove(card))
+            var startInput = Input.ElementAtOrDefault(0)?.Value ?? VariantValue.Null;
+            var start = startInput.TryGetBoolean(out var b) && b;
+            bool risingEdge = start && !_prevStart;
+            _prevStart = start;
+
+            if (risingEdge)
             {
-                State = ExecutionState.Error;
-                return;
+                LaunchAll(card);
+                _motionLaunched = true;
+                SetOutputs(true, false);
             }
-
-            var sw = Stopwatch.StartNew();
-            while (!card.GetAxisStatus(AxisId))
+            else if (_motionLaunched)
             {
-                if (card.GetAlarmValue(AxisId))
+                if (AllDone(card))
                 {
-                    card.Stop(AxisId);
-                    State = ExecutionState.Error;
-                    return;
+                    _motionLaunched = false;
+                    SetOutputs(false, true);
                 }
-                if (sw.Elapsed.TotalMilliseconds > Timeout)
+                else
                 {
-                    card.Stop(AxisId);
-                    State = ExecutionState.Error;
-                    return;
+                    SetOutputs(true, false);
                 }
-                Thread.Sleep(20);
             }
-
-            SetOutputBool(true);
+            else
+            {
+                SetOutputs(false, false);
+            }
         }
 
         public override async Task ExecuteAsync(CancellationToken ct = default)
         {
-            var card = Card;
-            if (card == null || !card.Initialized) return;
-            if (!GetInputBool()) return;
+            var card = CardManager.Card;
+            if (card == null || !card.Initialized) { SetOutputs(false, false); return; }
 
-            SetOutputBool(false);
+            var startInput = Input.ElementAtOrDefault(0)?.Value ?? VariantValue.Null;
+            var start = startInput.TryGetBoolean(out var b) && b;
+            bool risingEdge = start && !_prevStart;
+            _prevStart = start;
 
-            if (!DoMove(card))
+            if (risingEdge)
             {
-                State = ExecutionState.Error;
-                return;
-            }
+                LaunchAll(card);
+                SetOutputs(true, false);
 
-            var sw = Stopwatch.StartNew();
-            while (!card.GetAxisStatus(AxisId))
-            {
-                ct.ThrowIfCancellationRequested();
-
-                if (card.GetAlarmValue(AxisId))
+                while (!AllDone(card))
                 {
-                    card.Stop(AxisId);
-                    State = ExecutionState.Error;
-                    return;
+                    ct.ThrowIfCancellationRequested();
+                    await Task.Delay(20, ct);
                 }
-                if (sw.Elapsed.TotalMilliseconds > Timeout)
-                {
-                    card.Stop(AxisId);
-                    State = ExecutionState.Error;
-                    return;
-                }
-                await Task.Delay(20, ct);
+                SetOutputs(false, true);
             }
-
-            SetOutputBool(true);
+            else { SetOutputs(false, false); }
         }
 
-        private bool DoMove(IControlCard card)
+        private void LaunchAll(IControlCard card)
         {
-            return MoveType == 1
-                ? card.RelMove(AxisId, Speed, Position)
-                : card.AbsMove(AxisId, Speed, Position);
+            foreach (var cfg in Configs)
+            {
+                _ = cfg.MoveType == 1
+                    ? card.RelMove(cfg.AxisId, cfg.Speed, cfg.Position)
+                    : card.AbsMove(cfg.AxisId, cfg.Speed, cfg.Position);
+            }
+        }
+
+        private bool AllDone(IControlCard card)
+        {
+            foreach (var cfg in Configs)
+            {
+                if (!card.GetAxisStatus(cfg.AxisId))
+                    return false;
+            }
+            return true;
+        }
+
+        private void SetOutputs(bool running, bool completed)
+        {
+            if (Output.Count > 0) Output[0].Value = VariantValue.FromBoolean(running);
+            if (Output.Count > 1) Output[1].Value = VariantValue.FromBoolean(completed);
         }
     }
 }

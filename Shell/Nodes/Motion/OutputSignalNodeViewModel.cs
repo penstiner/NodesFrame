@@ -8,6 +8,7 @@ using Hardware.Card.Interface;
 using Hardware.Card.Models;
 using Nodify;
 using Shell.Models.Attributes;
+using Shell.Services;
 
 namespace Shell.Models.Nodes.Motion
 {
@@ -29,50 +30,24 @@ namespace Shell.Models.Nodes.Motion
     {
         public OutputSignalNodeViewModel()
         {
-            SignalConfigs.Add(NewSignalConfig());
-
-            AddSignalCommand = new DelegateCommand(() => SignalConfigs.Add(NewSignalConfig()));
-            RemoveSignalCommand = new DelegateCommand<OutputSignalConfig>(cfg =>
-            {
-                if (cfg != null) { SignalConfigs.Remove(cfg); RefreshAllFilters(); }
-            });
-
-            SignalConfigs.CollectionChanged += (s, e) =>
-            {
-                if (e.NewItems != null)
-                    foreach (OutputSignalConfig item in e.NewItems) item.Siblings = SignalConfigs;
-                RefreshAllFilters();
-            };
+            ConfigCollectionHelper.Initialize<IOParameter, OutputSignalConfig>(
+                SignalConfigs,
+                () => SignalConfigFactory(),
+                out var add, out var remove);
+            AddSignalCommand = add;
+            RemoveSignalCommand = remove;
         }
 
-        private OutputSignalConfig NewSignalConfig()
-        {
-            var cfg = new OutputSignalConfig { Siblings = SignalConfigs };
-            cfg.PropertyChanged += (s, e) =>
-            {
-                if (e.PropertyName == nameof(OutputSignalConfig.RegId))
-                    ScheduleRefresh();
-            };
-            return cfg;
-        }
-
-        private void ScheduleRefresh()
-        {
-            System.Windows.Application.Current.Dispatcher.BeginInvoke(
-                System.Windows.Threading.DispatcherPriority.Background,
-                new Action(RefreshAllFilters));
-        }
-
-        private void RefreshAllFilters()
-        {
-            foreach (var cfg in SignalConfigs) cfg.NotifyFilteredChanged();
-        }
+        private OutputSignalConfig SignalConfigFactory() =>
+            ConfigCollectionHelper.CreateConfig<IOParameter, OutputSignalConfig>(SignalConfigs, ScheduleRefresh);
 
         [NodeProperty(Key = "signalConfigs", DisplayName = "信号配置列表", Group = "信号参数")]
         public ObservableCollection<OutputSignalConfig> SignalConfigs { get; set; } = new();
-
         public ICommand AddSignalCommand { get; }
         public ICommand RemoveSignalCommand { get; }
+
+        private void ScheduleRefresh() => ConfigCollectionHelper.ScheduleRefresh(RefreshAllFilters);
+        private void RefreshAllFilters() { foreach (var c in SignalConfigs) c.NotifyFilteredChanged(); }
 
         public override void Execute()
         {
