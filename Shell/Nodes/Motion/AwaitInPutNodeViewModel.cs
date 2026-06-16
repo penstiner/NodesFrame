@@ -47,10 +47,16 @@ namespace Shell.Models.Nodes.Motion
         public override void Execute()
         {
             var card = Card;
-            if (card == null || !card.Initialized) return;
-            if (!GetInputBool()) return;
-            if (SignalConfigs.Count == 0) return;
+            if (card == null || !card.Initialized) { ExecutionLogger.Warning("等待信号", "等待控制卡就绪..."); }
+            else if (!GetInputBool()) { ExecutionLogger.Warning("等待信号", "等待触发信号..."); }
+            else if (SignalConfigs.Count == 0) { ExecutionLogger.Warning("等待信号", "等待信号配置..."); }
+            while (card == null || !card.Initialized || !GetInputBool() || SignalConfigs.Count == 0)
+            {
+                Thread.Sleep(100);
+                card = Card;
+            }
 
+            ExecutionLogger.Info("等待信号", "开始等待信号就绪...");
             var sw = System.Diagnostics.Stopwatch.StartNew();
             while (!AllSignalsActive(card))
             {
@@ -68,10 +74,17 @@ namespace Shell.Models.Nodes.Motion
         public override async Task ExecuteAsync(CancellationToken ct = default)
         {
             var card = Card;
-            if (card == null || !card.Initialized) return;
-            if (!GetInputBool()) return;
-            if (SignalConfigs.Count == 0) return;
+            if (card == null || !card.Initialized) { ExecutionLogger.Warning("等待信号", "等待控制卡就绪..."); }
+            else if (!GetInputBool()) { ExecutionLogger.Warning("等待信号", "等待触发信号..."); }
+            else if (SignalConfigs.Count == 0) { ExecutionLogger.Warning("等待信号", "等待信号配置..."); }
+            while (card == null || !card.Initialized || !GetInputBool() || SignalConfigs.Count == 0)
+            {
+                ct.ThrowIfCancellationRequested();
+                await Task.Delay(100, ct);
+                card = Card;
+            }
 
+            ExecutionLogger.Info("等待信号", "开始等待信号就绪...");
             while (!AllSignalsActive(card))
             {
                 ct.ThrowIfCancellationRequested();
@@ -85,13 +98,11 @@ namespace Shell.Models.Nodes.Motion
         {
             foreach (var cfg in SignalConfigs)
             {
-                bool isOn = card.ReadIn(cfg.RegId);
-                // IO_STATUS.ON = 低电平有效 → 信号为低时满足
-                if (cfg.Condition == (int)IO_STATUS.ON)
-                    isOn = !isOn;
-                if (!isOn) return false;
+                bool hwIsOn = card.ReadIn(cfg.RegId);                    // true=硬件ON(低电平), false=硬件OFF(高电平)
+                bool expectedMatches = (cfg.Condition == (int)IO_STATUS.ON) ? hwIsOn : !hwIsOn;
+                if (!expectedMatches) return false;                       // 任一信号不满足 → 整体不通过
             }
-            return true;
+            return true;                                                  // 全部信号满足 → 放行
         }
     }
 }

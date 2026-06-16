@@ -43,9 +43,11 @@ namespace Shell.Models.Nodes.Motion
 
         public override void Execute()
         {
-            if (!GetInputBool()) return;
-            if (Card == null) return;
-            if (AxisConfigs.Count == 0) return;
+            if (!GetInputBool()) ExecutionLogger.Warning("停止轴", "等待触发信号...");
+            if (Card == null) ExecutionLogger.Warning("停止轴", "等待控制卡就绪...");
+            if (AxisConfigs.Count == 0) ExecutionLogger.Warning("停止轴", "等待轴配置...");
+            while (!GetInputBool() || Card == null || AxisConfigs.Count == 0)
+                Thread.Sleep(100);
 
             bool allOk = true;
             foreach (var cfg in AxisConfigs)
@@ -58,9 +60,14 @@ namespace Shell.Models.Nodes.Motion
 
         public override async Task ExecuteAsync(CancellationToken ct = default)
         {
-            if (!GetInputBool()) return;
-            if (Card == null) return;
-            if (AxisConfigs.Count == 0) return;
+            if (!GetInputBool()) ExecutionLogger.Warning("停止轴", "等待触发信号...");
+            if (Card == null) ExecutionLogger.Warning("停止轴", "等待控制卡就绪...");
+            if (AxisConfigs.Count == 0) ExecutionLogger.Warning("停止轴", "等待轴配置...");
+            while (!GetInputBool() || Card == null || AxisConfigs.Count == 0)
+            {
+                ct.ThrowIfCancellationRequested();
+                await Task.Delay(100, ct);
+            }
 
             bool allOk = await Task.Run(() =>
             {

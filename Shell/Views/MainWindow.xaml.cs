@@ -28,6 +28,9 @@ namespace Shell.Views
         {
             InitializeComponent();
 
+            // 配置 Growl 通知宿主面板（居中显示）
+            HandyControl.Controls.Growl.GrowlPanel = GrowlHost;
+
             // 绑定日志数据源
             LogItemsControl.ItemsSource = ExecutionLogger.Logs;
 

@@ -448,8 +448,10 @@
                         Style="{StaticResource IconBtnStyle}">&#xf067;</Button>
                 <Rectangle Width="1" Height="18" Fill="#40FFFFFF" Margin="6,0" VerticalAlignment="Center"/>
                 <!-- 文件操作组 -->
-                <Button ToolTip="保存" Command="{Binding SaveCommand}"
+                <Button ToolTip="保存 (直接覆写)" Command="{Binding SaveCommand}"
                         Style="{StaticResource IconBtnAccentStyle}">&#xf0c7;</Button>
+                <Button ToolTip="另存为" Command="{Binding SaveAsCommand}"
+                        Style="{StaticResource IconBtnAccentStyle}">&#xf0c5;</Button>
                 <Button ToolTip="加载" Command="{Binding LoadCommand}"
                         Style="{StaticResource IconBtnAccentStyle}">&#xf07b;</Button>
                 <Rectangle Width="1" Height="18" Fill="#40FFFFFF" Margin="6,0" VerticalAlignment="Center"/>
@@ -796,5 +798,10 @@
                 <views:VariableManagerPanel DataContext="{Binding}" />
             </Border>
         </Grid>
+
+        <!-- ═══ Growl 通知宿主（居中显示）═══ -->
+        <StackPanel x:Name="GrowlHost" Grid.RowSpan="2" Grid.ColumnSpan="3"
+                    HorizontalAlignment="Center" VerticalAlignment="Center"
+                    IsHitTestVisible="False" />
     </Grid>
 </Window>

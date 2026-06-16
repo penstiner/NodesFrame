@@ -52,9 +52,14 @@ namespace Shell.Models.Nodes.Motion
         public override void Execute()
         {
             var card = Card;
-            if (card == null || !card.Initialized) return;
-            if (!GetInputBool()) return;
-            if (SignalConfigs.Count == 0) return;
+            if (card == null || !card.Initialized) { ExecutionLogger.Warning("输出信号", "等待控制卡就绪..."); }
+            else if (!GetInputBool()) { ExecutionLogger.Warning("输出信号", "等待触发信号..."); }
+            else if (SignalConfigs.Count == 0) { ExecutionLogger.Warning("输出信号", "等待信号配置..."); }
+            while (card == null || !card.Initialized || !GetInputBool() || SignalConfigs.Count == 0)
+            {
+                Thread.Sleep(100);
+                card = Card;
+            }
 
             bool allOk = WriteAllOutputs(card);
             SetOutputBool(allOk);
@@ -63,9 +68,15 @@ namespace Shell.Models.Nodes.Motion
         public override async Task ExecuteAsync(CancellationToken ct = default)
         {
             var card = Card;
-            if (card == null || !card.Initialized) return;
-            if (!GetInputBool()) return;
-            if (SignalConfigs.Count == 0) return;
+            if (card == null || !card.Initialized) { ExecutionLogger.Warning("输出信号", "等待控制卡就绪..."); }
+            else if (!GetInputBool()) { ExecutionLogger.Warning("输出信号", "等待触发信号..."); }
+            else if (SignalConfigs.Count == 0) { ExecutionLogger.Warning("输出信号", "等待信号配置..."); }
+            while (card == null || !card.Initialized || !GetInputBool() || SignalConfigs.Count == 0)
+            {
+                ct.ThrowIfCancellationRequested();
+                await Task.Delay(100, ct);
+                card = Card;
+            }
 
             ct.ThrowIfCancellationRequested();
 

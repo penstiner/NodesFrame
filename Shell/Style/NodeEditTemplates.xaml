@@ -1564,8 +1564,8 @@
                                                              SelectedIndex="{Binding Condition, UpdateSourceTrigger=PropertyChanged}"
                                                              Margin="3,0"
                                                              HorizontalContentAlignment="Center">
-                                                    <ComboBoxItem Content="低电平" HorizontalContentAlignment="Center"/>
-                                                    <ComboBoxItem Content="高电平" HorizontalContentAlignment="Center"/>
+                                                    <ComboBoxItem Content="ON" HorizontalContentAlignment="Center"/>
+                                                    <ComboBoxItem Content="OFF" HorizontalContentAlignment="Center"/>
                                                 </hc:ComboBox>
 
                                                 <!-- 删除按钮 -->

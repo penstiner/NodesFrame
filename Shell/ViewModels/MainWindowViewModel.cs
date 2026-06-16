@@ -2,6 +2,8 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
+using HandyControl.Controls;
+using HandyControl.Data;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -64,6 +66,10 @@ namespace Shell.ViewModels
         // 保存 / 加载命令
         public ICommand SaveCommand { get; }
         public ICommand LoadCommand { get; }
+        public ICommand SaveAsCommand { get; }
+
+        /// <summary>当前已打开/保存的文件路径，用于"保存"直接覆写。</summary>
+        private string? _currentFilePath;
 
         // 清空编辑器命令
         public ICommand ClearCommand { get; }
@@ -160,6 +166,7 @@ namespace Shell.ViewModels
             UndoCommand = new DelegateCommand(() => GraphHistory.Undo(), () => GraphHistory.CanUndo);
             RedoCommand = new DelegateCommand(() => GraphHistory.Redo(), () => GraphHistory.CanRedo);
             SaveCommand = new DelegateCommand(SaveGraph);
+            SaveAsCommand = new DelegateCommand(SaveAsGraph);
             LoadCommand = new DelegateCommand(LoadGraph);
             ClearCommand = new DelegateCommand(ClearAll);
 
@@ -388,6 +395,8 @@ namespace Shell.ViewModels
             IsRunning = true;
             // 强制刷新停止按钮可用状态
             ((Prism.Commands.DelegateCommand)StopCommand).RaiseCanExecuteChanged();
+            // 清理上一次残留的 _cts，然后创建新的
+            _cts?.Dispose();
             _cts = new CancellationTokenSource();
 
             try
@@ -449,6 +458,15 @@ namespace Shell.ViewModels
             finally
             {
                 IsRunning = false;
+                // 只清除遗留的 Running 节点（Error 保留供用户查看）
+                foreach (var n in Nodes)
+                {
+                    if (n.State == ExecutionState.Running)
+                    {
+                        n.State = ExecutionState.Idle;
+                        n.ExecutionTime = null;
+                    }
+                }
                 ((Prism.Commands.DelegateCommand)StopCommand).RaiseCanExecuteChanged();
                 _cts?.Dispose();
                 _cts = null;
@@ -457,6 +475,7 @@ namespace Shell.ViewModels
 
         private void StopFlow()
         {
+            ExecutionLogger.Warning("执行器", "⏹ 收到停止指令，准备取消...");
             // 「立即循环」模式 WhileNode：设变量为 false 使循环退出
             foreach (var node in Nodes.OfType<WhileNodeViewModel>())
             {
@@ -468,7 +487,26 @@ namespace Shell.ViewModels
                 }
             }
             // 等待信号 / WhileNode「等待触发」模式：不修改变量，由 CancellationToken 中断
-            _cts?.Cancel();
+            if (_cts != null)
+            {
+                _cts.Cancel();
+                _cts.Dispose();
+                _cts = null;
+                ExecutionLogger.Warning("执行器", "⏹ CancellationToken 已取消并释放");
+            }
+            else
+            {
+                // 流程已自行退出：手动清除残留的 Error / Running 状态，耗时清零
+                ExecutionLogger.Warning("执行器", "⏹ _cts 为 null（流程已退出），清除节点错误状态...");
+                foreach (var n in Nodes)
+                {
+                    if (n.State == ExecutionState.Running || n.State == ExecutionState.Error)
+                    {
+                        n.State = ExecutionState.Idle;
+                        n.ExecutionTime = null;
+                    }
+                }
+            }
             // 刷新按钮状态
             ((Prism.Commands.DelegateCommand)StopCommand).RaiseCanExecuteChanged();
         }
@@ -703,30 +741,62 @@ namespace Shell.ViewModels
         }
 
         /// <summary>
-        /// 保存当前图为 JSON 文件。
+        /// 保存当前图。如果已有保存/打开路径则直接覆写，否则弹出另存为对话框。
         /// </summary>
         private void SaveGraph()
+        {
+            if (_currentFilePath != null)
+            {
+                // 已有路径，直接覆写
+                SaveToFile(_currentFilePath);
+                return;
+            }
+
+            // 首次保存 → 弹出对话框选路径
+            SaveAsGraph();
+        }
+
+        /// <summary>
+        /// 另存为 — 始终弹出对话框选择路径。
+        /// </summary>
+        private void SaveAsGraph()
         {
             var dialog = new Microsoft.Win32.SaveFileDialog
             {
                 Filter = "流程图文件 (*.flow)|*.flow|JSON 文件 (*.json)|*.json|所有文件 (*.*)|*.*",
                 DefaultExt = ".flow",
-                FileName = "graph.flow"
+                FileName = !string.IsNullOrEmpty(_currentFilePath)
+                    ? System.IO.Path.GetFileName(_currentFilePath)
+                    : "graph.flow"
             };
 
             if (dialog.ShowDialog() == true)
             {
-                try
+                _currentFilePath = dialog.FileName;
+                SaveToFile(_currentFilePath);
+            }
+        }
+
+        /// <summary>将图序列化写入指定路径。</summary>
+        private void SaveToFile(string filePath)
+        {
+            try
+            {
+                var json = _serializer.Serialize(Nodes.ToList(), Connections.ToList(), VariableManager);
+                System.IO.File.WriteAllText(filePath, json);
+                Growl.Success(new GrowlInfo
                 {
-                    var json = _serializer.Serialize(Nodes.ToList(), Connections.ToList(), VariableManager);
-                    System.IO.File.WriteAllText(dialog.FileName, json);
-                    Debug.WriteLine($"[Save] 图已保存到 {dialog.FileName}");
-                }
-                catch (Exception ex)
+                    Message = $"已保存到：{filePath}",
+                    WaitTime = 3
+                });
+            }
+            catch (Exception ex)
+            {
+                Growl.Error(new GrowlInfo
                 {
-                    ExecutionError = $"保存失败：{ex.Message}";
-                    Debug.WriteLine($"[Save] 错误：{ex.Message}");
-                }
+                    Message = $"保存失败：{ex.Message}",
+                    WaitTime = 3
+                });
             }
         }
 
@@ -806,12 +876,22 @@ namespace Shell.ViewModels
                         }
                     }
 
-                    Debug.WriteLine($"[Load] 成功加载 {loadedNodes.Count} 个节点，{connCount} 个连接。");
+                    // 记录加载路径，后续"保存"可直接覆写
+                    _currentFilePath = dialog.FileName;
+
+                    Growl.Success(new GrowlInfo
+                    {
+                        Message = $"已加载：{_currentFilePath}",
+                        WaitTime = 3
+                    });
                 }
                 catch (Exception ex)
                 {
-                    ExecutionError = $"加载失败：{ex.Message}";
-                    Debug.WriteLine($"[Load] 错误：{ex.Message}");
+                    Growl.Error(new GrowlInfo
+                    {
+                        Message = $"加载失败：{ex.Message}",
+                        WaitTime = 3
+                    });
                 }
             }
         }

@@ -43,9 +43,11 @@ namespace Shell.Models.Nodes.Motion
 
         public override void Execute()
         {
-            if (!GetInputBool()) return;
-            if (Card == null) return;
-            if (SensorConfigs.Count == 0) return;
+            if (!GetInputBool()) ExecutionLogger.Warning("轴IO检测", "等待触发信号...");
+            if (Card == null) ExecutionLogger.Warning("轴IO检测", "等待控制卡就绪...");
+            if (SensorConfigs.Count == 0) ExecutionLogger.Warning("轴IO检测", "等待传感器配置...");
+            while (!GetInputBool() || Card == null || SensorConfigs.Count == 0)
+                Thread.Sleep(100);
 
             bool allMatch = SensorConfigs.All(cfg =>
             {
@@ -65,9 +67,14 @@ namespace Shell.Models.Nodes.Motion
 
         public override async Task ExecuteAsync(CancellationToken ct = default)
         {
-            if (!GetInputBool()) return;
-            if (Card == null) return;
-            if (SensorConfigs.Count == 0) return;
+            if (!GetInputBool()) ExecutionLogger.Warning("轴IO检测", "等待触发信号...");
+            if (Card == null) ExecutionLogger.Warning("轴IO检测", "等待控制卡就绪...");
+            if (SensorConfigs.Count == 0) ExecutionLogger.Warning("轴IO检测", "等待传感器配置...");
+            while (!GetInputBool() || Card == null || SensorConfigs.Count == 0)
+            {
+                ct.ThrowIfCancellationRequested();
+                await Task.Delay(100, ct);
+            }
 
             bool result = await Task.Run(() =>
                 SensorConfigs.All(cfg =>

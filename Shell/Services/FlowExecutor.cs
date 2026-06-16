@@ -41,6 +41,7 @@ namespace Shell.Services
 
             var sw = Stopwatch.StartNew();
             var loopStack = new Stack<NodeViewModel>();
+            var sideBranchTasks = new List<Task>();
             TotalLoopIterations = 0;
             NodeViewModel? current = startNode;
 
@@ -48,14 +49,14 @@ namespace Shell.Services
             {
                 while (current != null)
                 {
-                    if (ct.IsCancellationRequested) { result.WasCancelled = true; break; }
+                    if (ct.IsCancellationRequested) { result.WasCancelled = true; ExecutionLogger.Warning("流程执行器", "⏹ 检测到取消请求，退出主循环"); break; }
 
                     // ① 执行
                     if (!await TryExecuteNode(current, ct, result)) break;
                     // ② 传播 + 旁路 + 输出绑定
                     PropagateOutputs(current, outputMap);
                     WriteOutputBindings(current);
-                    RunSidePaths(current, outputMap, result);
+                    RunSidePaths(current, outputMap, result, ct, sideBranchTasks);
                     // ③ 循环栈
                     ManageLoopStack(current, loopStack);
                     // ④ 下一节点
@@ -76,11 +77,43 @@ namespace Shell.Services
             catch (Exception ex) { result.Fail($"流程执行异常: {ex.Message}"); }
             sw.Stop();
 
+            // 等待所有旁路分支完成（或被取消）
+            if (sideBranchTasks.Count > 0)
+            {
+                try { await Task.WhenAll(sideBranchTasks); }
+                catch { /* 单个分支异常已在 ExecuteSideBranchesAsync 内部处理 */ }
+            }
+
             if (result.WasCancelled)
             {
                 ExecutionLogger.Warning("流程执行器", "流程已取消，正在执行清理路径...");
                 await ExecuteCleanupPathAsync(nodes, outputMap);
                 result.Fail("执行已被取消。");
+            }
+
+            // 取消后：将所有 Running / Error 节点重置为 Idle，耗时清零
+            // 非取消的失败：只重置 Running（保留 Error 让用户看到哪个节点出错）
+            if (result.WasCancelled)
+            {
+                foreach (var n in nodes)
+                {
+                    if (n.State == ExecutionState.Running || n.State == ExecutionState.Error)
+                    {
+                        n.State = ExecutionState.Idle;
+                        n.ExecutionTime = null;
+                    }
+                }
+            }
+            else if (!result.Success)
+            {
+                foreach (var n in nodes)
+                {
+                    if (n.State == ExecutionState.Running)
+                    {
+                        n.State = ExecutionState.Idle;
+                        n.ExecutionTime = null;
+                    }
+                }
             }
 
             if (result.Success)
@@ -106,12 +139,20 @@ namespace Shell.Services
             var sw = Stopwatch.StartNew();
             try { await node.ExecuteAsync(ct); }
             catch (OperationCanceledException)
-            { node.ExecutionTime = sw.Elapsed; node.State = ExecutionState.Idle; result.WasCancelled = true; return false; }
+            { node.ExecutionTime = sw.Elapsed; node.State = ExecutionState.Idle; result.WasCancelled = true; ExecutionLogger.Warning("流程执行器", $"⏹ 节点 [{node.Title}] 收到取消，正在退出..."); return false; }
             catch (Exception ex)
             {
                 node.ExecutionTime = sw.Elapsed; node.State = ExecutionState.Error;
                 result.Fail($"节点 [{node.Title}] 执行异常: {ex.Message}");
                 ExecutionLogger.Error("流程执行器", $"✖ {node.Title} — {node.ExecutionTimeDisplay}: {ex.Message}");
+                return false;
+            }
+            // 如果节点内部已将状态标记为 Error，则视为执行失败
+            if (node.State == ExecutionState.Error)
+            {
+                node.ExecutionTime = sw.Elapsed;
+                result.Fail($"节点 [{node.Title}] 执行失败（节点内部标记）。");
+                ExecutionLogger.Error("流程执行器", $"✖ {node.Title} — {node.ExecutionTimeDisplay}: 节点内部错误");
                 return false;
             }
             node.ExecutionTime = sw.Elapsed; node.State = ExecutionState.Success;
@@ -166,7 +207,8 @@ namespace Shell.Services
 
         private void RunSidePaths(NodeViewModel current,
             Dictionary<ConnectorViewModel, List<ConnectionViewModel>> outputMap,
-            FlowExecutionResult result)
+            FlowExecutionResult result, CancellationToken ct,
+            List<Task> sideBranchTasks)
         {
             int outIdx = current is IBranchNode b ? b.ActiveOutputIndex : 0;
 
@@ -181,7 +223,8 @@ namespace Shell.Services
                     if (isFirst) { isFirst = false; continue; }
                     var side = conn.Target.ParentNode;
                     if (IsLoopNode(side) || side == current) continue;
-                    ExecuteSideBranches(side!, outputMap, result);
+                    // 启动并行任务执行旁路分支，加入追踪列表
+                    sideBranchTasks.Add(Task.Run(() => ExecuteSideBranchesAsync(side!, outputMap, result, ct)));
                 }
             }
             // 非活跃输出 → 全部旁路（但跳过 IBranchNode 的 Output[1]——那是退出/停止口）
@@ -195,14 +238,14 @@ namespace Shell.Services
                 {
                     var side = conn.Target.ParentNode;
                     if (side == null || side == current) continue;
-                    ExecuteSideBranches(side, outputMap, result);
+                    sideBranchTasks.Add(Task.Run(() => ExecuteSideBranchesAsync(side, outputMap, result, ct)));
                 }
             }
         }
 
-        private void ExecuteSideBranches(NodeViewModel start,
+        private async Task ExecuteSideBranchesAsync(NodeViewModel start,
             Dictionary<ConnectorViewModel, List<ConnectionViewModel>> outputMap,
-            FlowExecutionResult result)
+            FlowExecutionResult result, CancellationToken ct)
         {
             var queue = new Queue<NodeViewModel>();
             var visited = new HashSet<NodeViewModel>();
@@ -216,13 +259,30 @@ namespace Shell.Services
                 {
                     node.State = ExecutionState.Running;
                     var sw = Stopwatch.StartNew();
-                    node.Execute();
+                    // 支持异步执行并响应取消
+                    await node.ExecuteAsync(ct);
                     node.ExecutionTime = sw.Elapsed;
                     node.State = ExecutionState.Success;
                     result.ExecutedNodeCount++;
                     PropagateOutputs(node, outputMap);
                     WriteOutputBindings(node);
                     ExecutionLogger.Info("流程执行器", $"├ {node.Title} — {node.ExecutionTimeDisplay}");
+                }
+                catch (OperationCanceledException)
+                {
+                    node.ExecutionTime = TimeSpan.Zero;
+                    node.State = ExecutionState.Idle;
+                    ExecutionLogger.Info("流程执行器", $"├ {node.Title} 已取消");
+                    // 取消后：将该分支已访问过的 Error 节点也重置
+                    foreach (var vn in visited)
+                    {
+                        if (vn.State == ExecutionState.Error)
+                        {
+                            vn.State = ExecutionState.Idle;
+                            vn.ExecutionTime = null;
+                        }
+                    }
+                    return;
                 }
                 catch (Exception ex)
                 {

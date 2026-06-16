@@ -87,9 +87,10 @@ namespace Shell.ViewModels
             {
                 if (c.Name == "流程控制") return 0;
                 if (c.Name == "输入输出") return 1;
-                if (c.Name == "硬件采集") return 2;
-                if (c.Name == "视觉算法") return 3;
-                return 4;
+                if (c.Name == "运动控制") return 2;
+                if (c.Name == "硬件采集") return 3;
+                if (c.Name == "视觉算法") return 4;
+                return 5;
             }).ToList();
 
             Categories.Clear();
@@ -256,6 +257,17 @@ namespace Shell.ViewModels
                 "Vision.RectROI"            => Core.UI.ElaIcon.ViRectROI,
                 "Vision.MorphGradient"      => Core.UI.ElaIcon.ViMorphGradient,
 
+                // ── 运动控制节点 ──
+                "Motion.ControlCardInit"   => Core.UI.ElaIcon.GearComplex,      // 初始化/配置
+                "Motion.ControlCardClose"  => Core.UI.ElaIcon.CircleXmark,      // 关闭控制卡
+                "Motion.AwaitInput"        => Core.UI.ElaIcon.ArrowRight,       // 输入方向 → 等待输入信号
+                "Motion.OutputSignal"      => Core.UI.ElaIcon.Bell,             // 通知/信号发出
+                "Motion.SensorCheck"       => Core.UI.ElaIcon.Eye,              // 传感器检测
+                "Motion.Stop"              => Core.UI.ElaIcon.CircleStop,       // 停止
+                "Motion.MotorMove"         => Core.UI.ElaIcon.Play,             // 启动电机运动
+                "Motion.ResetAxis"         => Core.UI.ElaIcon.ArrowRotateRight, // 复位/刷新
+                "Motion.VMove"             => Core.UI.ElaIcon.CirclePlay,       // 模拟/虚拟运行
+
                 _ => Core.UI.ElaIcon.Circle,
             };
         }
@@ -314,11 +326,30 @@ namespace Shell.ViewModels
                 "Vision.ImageSource" => "#FF26C6DA",
                 "Vision.ImageDisplay" => "#FF26C6DA",
 
+                // ── 运动控制节点颜色 ──
+                // 初始化/关闭类 - 深蓝色
+                "Motion.ControlCardInit"   => "#FF1A73E8",
+                "Motion.ControlCardClose"  => "#FF1A73E8",
+                // 信号类 - 琥珀色
+                "Motion.AwaitInput"        => "#FFFF8F00",
+                "Motion.OutputSignal"      => "#FFFF8F00",
+                // 检测类 - 青绿色
+                "Motion.SensorCheck"       => "#FF26A69A",
+                // 停止类 - 红色
+                "Motion.Stop"              => "#FFE53935",
+                // 运动类 - 紫色调
+                "Motion.MotorMove"         => "#FF7B1FA2",
+                "Motion.ResetAxis"         => "#FF7B1FA2",
+                "Motion.VMove"             => "#FF7B1FA2",
+
                 // 硬件采集节点 - 靖蓝色
                 _ when nodeTypeId.StartsWith("Hardware.") => "#FF5C6BC0",
                 
                 // 流程控制节点 - 绿色
                 _ when nodeTypeId.StartsWith("Flow.") => "#FF66BB6A",
+
+                // 运动控制（未有精确匹配的兜底）
+                _ when nodeTypeId.StartsWith("Motion.") => "#FF1A73E8",
 
                 _ => "#FF78909C"             // 灰色（默认）
             };

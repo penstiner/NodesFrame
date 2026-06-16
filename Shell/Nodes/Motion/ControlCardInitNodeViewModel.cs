@@ -44,10 +44,12 @@ namespace Shell.Models.Nodes.Motion
 
         public override void Execute()
         {
-            if (!GetInputBool()) return;
-            if (Card == null) return;
+            if (!GetInputBool()) ExecutionLogger.Warning("控制卡初始化", "等待触发信号...");
+            if (Card == null) ExecutionLogger.Warning("控制卡初始化", "等待控制卡注册...");
+            while (!GetInputBool() || Card == null)
+                Thread.Sleep(100);
 
-            bool ok = Card.Init();
+            bool ok = Card!.Init();
             if (ok)
             {
                 ApplyAxisConfigs();
@@ -61,10 +63,15 @@ namespace Shell.Models.Nodes.Motion
 
         public override async Task ExecuteAsync(CancellationToken ct = default)
         {
-            if (!GetInputBool()) return;
-            if (Card == null) return;
+            if (!GetInputBool()) ExecutionLogger.Warning("控制卡初始化", "等待触发信号...");
+            if (Card == null) ExecutionLogger.Warning("控制卡初始化", "等待控制卡注册...");
+            while (!GetInputBool() || Card == null)
+            {
+                ct.ThrowIfCancellationRequested();
+                await Task.Delay(100, ct);
+            }
 
-            bool ok = Card.Init();
+            bool ok = Card!.Init();
             if (ok)
             {
                 await Task.Run(() => ApplyAxisConfigs(), ct);

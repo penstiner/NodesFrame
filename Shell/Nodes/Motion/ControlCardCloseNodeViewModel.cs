@@ -22,10 +22,12 @@ namespace Shell.Models.Nodes.Motion
     {
         public override void Execute()
         {
-            if (!GetInputBool()) return;
-            if (Card == null) return;
+            if (!GetInputBool()) ExecutionLogger.Warning("控制卡关闭", "等待触发信号...");
+            if (Card == null) ExecutionLogger.Warning("控制卡关闭", "等待控制卡就绪...");
+            while (!GetInputBool() || Card == null)
+                Thread.Sleep(100);
 
-            bool ok = Card.Close();
+            bool ok = Card!.Close();
             if (ok)
             {
                 SetOutputBool(true);
@@ -39,10 +41,15 @@ namespace Shell.Models.Nodes.Motion
 
         public override async Task ExecuteAsync(CancellationToken ct = default)
         {
-            if (!GetInputBool()) return;
-            if (Card == null) return;
+            if (!GetInputBool()) ExecutionLogger.Warning("控制卡关闭", "等待触发信号...");
+            if (Card == null) ExecutionLogger.Warning("控制卡关闭", "等待控制卡就绪...");
+            while (!GetInputBool() || Card == null)
+            {
+                ct.ThrowIfCancellationRequested();
+                await Task.Delay(100, ct);
+            }
 
-            bool ok = Card.Close();
+            bool ok = Card!.Close();
             if (ok)
             {
                 SetOutputBool(true);

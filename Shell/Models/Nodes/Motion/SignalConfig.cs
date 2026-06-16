@@ -25,7 +25,7 @@ namespace Shell.Models.Nodes.Motion
 
         /// <summary>判定条件显示文本。</summary>
         [JsonIgnore]
-        public string ConditionText => Condition == (int)IO_STATUS.OFF ? "高电平" : "低电平";
+        public string ConditionText => Condition == (int)IO_STATUS.OFF ? "OFF" : "ON";
 
         // ── 子类实现 ──
 

@@ -135,6 +135,9 @@ namespace Nodify.UndoRedo
                 op.Undo();
                 _isApplyingOperation = false;
                 _position--;
+
+                PropertyChanged?.Invoke(this, _canUndoArgs);
+                PropertyChanged?.Invoke(this, _canRedoArgs);
             }
         }
 
@@ -152,6 +155,9 @@ namespace Nodify.UndoRedo
                 _isApplyingOperation = true;
                 op.Execute();
                 _isApplyingOperation = false;
+
+                PropertyChanged?.Invoke(this, _canUndoArgs);
+                PropertyChanged?.Invoke(this, _canRedoArgs);
             }
         }
 
