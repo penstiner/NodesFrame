@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using Shell.Models;
+using Shell.Models.Nodes.Flow;
 using Shell.Models.Nodes.Vision;
+using Shell.Models.Nodes.Motion;
 using Shell.Services;
 
 namespace Shell.Views
@@ -24,6 +26,7 @@ namespace Shell.Views
         public DataTemplate ConditionTemplate { get; set; }
         public DataTemplate LoopTemplate { get; set; }
         public DataTemplate ImageDisplayTemplate { get; set; }
+        public DataTemplate MotionControlTemplate { get; set; }
         public DataTemplate DefaultTemplate { get; set; }
 
         /// <summary>
@@ -54,6 +57,17 @@ namespace Shell.Views
                 ConditionNodeViewModel => ConditionTemplate ?? DefaultTemplate,
                 LoopNodeViewModel => LoopTemplate ?? DefaultTemplate,
                 ImageDisplayNodeViewModel => ImageDisplayTemplate ?? DefaultTemplate,
+
+                ResetAxisNodeViewModel => MotionControlTemplate ?? DefaultTemplate,
+                MotorMoveNodeViewModel => MotionControlTemplate ?? DefaultTemplate,
+                ControlCardInitNodeViewModel => MotionControlTemplate ?? DefaultTemplate,
+                ControlCardCloseNodeViewModel => MotionControlTemplate ?? DefaultTemplate,
+                StopNodeViewModel => MotionControlTemplate ?? DefaultTemplate,
+                VMoveNodeViewModel => MotionControlTemplate ?? DefaultTemplate,
+                SensorCheckNodeViewModel => MotionControlTemplate ?? DefaultTemplate,
+                AwaitInputNodeViewModel => MotionControlTemplate ?? DefaultTemplate,
+                OutputSignalNodeViewModel => MotionControlTemplate ?? DefaultTemplate,
+                SyncNodeViewModel => DefaultTemplate,
                 _ => DefaultTemplate
             };
         }

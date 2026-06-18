@@ -104,7 +104,7 @@ namespace Hardware.Card.Interface
         {
             AxisParameter axis = AxisList.Where(it => it.RegID == id).First();
             uint status = LTDMC.dmc_axis_io_status(axis.CardID, axis.AxisID);
-            bool value = ((status >> (int)Motion_IO_Status.PEL) & 1) == 1;
+            bool value = ((status >> (int)Motion_IO_Status.NEL) & 1) == 1;
             return value;
         }
 
@@ -250,7 +250,8 @@ namespace Hardware.Card.Interface
             }
             else
             {
-                ErrorEvent?.Invoke(this, new DMC_ErrMsg(CardErr.Low, $"设置卡{axis.Name}使能错误"));
+                var handler = ErrorEvent;
+                handler?.Invoke(this, new DMC_ErrMsg(CardErr.Low, $"设置卡{axis.Name}使能错误"));
             }
             return false;
         }
@@ -287,7 +288,8 @@ namespace Hardware.Card.Interface
             }
             else
             {
-                ErrorEvent?.Invoke(this, new DMC_ErrMsg(CardErr.High, $"{axis.Name}停止错误"));
+                var handler = ErrorEvent;
+                handler?.Invoke(this, new DMC_ErrMsg(CardErr.High, $"{axis.Name}停止错误"));
             }
             return false;
         }
@@ -308,7 +310,8 @@ namespace Hardware.Card.Interface
         /// <param name="msg"></param>
         public void OnErrorEvent(DMC_ErrMsg msg)
         {
-            ErrorEvent?.Invoke(this, msg);
+            var handler = ErrorEvent;
+            handler?.Invoke(this, msg);
         }
 
         #region 内部辅助函数

@@ -25,6 +25,9 @@ namespace Shell.Models.Attributes
 
         /// <summary>节点类型标识符（用于序列化）。若未指定则使用类名。</summary>
         public string NodeTypeId { get; set; }
+
+        /// <summary>旧版类型标识符列表。反序列化旧存档时自动映射到当前类型。</summary>
+        public string[] LegacyTypeIds { get; set; } = Array.Empty<string>();
     }
 
     /// <summary>

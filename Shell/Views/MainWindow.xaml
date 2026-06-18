@@ -31,7 +31,7 @@
     </Window.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="200"/>
+            <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="280"/>
         </Grid.ColumnDefinitions>
@@ -67,106 +67,174 @@
             </Grid>
         </Border>
 
-        <!-- 左侧工具箱 -->
-        <Grid Grid.Row="1" Grid.Column="0">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="auto"/>
-                <RowDefinition Height="auto"/>
-                <RowDefinition/>
-            </Grid.RowDefinitions>
-            <!-- 标题栏 -->
-            <Border Grid.Row="0" Background="{DynamicResource ContrastBackgroundBrush}" Padding="8,10">
-                <TextBlock Foreground="{DynamicResource ToolboxItemForeground}" FontSize="14" FontWeight="SemiBold">
-                    <Run Text="&#xf0b0;" FontFamily="{StaticResource FontAwesome}" FontSize="13"/>
-                    <Run Text=" 工具箱"/>
-                </TextBlock>
-            </Border>
-            <!-- ═══ 搜索框 ═══ -->
-            <Border Grid.Row="1" x:Name="SearchBorder"
-                    CornerRadius="8" Background="{DynamicResource ContrastBackgroundBrush}"
-                    BorderBrush="{DynamicResource ToolboxCardBorderBrush}" BorderThickness="1"
-                    Margin="8,8,8,4">
-                <Border.Style>
-                    <Style TargetType="Border">
-                        <Style.Triggers>
-                            <Trigger Property="IsKeyboardFocusWithin" Value="True">
-                                <Setter Property="BorderBrush" Value="{DynamicResource ToolboxSearchFocusBrush}"/>
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </Border.Style>
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <!-- 搜索图标 -->
-                    <TextBlock Grid.Column="0" Text="&#xf002;" FontFamily="{StaticResource FontAwesome}"
-                               FontSize="12" Foreground="#60FFFFFF" VerticalAlignment="Center" Margin="10,0,0,0"/>
-                    <!-- 搜索输入框 -->
-                    <hc:TextBox Grid.Column="0" Grid.ColumnSpan="3"
-                             hc:InfoElement.Placeholder="搜索节点..."
-                             Text="{Binding ToolBox.SearchText, UpdateSourceTrigger=PropertyChanged}"
-                             Background="Transparent" BorderThickness="0" Padding="28,6,28,6"
-                             Foreground="{DynamicResource ToolboxItemForeground}"
-                             CaretBrush="{DynamicResource ToolboxItemForeground}"
-                             VerticalContentAlignment="Center" FontSize="12"/>
-                    <!-- 清除按钮 -->
-                    <Button Grid.Column="2" Content="&#xf00d;" FontFamily="{StaticResource FontAwesome}"
-                            FontSize="10" Foreground="#60FFFFFF" Background="Transparent" BorderThickness="0"
-                            Command="{Binding ToolBox.ClearSearchCommand}" Cursor="Hand"
-                            Margin="0,0,8,0" Padding="4" VerticalAlignment="Center">
-                        <Button.Style>
-                            <Style TargetType="Button">
-                                <Setter Property="Visibility" Value="Collapsed"/>
+        <!-- 左侧工具箱（可折叠） -->
+        <Border Grid.Row="1" Grid.Column="0" Background="{DynamicResource BackgroundBrush}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="18"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- 工具箱主体 -->
+                <Grid Grid.Column="0" x:Name="ToolboxContent" Width="200" ClipToBounds="True">
+                    <Grid.Style>
+                        <Style TargetType="Grid">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsChecked, ElementName=ToolBoxToggle}" Value="False">
+                                    <DataTrigger.EnterActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetProperty="Width"
+                                                                 To="0" Duration="0:0:0.2"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </DataTrigger.EnterActions>
+                                    <DataTrigger.ExitActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetProperty="Width"
+                                                                 To="200" Duration="0:0:0.2"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </DataTrigger.ExitActions>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Grid.Style>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <!-- 标题栏 + 折叠按钮 -->
+                    <Border Grid.Row="0" Background="{DynamicResource ContrastBackgroundBrush}" Padding="8,10">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Foreground="{DynamicResource ToolboxItemForeground}" FontSize="14" FontWeight="SemiBold">
+                                <Run Text="&#xf0b0;" FontFamily="{StaticResource FontAwesome}" FontSize="13"/>
+                                <Run Text=" 工具箱"/>
+                            </TextBlock>
+                            <ToggleButton Grid.Column="1" x:Name="ToolBoxToggle"
+                                          FontFamily="{StaticResource FontAwesome}"
+                                          Content="&#xf053;" FontSize="10" Foreground="#666"
+                                          Background="Transparent" BorderThickness="0" Cursor="Hand"
+                                          ToolTip="折叠工具箱"
+                                          VerticalAlignment="Center" Padding="5,3" IsChecked="True">
+                                <ToggleButton.Style>
+                                    <Style TargetType="ToggleButton">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="ToggleButton">
+                                                    <Border x:Name="Bd"
+                                                            Background="{TemplateBinding Background}"
+                                                            CornerRadius="4"
+                                                            Padding="{TemplateBinding Padding}">
+                                                        <ContentPresenter HorizontalAlignment="Center"
+                                                                          VerticalAlignment="Center"/>
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter TargetName="Bd" Property="Background" Value="#2AFFFFFF"/>
+                                                            <Setter Property="Foreground" Value="#BBB"/>
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </ToggleButton.Style>
+                            </ToggleButton>
+                        </Grid>
+                    </Border>
+                    <!-- ═══ 搜索框 ═══ -->
+                    <Border Grid.Row="1" x:Name="SearchBorder"
+                            CornerRadius="8" Background="{DynamicResource ContrastBackgroundBrush}"
+                            BorderBrush="{DynamicResource ToolboxCardBorderBrush}" BorderThickness="1"
+                            Margin="8,8,8,4">
+                        <Border.Style>
+                            <Style TargetType="Border">
                                 <Style.Triggers>
-                                    <DataTrigger Binding="{Binding ToolBox.SearchText, Converter={StaticResource StringToVisibilityConverter}}" Value="Visible">
-                                        <Setter Property="Visibility" Value="Visible"/>
-                                    </DataTrigger>
+                                    <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                                        <Setter Property="BorderBrush" Value="{DynamicResource ToolboxSearchFocusBrush}"/>
+                                    </Trigger>
                                 </Style.Triggers>
                             </Style>
-                        </Button.Style>
-                    </Button>
-                </Grid>
-            </Border>
-            <!-- ═══ TreeView + 右侧分隔线 ═══ -->
-            <Grid Grid.Row="2">
-                <TreeView x:Name="ToolBoxTree" Background="{DynamicResource BackgroundBrush}"
-                         BorderThickness="0" Padding="0,8" Margin="0,0,1,0"
-                         ScrollViewer.VerticalScrollBarVisibility="Auto"
-                         ItemsSource="{Binding ToolBox.Categories}">
-                    <TreeView.Resources>
-                        <!-- 叶节点样式：移除展开按钮和缩进 -->
-                        <Style x:Key="LeafItemStyle" TargetType="TreeViewItem">
-                            <Setter Property="Padding" Value="0"/>
-                            <Setter Property="Margin" Value="0"/>
-                            <EventSetter Event="PreviewMouseLeftButtonDown" Handler="ToolBoxTree_PreviewMouseLeftButtonDown"/>
-                            <EventSetter Event="PreviewMouseLeftButtonUp" Handler="ToolBoxTree_PreviewMouseLeftButtonUp"/>
-                            <EventSetter Event="PreviewMouseMove" Handler="ToolBoxTree_PreviewMouseMove"/>
-                            <Setter Property="Template">
-                                <Setter.Value>
-                                    <ControlTemplate TargetType="TreeViewItem">
-                                        <Border Background="Transparent" Padding="{TemplateBinding Padding}">
-                                            <ContentPresenter ContentSource="Header"/>
-                                        </Border>
-                                    </ControlTemplate>
-                                </Setter.Value>
-                            </Setter>
-                        </Style>
-                        <!-- ═══ 分类标题模板 ═══ -->
-                        <HierarchicalDataTemplate DataType="{x:Type models:ToolBoxCategory}" ItemsSource="{Binding Items}"
-                                                 ItemContainerStyle="{StaticResource LeafItemStyle}">
-                            <Border Background="#10FFFFFF" CornerRadius="4" Padding="4,6" Margin="0,2">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                    </Grid.ColumnDefinitions>
-                                    <!-- 分类名 -->
-                                    <TextBlock Grid.Column="0" Text="{Binding Name}" FontSize="12" FontWeight="SemiBold"
-                                               Foreground="{DynamicResource ToolboxHeaderForeground}" VerticalAlignment="Center"/>
+                        </Border.Style>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <!-- 搜索图标 -->
+                            <TextBlock Grid.Column="0" Text="&#xf002;" FontFamily="{StaticResource FontAwesome}"
+                                       FontSize="12" Foreground="#60FFFFFF" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                            <!-- 搜索输入框 -->
+                            <hc:TextBox Grid.Column="0" Grid.ColumnSpan="3"
+                                     hc:InfoElement.Placeholder="搜索节点..."
+                                     Text="{Binding ToolBox.SearchText, UpdateSourceTrigger=PropertyChanged}"
+                                     Background="Transparent" BorderThickness="0" Padding="28,6,28,6"
+                                     Foreground="{DynamicResource ToolboxItemForeground}"
+                                     CaretBrush="{DynamicResource ToolboxItemForeground}"
+                                     VerticalContentAlignment="Center" FontSize="12"/>
+                            <!-- 清除按钮 -->
+                            <Button Grid.Column="2" Content="&#xf00d;" FontFamily="{StaticResource FontAwesome}"
+                                    FontSize="10" Foreground="#60FFFFFF" Background="Transparent" BorderThickness="0"
+                                    Command="{Binding ToolBox.ClearSearchCommand}" Cursor="Hand"
+                                    Margin="0,0,8,0" Padding="4" VerticalAlignment="Center">
+                                <Button.Style>
+                                    <Style TargetType="Button">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding ToolBox.SearchText, Converter={StaticResource StringToVisibilityConverter}}" Value="Visible">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+                        </Grid>
+                    </Border>
+                    <!-- ═══ TreeView + 右侧分隔线 ═══ -->
+                    <Grid Grid.Row="2">
+                        <TreeView x:Name="ToolBoxTree" Background="{DynamicResource BackgroundBrush}"
+                                 BorderThickness="0" Padding="0,8" Margin="0,0,1,0"
+                                 ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                 ItemsSource="{Binding ToolBox.Categories}">
+                            <TreeView.Resources>
+                                <!-- 叶节点样式：移除展开按钮和缩进 -->
+                                <Style x:Key="LeafItemStyle" TargetType="TreeViewItem">
+                                    <Setter Property="Padding" Value="0"/>
+                                    <Setter Property="Margin" Value="0"/>
+                                    <EventSetter Event="PreviewMouseLeftButtonDown" Handler="ToolBoxTree_PreviewMouseLeftButtonDown"/>
+                                    <EventSetter Event="PreviewMouseLeftButtonUp" Handler="ToolBoxTree_PreviewMouseLeftButtonUp"/>
+                                    <EventSetter Event="PreviewMouseMove" Handler="ToolBoxTree_PreviewMouseMove"/>
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="TreeViewItem">
+                                                <Border Background="Transparent" Padding="{TemplateBinding Padding}">
+                                                    <ContentPresenter ContentSource="Header"/>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                                <!-- ═══ 分类标题模板 ═══ -->
+                                <HierarchicalDataTemplate DataType="{x:Type models:ToolBoxCategory}" ItemsSource="{Binding Items}"
+                                                         ItemContainerStyle="{StaticResource LeafItemStyle}">
+                                    <Border Background="#10FFFFFF" CornerRadius="4" Padding="4,6" Margin="0,2">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <!-- 分类名 -->
+                                            <TextBlock Grid.Column="0" Text="{Binding Name}" FontSize="12" FontWeight="SemiBold"
+                                                       Foreground="{DynamicResource ToolboxHeaderForeground}" VerticalAlignment="Center"/>
                                     <!-- 计数徽章 -->
                                     <Border Grid.Column="1" CornerRadius="8" Background="{DynamicResource ToolboxBadgeBrush}"
                                             Padding="6,2" Margin="8,0,4,0" VerticalAlignment="Center" HorizontalAlignment="Right">
@@ -297,9 +365,65 @@
                         HorizontalAlignment="Right" Margin="0,0,0,0"/>
             </Grid>
         </Grid>
+        <!-- 折叠边栏（始终可见） -->
+        <Border Grid.Column="1" Width="28" Background="{DynamicResource ContrastBackgroundBrush}"
+                BorderBrush="{DynamicResource ToolboxSeparatorBrush}" BorderThickness="0,0,1,0">
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="{DynamicResource ToolboxItemHoverBrush}"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+            <ToggleButton FontFamily="{StaticResource FontAwesome}"
+                         Content="&#xf054;" FontSize="10" Foreground="#666"
+                         Background="Transparent" BorderThickness="0" Cursor="Hand"
+                         IsChecked="{Binding IsChecked, ElementName=ToolBoxToggle, Mode=TwoWay}"
+                         VerticalAlignment="Center" HorizontalAlignment="Center">
+                <ToggleButton.Style>
+                    <Style TargetType="ToggleButton">
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="ToggleButton">
+                                    <Border x:Name="Bd"
+                                            Background="{TemplateBinding Background}"
+                                            CornerRadius="3"
+                                            Width="22" Height="22"
+                                            Padding="0">
+                                        <ContentPresenter HorizontalAlignment="Center"
+                                                          VerticalAlignment="Center"/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="Bd" Property="Background" Value="#2AFFFFFF"/>
+                                            <Setter Property="Foreground" Value="#BBB"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsChecked, RelativeSource={RelativeSource Self}}" Value="True">
+                                <Setter Property="Content" Value="&#xf053;"/>
+                                <Setter Property="ToolTip" Value="折叠工具箱"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsChecked, RelativeSource={RelativeSource Self}}" Value="False">
+                                <Setter Property="Content" Value="&#xf054;"/>
+                                <Setter Property="ToolTip" Value="展开工具箱"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ToggleButton.Style>
+            </ToggleButton>
+        </Border>
+        </Grid>
+    </Border>
 
-        <Grid Grid.Row="1" Grid.Column="1" x:Name="EditorGrid">
+    <Grid Grid.Row="1" Grid.Column="1" x:Name="EditorGrid">
             <Grid.RowDefinitions>
+                <RowDefinition Height="auto" />
                 <RowDefinition Height="auto" />
                 <RowDefinition Height="*" />
                 <RowDefinition Height="160" />
@@ -325,14 +449,22 @@
                         Style="{StaticResource IconBtnStyle}">&#xf067;</Button>
                 <Rectangle Width="1" Height="18" Fill="#40FFFFFF" Margin="6,0" VerticalAlignment="Center"/>
                 <!-- 文件操作组 -->
-                <Button ToolTip="保存" Command="{Binding SaveCommand}"
-                        Style="{StaticResource IconBtnAccentStyle}">&#xf0c7;</Button>
+                <Button ToolTip="新建流程" Command="{Binding NewDocumentCommand}"
+                        Style="{StaticResource IconBtnAccentStyle}">&#xf15b;</Button>
                 <Button ToolTip="加载" Command="{Binding LoadCommand}"
                         Style="{StaticResource IconBtnAccentStyle}">&#xf07b;</Button>
+                <Button ToolTip="保存 (直接覆写)" Command="{Binding SaveCommand}"
+                        Style="{StaticResource IconBtnAccentStyle}">&#xf0c7;</Button>
+                <Button ToolTip="另存为" Command="{Binding SaveAsCommand}"
+                        Style="{StaticResource IconBtnAccentStyle}">&#xf0c5;</Button>
                 <Rectangle Width="1" Height="18" Fill="#40FFFFFF" Margin="6,0" VerticalAlignment="Center"/>
                 <!-- 危险操作 -->
                 <Button ToolTip="清空" Command="{Binding ClearCommand}"
                         Style="{StaticResource IconBtnDangerStyle}">&#xf1f8;</Button>
+                <Rectangle Width="1" Height="18" Fill="#40FFFFFF" Margin="6,0" VerticalAlignment="Center"/>
+                <!-- 硬件 -->
+                <Button ToolTip="硬件配置（轴参数 / IO 信号）" Command="{Binding HardwareConfigCommand}"
+                        Style="{StaticResource IconBtnWarnStyle}">&#xf085;</Button>
                 <Rectangle Width="1" Height="18" Fill="#40FFFFFF" Margin="6,0" VerticalAlignment="Center"/>
                 <!-- 布局 -->
                 <Button ToolTip="自动布局" Command="{Binding AutoLayoutCommand}"
@@ -354,11 +486,119 @@
             </StackPanel>
             </Border>
 
-            <nodify:NodifyEditor Grid.Row="1" GridCellSize="20"
-                                 ItemsSource="{Binding Nodes}" Connections="{Binding Connections}"
-                                 SelectedItems="{Binding SelectedNodes}" PendingConnection="{Binding PendingConnection}"
-                                 DisconnectConnectorCommand="{Binding DisconnectConnectorCommand}"
-                                 RemoveConnectionCommand="{Binding DeleteConnectionCommand}"
+            <!-- ═══ 文档标签页 ═══ -->
+            <Border Grid.Row="1" Background="{DynamicResource BackgroundBrush}"
+                    BorderBrush="{DynamicResource EditorToolbarBorder}" BorderThickness="0,0,0,1">
+                <Grid Height="33">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <ListBox x:Name="DocumentTabs" ItemsSource="{Binding Documents}"
+                             SelectedItem="{Binding ActiveDocument}"
+                             Background="Transparent" BorderThickness="0"
+                             ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                             ScrollViewer.VerticalScrollBarVisibility="Disabled">
+                        <ListBox.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" IsItemsHost="True" />
+                            </ItemsPanelTemplate>
+                        </ListBox.ItemsPanel>
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                                <Setter Property="Padding" Value="12,5" />
+                                <Setter Property="Margin" Value="0,0,0,0" />
+                                <Setter Property="Background" Value="Transparent" />
+                                <Setter Property="Foreground" Value="{DynamicResource ToolboxItemDescForeground}" />
+                                <Setter Property="BorderBrush" Value="Transparent" />
+                                <Setter Property="BorderThickness" Value="0" />
+                                <Setter Property="Cursor" Value="Hand" />
+                                <Setter Property="HorizontalContentAlignment" Value="Left" />
+                                <Setter Property="VerticalContentAlignment" Value="Stretch" />
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="ListBoxItem">
+                                            <Border x:Name="TabBorder"
+                                                    Background="{TemplateBinding Background}"
+                                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                                    CornerRadius="4,4,0,0">
+                                                <Grid>
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition Height="*" />
+                                                        <RowDefinition Height="2" />
+                                                    </Grid.RowDefinitions>
+                                                    <ContentPresenter Grid.Row="0"
+                                                                      Margin="{TemplateBinding Padding}" />
+                                                    <Border x:Name="SelectionBar" Grid.Row="1"
+                                                            Background="Transparent"
+                                                            Height="2" HorizontalAlignment="Stretch"
+                                                            CornerRadius="1,1,0,0" />
+                                                </Grid>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsSelected" Value="True">
+                                                    <Setter TargetName="TabBorder" Property="Background" Value="#1EFFFFFF" />
+                                                    <Setter Property="Foreground" Value="{DynamicResource ToolboxItemForeground}" />
+                                                    <Setter TargetName="SelectionBar" Property="Background" Value="#FF42A5F5" />
+                                                </Trigger>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="TabBorder" Property="Background" Value="#12FFFFFF" />
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate DataType="{x:Type viewModels:DocumentViewModel}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="{Binding Title}" FontSize="12"
+                                               VerticalAlignment="Center" MaxWidth="150"
+                                               TextTrimming="CharacterEllipsis" />
+                                    <Ellipse Grid.Column="1" Width="7" Height="7" Fill="#FF42A5F5"
+                                             Margin="5,0,0,0" VerticalAlignment="Center"
+                                             Visibility="{Binding IsDirty, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                    <Button x:Name="CloseBtn" Grid.Column="2"
+                                            Content="&#xf00d;" FontFamily="{StaticResource FontAwesome}"
+                                            FontSize="9" Margin="6,0,0,0" Padding="3,1"
+                                            Background="Transparent" BorderThickness="0"
+                                            Cursor="Hand" Opacity="0" VerticalAlignment="Center"
+                                            Foreground="{DynamicResource ToolboxItemDescForeground}"
+                                            Command="{Binding DataContext.CloseDocumentWithParamCommand, RelativeSource={RelativeSource AncestorType={x:Type ListBox}}}"
+                                            CommandParameter="{Binding}"
+                                            ToolTip="关闭标签页" />
+                                </Grid>
+                                <DataTemplate.Triggers>
+                                    <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}}}" Value="True">
+                                        <Setter TargetName="CloseBtn" Property="Opacity" Value="1" />
+                                    </DataTrigger>
+                                </DataTemplate.Triggers>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                    <!-- 新建标签按钮 -->
+                    <Button Grid.Column="1" Content="&#xf067;" FontFamily="{StaticResource FontAwesome}"
+                            FontSize="11" Margin="2,0,0,0" Padding="6,4"
+                            Background="Transparent" BorderThickness="0"
+                            Cursor="Hand" VerticalAlignment="Stretch"
+                            Foreground="{DynamicResource ToolboxItemDescForeground}"
+                            Command="{Binding NewDocumentCommand}"
+                            ToolTip="新建流程" />
+                </Grid>
+            </Border>
+
+            <nodify:NodifyEditor Grid.Row="2" GridCellSize="20"
+                                 ItemsSource="{Binding ActiveDocument.Nodes}" Connections="{Binding ActiveDocument.Connections}"
+                                 SelectedItems="{Binding ActiveDocument.SelectedNodes}" PendingConnection="{Binding ActiveDocument.PendingConnection}"
+                                 DisconnectConnectorCommand="{Binding ActiveDocument.DisconnectConnectorCommand}"
+                                 RemoveConnectionCommand="{Binding ActiveDocument.DeleteConnectionCommand}"
                                  Margin="10" x:Name="Editor"
                                  AllowDrop="True" DragOver="Editor_DragOver" Drop="Editor_Drop"
                                  Background="{StaticResource SmallGridDrawingBrush}">
@@ -372,14 +612,15 @@
                         <Setter Property="BorderBrush" Value="Transparent" />
                         <EventSetter Event="MouseDoubleClick" Handler="ItemContainer_MouseDoubleClick" />
                         <Style.Triggers>
-                            <!-- 执行中：呼吸灯辉光（边框颜色脉动，执行完自动停止） -->
+                            <!-- 执行中：蓝色呼吸辉光（边框脉冲，无 DropShadow 避免软件渲染） -->
                             <DataTrigger Binding="{Binding State}" Value="Running">
                                 <DataTrigger.EnterActions>
                                     <BeginStoryboard Name="BreathAnim">
                                         <Storyboard RepeatBehavior="Forever" AutoReverse="True">
-                                            <ColorAnimation Storyboard.TargetProperty="BorderBrush.Color"
-                                                            From="#3342A5F5" To="#FF42A5F5"
-                                                            Duration="0:0:0.6"/>
+                                            <ThicknessAnimation Storyboard.TargetProperty="BorderThickness"
+                                                             From="2" To="6" Duration="0:0:0.6"/>
+                                            <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                             From="0.85" To="1.0" Duration="0:0:0.6"/>
                                         </Storyboard>
                                     </BeginStoryboard>
                                 </DataTrigger.EnterActions>
@@ -387,7 +628,27 @@
                                     <StopStoryboard BeginStoryboardName="BreathAnim"/>
                                 </DataTrigger.ExitActions>
                                 <Setter Property="BorderBrush" Value="#FF42A5F5"/>
-                                <Setter Property="BorderThickness" Value="3"/>
+                                <Setter Property="BorderThickness" Value="4"/>
+                                <Setter Property="Opacity" Value="1.0"/>
+                            </DataTrigger>
+                            <!-- 错误：红色呼吸辉光 -->
+                            <DataTrigger Binding="{Binding State}" Value="Error">
+                                <DataTrigger.EnterActions>
+                                    <BeginStoryboard Name="ErrorBreathAnim">
+                                        <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+                                            <ThicknessAnimation Storyboard.TargetProperty="BorderThickness"
+                                                             From="2" To="6" Duration="0:0:0.8"/>
+                                            <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                             From="0.85" To="1.0" Duration="0:0:0.8"/>
+                                        </Storyboard>
+                                    </BeginStoryboard>
+                                </DataTrigger.EnterActions>
+                                <DataTrigger.ExitActions>
+                                    <StopStoryboard BeginStoryboardName="ErrorBreathAnim"/>
+                                </DataTrigger.ExitActions>
+                                <Setter Property="BorderBrush" Value="#FFEF5350"/>
+                                <Setter Property="BorderThickness" Value="4"/>
+                                <Setter Property="Opacity" Value="1.0"/>
                             </DataTrigger>
                             <!-- 选中状态（最后，优先级最高） -->
                             <Trigger Property="IsSelected" Value="True">
@@ -427,7 +688,7 @@
                 </nodify:NodifyEditor.ConnectionTemplate>
             </nodify:NodifyEditor>
 
-            <nodify:Minimap Grid.Row="1"
+            <nodify:Minimap Grid.Row="2"
                             ItemsSource="{Binding ItemsSource, ElementName=Editor}"
                             ViewportLocation="{Binding ViewportLocation, ElementName=Editor}"
                             ViewportSize="{Binding ViewportSize, ElementName=Editor}"
@@ -444,7 +705,7 @@
             </nodify:Minimap>
 
             <!-- ═══ 日志面板（编辑器内部下方） ═══ -->
-            <Border Grid.Row="2" Background="{DynamicResource LogPanelBackgroundBrush}"
+            <Border Grid.Row="3" Background="{DynamicResource LogPanelBackgroundBrush}"
                     BorderBrush="{DynamicResource LogPanelBorderBrush}" BorderThickness="0,1,0,0">
                 <Border.ContextMenu>
                     <ContextMenu Background="{DynamicResource ContrastBackgroundBrush}"
@@ -648,5 +909,10 @@
                 <views:VariableManagerPanel DataContext="{Binding}" />
             </Border>
         </Grid>
+
+        <!-- ═══ Growl 通知宿主（居中显示）═══ -->
+        <StackPanel x:Name="GrowlHost" Grid.RowSpan="2" Grid.ColumnSpan="3"
+                    HorizontalAlignment="Center" VerticalAlignment="Center"
+                    IsHitTestVisible="False" />
     </Grid>
 </Window>

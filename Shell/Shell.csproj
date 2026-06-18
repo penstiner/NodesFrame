@@ -23,6 +23,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Core.UI\Core.UI.csproj" />
+    <ProjectReference Include="..\Hardware.Card\Hardware.Card.csproj" />
     <ProjectReference Include="..\Nodify.Shared\Nodify.Shared.csproj" />
   </ItemGroup>
 

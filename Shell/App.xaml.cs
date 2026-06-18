@@ -1,7 +1,10 @@
-﻿using Prism.Ioc;
+﻿using Hardware.Card.Interface;
+using Hardware.Card.Services;
+using Prism.Ioc;
 using Prism.Modularity;
 using Prism.Unity;
 using Shell.Services;
+using Shell.ViewModels;
 using Shell.Views;
 using System.Configuration;
 using System.Data;
@@ -25,6 +28,11 @@ namespace Shell
         protected override void RegisterTypes(IContainerRegistry services)
         {
             services.RegisterForNavigation<MainWindow>();
+            IControlCard card = new DMC3000();  // 或 DMC5000
+            card.Init();
+            CardManager.Register(card);
+            HardwareConfigViewModel.InitCardFromFile();
+
             // GraphExecutor 已移除，使用 FlowExecutor.RunAsync() 替代
             services.RegisterSingleton<IGraphSerializer, GraphSerializer>();
             services.RegisterSingleton<INodeDialogService, NodeDialogService>();

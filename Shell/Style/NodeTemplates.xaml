@@ -2,6 +2,7 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:models="clr-namespace:Shell.Models"
                     xmlns:vision="clr-namespace:Shell.Models.Nodes.Vision"
+                    xmlns:motion="clr-namespace:Shell.Models.Nodes.Motion"
                     xmlns:views="clr-namespace:Shell.Views"
                     xmlns:nodify="clr-namespace:Nodify;assembly=Nodify"
                     xmlns:shared="clr-namespace:Nodify;assembly=Nodify.Shared">
@@ -174,9 +175,9 @@
             <DataTemplate DataType="{x:Type models:DisplayNodeViewModel}">
                 <nodify:Node Header="{Binding}" HeaderTemplate="{StaticResource NodeHeaderTemplate}"
                              Input="{Binding Input}" Output="{Binding Output}"
-                             BorderBrush="#FFFFA726" BorderThickness="1.5"
-                             HeaderBrush="{StaticResource OrangeHeaderBrush}"
-                             ContentBrush="#FFFFF3E0" Background="#FFFFF3E0"
+                             BorderBrush="#FF00ACC1" BorderThickness="1.5"
+                             HeaderBrush="{StaticResource CyanHeaderBrush}"
+                             ContentBrush="#FFE0F7FA" Background="#FFE0F7FA"
                              Padding="0"
                              Effect="{DynamicResource NodeDropShadow}"
                              HeaderContainerStyle="{DynamicResource NodeHeaderStyle}"
@@ -203,10 +204,10 @@
                     </nodify:Node.OutputConnectorTemplate>
                     <StackPanel Orientation="Vertical" Margin="10,6" MinWidth="80">
                         <TextBlock Text="观测值" FontWeight="SemiBold"
-                                   Foreground="#E65100" FontSize="11" />
+                                   Foreground="#006064" FontSize="11" />
                         <TextBlock Text="{Binding DisplayText, Mode=OneWay}"
                                    Margin="0,4,0,0" FontSize="16" FontWeight="Bold"
-                                   Foreground="#BF360C" />
+                                   Foreground="#00838F" />
                         <TextBlock Text="{Binding ExecutionTimeDisplay, Mode=OneWay}"
                                    FontSize="9" Foreground="#999999" Margin="0,3,0,0"/>
                     </StackPanel>
@@ -327,8 +328,8 @@
             <DataTemplate DataType="{x:Type models:LoopNodeViewModel}">
                 <nodify:Node Header="{Binding}" HeaderTemplate="{StaticResource NodeHeaderTemplate}"
                              Input="{Binding Input}" Output="{Binding Output}"
-                             BorderBrush="#FFEF5350" BorderThickness="1.5"
-                             HeaderBrush="{StaticResource OrangeHeaderBrush}"
+                             BorderBrush="#FFE53935" BorderThickness="1.5"
+                             HeaderBrush="{StaticResource RedHeaderBrush}"
                              ContentBrush="#FFFFEBEE" Background="#FFFFEBEE"
                              Padding="0"
                              Effect="{DynamicResource NodeDropShadow}"
@@ -356,16 +357,16 @@
                     </nodify:Node.OutputConnectorTemplate>
                     <StackPanel Orientation="Vertical" Margin="10,6" MinWidth="80">
                         <TextBlock Text="循环设置" FontWeight="SemiBold"
-                                   Foreground="#C62828" FontSize="11" />
+                                   Foreground="#B71C1C" FontSize="11" />
                         <Grid Margin="0,4,0,0">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
                             <TextBlock Grid.Column="0" Text="{Binding LoopCount, Mode=OneWay}"
                                        FontSize="18" FontWeight="Bold"
-                                       Foreground="#B71C1C" HorizontalAlignment="Center"/>
+                                       Foreground="#880E4F" HorizontalAlignment="Center"/>
                             <TextBlock Text=" 次" Grid.Column="1"
-                                       Foreground="#C62828" FontSize="13"
+                                       Foreground="#B71C1C" FontSize="13"
                                        VerticalAlignment="Center" Margin="6,0,0,0"/>
                         </Grid>
                         <TextBlock Text="{Binding ExecutionTimeDisplay, Mode=OneWay}"
@@ -420,6 +421,50 @@
                 </nodify:Node>
             </DataTemplate>
         </views:NodeTemplateSelector.ImageDisplayTemplate>
+
+        <!-- ── 多轴定位节点 ── -->
+        <!-- ═══ 运动控制类节点通用模板（多轴定位、单轴定位等） ═══ -->
+        <views:NodeTemplateSelector.MotionControlTemplate>
+            <DataTemplate DataType="{x:Type models:NodeViewModel}">
+                <nodify:Node Header="{Binding}" HeaderTemplate="{StaticResource NodeHeaderTemplate}"
+                             Input="{Binding Input}" Output="{Binding Output}"
+                             BorderBrush="#FFFFA000" BorderThickness="1.5"
+                             HeaderBrush="{StaticResource HardwareHeaderBrush}"
+                             ContentBrush="#FFFFF8E1" Background="#FFFFF8E1"
+                             Padding="0"
+                             Effect="{DynamicResource NodeDropShadow}"
+                             HeaderContainerStyle="{DynamicResource NodeHeaderStyle}"
+                             Foreground="White">
+                    <nodify:Node.InputConnectorTemplate>
+                        <DataTemplate DataType="{x:Type models:ConnectorViewModel}">
+                            <nodify:NodeInput Header="{Binding Title}"
+                                             IsConnected="{Binding IsConnected}"
+                                             Anchor="{Binding Anchor, Mode=OneWayToSource}"
+                                             ConnectorTemplate="{DynamicResource CircleConnectorTemplate}"
+                                             BorderBrush="{DynamicResource ConnectorStroke}"
+                                             Background="{DynamicResource ConnectorFill}" />
+                        </DataTemplate>
+                    </nodify:Node.InputConnectorTemplate>
+                    <nodify:Node.OutputConnectorTemplate>
+                        <DataTemplate DataType="{x:Type models:ConnectorViewModel}">
+                            <nodify:NodeOutput Header="{Binding Title}"
+                                              IsConnected="{Binding IsConnected}"
+                                              Anchor="{Binding Anchor, Mode=OneWayToSource}"
+                                              ConnectorTemplate="{DynamicResource CircleConnectorTemplate}"
+                                              BorderBrush="{DynamicResource ConnectorStroke}"
+                                              Background="{DynamicResource ConnectorFill}" />
+                        </DataTemplate>
+                    </nodify:Node.OutputConnectorTemplate>
+                    <StackPanel Orientation="Vertical" Margin="10,6" MinWidth="130">
+                        <TextBlock Text="{Binding Title}" FontWeight="SemiBold"
+                                   Foreground="#5D4037" FontSize="11" />
+                        <TextBlock Text="运动控制" FontSize="9" Foreground="#795548" Margin="0,2,0,0"/>
+                        <TextBlock Text="{Binding ExecutionTimeDisplay, Mode=OneWay}"
+                                   FontSize="9" Foreground="#999999" Margin="0,3,0,0"/>
+                    </StackPanel>
+                </nodify:Node>
+            </DataTemplate>
+        </views:NodeTemplateSelector.MotionControlTemplate>
 
         <!-- ── 默认模板（扩展节点） ── -->
         <views:NodeTemplateSelector.DefaultTemplate>

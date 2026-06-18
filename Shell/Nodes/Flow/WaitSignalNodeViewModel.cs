@@ -8,7 +8,7 @@ namespace Shell.Models.Nodes.Flow
 {
     [Node(
         Category = "流程控制",
-        DisplayName = "等待信号 ⏳",
+        DisplayName = "等待信号",
         DefaultTitle = "等待信号[单次]",
         Description = "绑定布尔变量，阻塞等待触发信号后放行；支持循环/单次模式",
         NodeTypeId = "Flow.WaitSignal")]
@@ -139,7 +139,7 @@ namespace Shell.Models.Nodes.Flow
         }
 
         /// <summary>获取实际要监听的变量名（优先绑定的变量名，其次属性值）。</summary>
-        private string ResolvedSignalName
+        internal string ResolvedSignalName
         {
             get
             {
