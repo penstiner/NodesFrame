@@ -5,21 +5,21 @@ using Prism.Commands;
 namespace Shell.ViewModels
 {
     /// <summary>
-    /// Ô¤±¸Á¬½Ó£¨PendingConnection£©µÄÊÓÍ¼Ä£ÐÍ£¬¸ºÔðÔÚ¿ªÊ¼/Íê³ÉÁ¬½ÓÊ±µ÷ÓÃ±à¼­Æ÷µÄÁ¬½Ó·½·¨¡£
+    /// Ô¤ï¿½ï¿½ï¿½ï¿½ï¿½Ó£ï¿½PendingConnectionï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¼Ä£ï¿½Í£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú¿ï¿½Ê¼/ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½Ã±à¼­ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó·ï¿½ï¿½ï¿½ï¿½ï¿½
     /// </summary>
     public class PendingConnectionViewModel
     {
-        private readonly MainWindowViewModel _editor;
+        private readonly DocumentViewModel _document;
         private Shell.Models.ConnectorViewModel _source;
 
-        public PendingConnectionViewModel(MainWindowViewModel editor)
+        public PendingConnectionViewModel(DocumentViewModel document)
         {
-            _editor = editor ?? throw new ArgumentNullException(nameof(editor));
+            _document = document ?? throw new ArgumentNullException(nameof(document));
             StartCommand = new DelegateCommand<Shell.Models.ConnectorViewModel>(s => _source = s);
             FinishCommand = new DelegateCommand<Shell.Models.ConnectorViewModel>(t =>
             {
                 if (t != null && _source != null)
-                    _editor.Connect(_source, t);
+                    _document.Connect(_source, t);
             });
         }
 

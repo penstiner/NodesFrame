@@ -16,8 +16,9 @@ namespace Shell.Views
         private void ManageVariables_Click(object sender, RoutedEventArgs e)
         {
             var vm = DataContext as ViewModels.MainWindowViewModel;
-            if (vm?.VariableManager != null)
-                VariableManagerDialog.Show(vm.VariableManager, Window.GetWindow(this));
+            var doc = vm?.ActiveDocument;
+            if (doc != null)
+                VariableManagerDialog.Show(doc.VariableManager, Window.GetWindow(this));
         }
 
         private void Card_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -28,8 +29,8 @@ namespace Shell.Views
                 if (vm != null)
                 {
                     vm.SelectedVariable = v;
-                    if (e.ClickCount == 2)
-                        VariableManagerDialog.Show(vm.VariableManager, Window.GetWindow(this));
+                    if (e.ClickCount == 2 && vm.ActiveDocument != null)
+                        VariableManagerDialog.Show(vm.ActiveDocument.VariableManager, Window.GetWindow(this));
                 }
             }
         }

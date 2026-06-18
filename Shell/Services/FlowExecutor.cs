@@ -297,7 +297,9 @@ namespace Shell.Services
                     foreach (var conn in conns)
                     {
                         var t = conn.Target.ParentNode;
-                        if (t != null && !visited.Contains(t)) queue.Enqueue(t);
+                        // 跳过汇合节点（如 Sync），旁路只负责把值传到它的输入，不越权执行它
+                        if (t != null && !visited.Contains(t) && !IsMergeNode(t))
+                            queue.Enqueue(t);
                     }
                 }
             }
@@ -305,6 +307,10 @@ namespace Shell.Services
 
         private static bool IsLoopNode(NodeViewModel? n) =>
             n is ILoopNode;
+
+        /// <summary>汇合节点（如 Sync）只应由主循环执行，旁路不应穿透。</summary>
+        private static bool IsMergeNode(NodeViewModel? n) =>
+            n is SyncNodeViewModel;
 
         // ═══════════════════════════════════════════════
         //  ③ ManageLoopStack
@@ -432,11 +438,21 @@ namespace Shell.Services
             IReadOnlyList<NodeViewModel> nodes,
             Dictionary<ConnectorViewModel, List<ConnectionViewModel>> outputMap)
         {
+            // 使用超时令牌，防止清理路径永久阻塞（最多等待 5 秒）
+            using var cleanupCts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+            var cleanupCt = cleanupCts.Token;
+
             try
             {
                 // 策略1：找 IBranchNode，优先 Output[1]（停止口），其次 Output[0]
+                // 但排除已被取消/执行过的节点（State=Idle 且 ExecutionTime 已记录），
+                // 以及已知会阻塞等待的节点类型，避免清理路径二次卡死。
                 var branchNodes = nodes
-                    .Where(n => n is IBranchNode && n.State != ExecutionState.Error).ToList();
+                    .Where(n => n is IBranchNode
+                        && n.State != ExecutionState.Error
+                        && n.ExecutionTime == null   // 未被 TryExecuteNode 执行过（已取消的节点有 ExecutionTime）
+                        && !IsBlockingCleanupNode(n))
+                    .ToList();
                 NodeViewModel? cleanupStart = null; int cleanupPort = 0;
                 foreach (var bn in branchNodes)
                 {
@@ -454,16 +470,31 @@ namespace Shell.Services
                         var node = exitConns[0].Target.ParentNode;
                         while (node != null && node is not FlowEndNodeViewModel)
                         {
+                            // 跳过会阻塞等待的节点类型
+                            if (IsBlockingCleanupNode(node))
+                            {
+                                ExecutionLogger.Info("流程执行器", $"⊘ [清理] 跳过阻塞节点 [{node.Title}]");
+                                node = ResolveNextNode(node, outputMap);
+                                continue;
+                            }
+
                             if (node.State == ExecutionState.Idle)
                             {
+                                cleanupCt.ThrowIfCancellationRequested();
                                 node.State = ExecutionState.Running;
                                 try
                                 {
                                     var sw = Stopwatch.StartNew();
-                                    await node.ExecuteAsync(CancellationToken.None);
+                                    await node.ExecuteAsync(cleanupCt);
                                     node.ExecutionTime = sw.Elapsed;
                                     node.State = ExecutionState.Success;
                                     ExecutionLogger.Info("流程执行器", $"▶ [清理] {node.Title} — {node.ExecutionTimeDisplay}");
+                                }
+                                catch (OperationCanceledException)
+                                {
+                                    node.ExecutionTime = TimeSpan.Zero;
+                                    node.State = ExecutionState.Idle;
+                                    ExecutionLogger.Warning("流程执行器", $"⏹ [清理] {node.Title} 超时/取消，跳过");
                                 }
                                 catch (Exception ex)
                                 {
@@ -480,16 +511,46 @@ namespace Shell.Services
                     }
                 }
 
-                // 策略2：兜底执行所有 CameraCloseNode
+                // 策略2：兜底执行所有 CameraCloseNode 和 ControlCardCloseNode
                 foreach (var cn in nodes.OfType<CameraCloseNodeViewModel>()
                     .Where(n => n.State == ExecutionState.Idle))
                 {
+                    if (cleanupCt.IsCancellationRequested) break;
                     cn.State = ExecutionState.Running;
                     try
                     {
-                        await cn.ExecuteAsync(CancellationToken.None);
+                        await cn.ExecuteAsync(cleanupCt);
                         cn.State = ExecutionState.Success;
                         ExecutionLogger.Info("流程执行器", $"▶ [清理] {cn.Title}");
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        cn.State = ExecutionState.Idle;
+                        ExecutionLogger.Warning("流程执行器", $"⏹ [清理] {cn.Title} 超时/取消");
+                    }
+                    catch (Exception ex)
+                    {
+                        cn.State = ExecutionState.Error;
+                        ExecutionLogger.Error("流程执行器", $"✖ [清理] {cn.Title}: {ex.Message}");
+                    }
+                }
+
+                // 策略3：兜底执行所有 ControlCardCloseNode（控制卡关闭）
+                foreach (var cn in nodes.OfType<Models.Nodes.Motion.ControlCardCloseNodeViewModel>()
+                    .Where(n => n.State == ExecutionState.Idle))
+                {
+                    if (cleanupCt.IsCancellationRequested) break;
+                    cn.State = ExecutionState.Running;
+                    try
+                    {
+                        await cn.ExecuteAsync(cleanupCt);
+                        cn.State = ExecutionState.Success;
+                        ExecutionLogger.Info("流程执行器", $"▶ [清理] {cn.Title}");
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        cn.State = ExecutionState.Idle;
+                        ExecutionLogger.Warning("流程执行器", $"⏹ [清理] {cn.Title} 超时/取消");
                     }
                     catch (Exception ex)
                     {
@@ -498,10 +559,24 @@ namespace Shell.Services
                     }
                 }
             }
+            catch (OperationCanceledException)
+            {
+                ExecutionLogger.Warning("流程执行器", "⏹ 清理路径整体超时（5s），已跳过剩余节点");
+            }
             catch (Exception ex)
             {
                 ExecutionLogger.Error("流程执行器", $"清理路径执行异常: {ex.Message}");
             }
+        }
+
+        /// <summary>判断节点是否会在清理路径中阻塞等待（不应在清理中执行）。</summary>
+        private static bool IsBlockingCleanupNode(NodeViewModel node)
+        {
+            return node is Models.Nodes.Motion.AwaitInputNodeViewModel
+                || node is Models.Nodes.Motion.SensorCheckNodeViewModel
+                || node is Models.Nodes.Motion.StopNodeViewModel
+                || node is Models.Nodes.Motion.OutputSignalNodeViewModel
+                || node is Models.Nodes.Flow.WaitSignalNodeViewModel;
         }
     }
 

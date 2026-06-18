@@ -139,7 +139,7 @@ namespace Shell.Models.Nodes.Flow
         }
 
         /// <summary>获取实际要监听的变量名（优先绑定的变量名，其次属性值）。</summary>
-        private string ResolvedSignalName
+        internal string ResolvedSignalName
         {
             get
             {

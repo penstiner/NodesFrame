@@ -58,7 +58,8 @@ namespace Shell.Models.Nodes.Motion
             }
 
             State = ExecutionState.Error;
-            while (true) Thread.Sleep(100);
+            // 不再无限等待：状态已标记为 Error，调用方应检测并停止流程
+            return;
         }
 
         public override async Task ExecuteAsync(CancellationToken ct = default)

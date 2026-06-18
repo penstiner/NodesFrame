@@ -424,6 +424,7 @@
     <Grid Grid.Row="1" Grid.Column="1" x:Name="EditorGrid">
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto" />
+                <RowDefinition Height="auto" />
                 <RowDefinition Height="*" />
                 <RowDefinition Height="160" />
             </Grid.RowDefinitions>
@@ -448,12 +449,14 @@
                         Style="{StaticResource IconBtnStyle}">&#xf067;</Button>
                 <Rectangle Width="1" Height="18" Fill="#40FFFFFF" Margin="6,0" VerticalAlignment="Center"/>
                 <!-- 文件操作组 -->
+                <Button ToolTip="新建流程" Command="{Binding NewDocumentCommand}"
+                        Style="{StaticResource IconBtnAccentStyle}">&#xf15b;</Button>
+                <Button ToolTip="加载" Command="{Binding LoadCommand}"
+                        Style="{StaticResource IconBtnAccentStyle}">&#xf07b;</Button>
                 <Button ToolTip="保存 (直接覆写)" Command="{Binding SaveCommand}"
                         Style="{StaticResource IconBtnAccentStyle}">&#xf0c7;</Button>
                 <Button ToolTip="另存为" Command="{Binding SaveAsCommand}"
                         Style="{StaticResource IconBtnAccentStyle}">&#xf0c5;</Button>
-                <Button ToolTip="加载" Command="{Binding LoadCommand}"
-                        Style="{StaticResource IconBtnAccentStyle}">&#xf07b;</Button>
                 <Rectangle Width="1" Height="18" Fill="#40FFFFFF" Margin="6,0" VerticalAlignment="Center"/>
                 <!-- 危险操作 -->
                 <Button ToolTip="清空" Command="{Binding ClearCommand}"
@@ -483,11 +486,119 @@
             </StackPanel>
             </Border>
 
-            <nodify:NodifyEditor Grid.Row="1" GridCellSize="20"
-                                 ItemsSource="{Binding Nodes}" Connections="{Binding Connections}"
-                                 SelectedItems="{Binding SelectedNodes}" PendingConnection="{Binding PendingConnection}"
-                                 DisconnectConnectorCommand="{Binding DisconnectConnectorCommand}"
-                                 RemoveConnectionCommand="{Binding DeleteConnectionCommand}"
+            <!-- ═══ 文档标签页 ═══ -->
+            <Border Grid.Row="1" Background="{DynamicResource BackgroundBrush}"
+                    BorderBrush="{DynamicResource EditorToolbarBorder}" BorderThickness="0,0,0,1">
+                <Grid Height="33">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <ListBox x:Name="DocumentTabs" ItemsSource="{Binding Documents}"
+                             SelectedItem="{Binding ActiveDocument}"
+                             Background="Transparent" BorderThickness="0"
+                             ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                             ScrollViewer.VerticalScrollBarVisibility="Disabled">
+                        <ListBox.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" IsItemsHost="True" />
+                            </ItemsPanelTemplate>
+                        </ListBox.ItemsPanel>
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                                <Setter Property="Padding" Value="12,5" />
+                                <Setter Property="Margin" Value="0,0,0,0" />
+                                <Setter Property="Background" Value="Transparent" />
+                                <Setter Property="Foreground" Value="{DynamicResource ToolboxItemDescForeground}" />
+                                <Setter Property="BorderBrush" Value="Transparent" />
+                                <Setter Property="BorderThickness" Value="0" />
+                                <Setter Property="Cursor" Value="Hand" />
+                                <Setter Property="HorizontalContentAlignment" Value="Left" />
+                                <Setter Property="VerticalContentAlignment" Value="Stretch" />
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="ListBoxItem">
+                                            <Border x:Name="TabBorder"
+                                                    Background="{TemplateBinding Background}"
+                                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                                    CornerRadius="4,4,0,0">
+                                                <Grid>
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition Height="*" />
+                                                        <RowDefinition Height="2" />
+                                                    </Grid.RowDefinitions>
+                                                    <ContentPresenter Grid.Row="0"
+                                                                      Margin="{TemplateBinding Padding}" />
+                                                    <Border x:Name="SelectionBar" Grid.Row="1"
+                                                            Background="Transparent"
+                                                            Height="2" HorizontalAlignment="Stretch"
+                                                            CornerRadius="1,1,0,0" />
+                                                </Grid>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsSelected" Value="True">
+                                                    <Setter TargetName="TabBorder" Property="Background" Value="#1EFFFFFF" />
+                                                    <Setter Property="Foreground" Value="{DynamicResource ToolboxItemForeground}" />
+                                                    <Setter TargetName="SelectionBar" Property="Background" Value="#FF42A5F5" />
+                                                </Trigger>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="TabBorder" Property="Background" Value="#12FFFFFF" />
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate DataType="{x:Type viewModels:DocumentViewModel}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="{Binding Title}" FontSize="12"
+                                               VerticalAlignment="Center" MaxWidth="150"
+                                               TextTrimming="CharacterEllipsis" />
+                                    <Ellipse Grid.Column="1" Width="7" Height="7" Fill="#FF42A5F5"
+                                             Margin="5,0,0,0" VerticalAlignment="Center"
+                                             Visibility="{Binding IsDirty, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                    <Button x:Name="CloseBtn" Grid.Column="2"
+                                            Content="&#xf00d;" FontFamily="{StaticResource FontAwesome}"
+                                            FontSize="9" Margin="6,0,0,0" Padding="3,1"
+                                            Background="Transparent" BorderThickness="0"
+                                            Cursor="Hand" Opacity="0" VerticalAlignment="Center"
+                                            Foreground="{DynamicResource ToolboxItemDescForeground}"
+                                            Command="{Binding DataContext.CloseDocumentWithParamCommand, RelativeSource={RelativeSource AncestorType={x:Type ListBox}}}"
+                                            CommandParameter="{Binding}"
+                                            ToolTip="关闭标签页" />
+                                </Grid>
+                                <DataTemplate.Triggers>
+                                    <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}}}" Value="True">
+                                        <Setter TargetName="CloseBtn" Property="Opacity" Value="1" />
+                                    </DataTrigger>
+                                </DataTemplate.Triggers>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                    <!-- 新建标签按钮 -->
+                    <Button Grid.Column="1" Content="&#xf067;" FontFamily="{StaticResource FontAwesome}"
+                            FontSize="11" Margin="2,0,0,0" Padding="6,4"
+                            Background="Transparent" BorderThickness="0"
+                            Cursor="Hand" VerticalAlignment="Stretch"
+                            Foreground="{DynamicResource ToolboxItemDescForeground}"
+                            Command="{Binding NewDocumentCommand}"
+                            ToolTip="新建流程" />
+                </Grid>
+            </Border>
+
+            <nodify:NodifyEditor Grid.Row="2" GridCellSize="20"
+                                 ItemsSource="{Binding ActiveDocument.Nodes}" Connections="{Binding ActiveDocument.Connections}"
+                                 SelectedItems="{Binding ActiveDocument.SelectedNodes}" PendingConnection="{Binding ActiveDocument.PendingConnection}"
+                                 DisconnectConnectorCommand="{Binding ActiveDocument.DisconnectConnectorCommand}"
+                                 RemoveConnectionCommand="{Binding ActiveDocument.DeleteConnectionCommand}"
                                  Margin="10" x:Name="Editor"
                                  AllowDrop="True" DragOver="Editor_DragOver" Drop="Editor_Drop"
                                  Background="{StaticResource SmallGridDrawingBrush}">
@@ -577,7 +688,7 @@
                 </nodify:NodifyEditor.ConnectionTemplate>
             </nodify:NodifyEditor>
 
-            <nodify:Minimap Grid.Row="1"
+            <nodify:Minimap Grid.Row="2"
                             ItemsSource="{Binding ItemsSource, ElementName=Editor}"
                             ViewportLocation="{Binding ViewportLocation, ElementName=Editor}"
                             ViewportSize="{Binding ViewportSize, ElementName=Editor}"
@@ -594,7 +705,7 @@
             </nodify:Minimap>
 
             <!-- ═══ 日志面板（编辑器内部下方） ═══ -->
-            <Border Grid.Row="2" Background="{DynamicResource LogPanelBackgroundBrush}"
+            <Border Grid.Row="3" Background="{DynamicResource LogPanelBackgroundBrush}"
                     BorderBrush="{DynamicResource LogPanelBorderBrush}" BorderThickness="0,1,0,0">
                 <Border.ContextMenu>
                     <ContextMenu Background="{DynamicResource ContrastBackgroundBrush}"

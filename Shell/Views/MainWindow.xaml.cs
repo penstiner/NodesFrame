@@ -42,6 +42,16 @@ namespace Shell.Views
 
             // 启动日志
             ExecutionLogger.Info("系统", "流程编辑器已启动");
+
+            // 确保标签页初始化后默认选中第一个
+            Loaded += (s, e) =>
+            {
+                if (DataContext is ViewModels.MainWindowViewModel vm && vm.ActiveDocument != null)
+                {
+                    // 触发布局刷新以确保 ListBox 正确处理选中状态
+                    DocumentTabs.UpdateLayout();
+                }
+            };
         }
 
         // ═══════════════════════════════════════════
